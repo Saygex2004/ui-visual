@@ -1,0 +1,50 @@
+[
+  {
+    "id": "act-1",
+    "listing_id": "1001",
+    "type": "rating_set",
+    "actor_id": "user-1",
+    "at": "2026-07-02T09:00:00.000Z",
+    "details": { "value": "ottimo_affare" }
+  },
+  {
+    "id": "act-2",
+    "listing_id": "1001",
+    "type": "thread_opened",
+    "actor_id": "user-1",
+    "at": "2026-07-02T09:05:00.000Z",
+    "details": {}
+  },
+  {
+    "id": "act-3",
+    "listing_id": "1001",
+    "type": "attachment_added",
+    "actor_id": "user-admin-1",
+    "at": "2026-07-02T09:10:00.000Z",
+    "details": { "filename": "perizia.pdf" }
+  },
+  {
+    "id": "act-4",
+    "listing_id": "1003",
+    "type": "thread_closed",
+    "actor_id": "user-admin-1",
+    "at": "2026-07-02T11:00:00.000Z",
+    "details": {}
+  },
+  {
+    "id": "act-5",
+    "listing_id": "1050",
+    "type": "listing_archived",
+    "actor_id": null,
+    "at": "2026-05-01T00:00:00.000Z",
+    "details": {}
+  },
+  {
+    "id": "act-6",
+    "listing_id": "1001",
+    "type": "calendar_assigned",
+    "actor_id": "user-1",
+    "at": "2026-07-02T07:00:00.000Z",
+    "details": { "date": "2026-07-02" }
+  }
+]

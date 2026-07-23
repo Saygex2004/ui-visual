@@ -1,0 +1,18 @@
+[
+  {
+    "id": "adm-1",
+    "type": "account_created",
+    "actor_id": "user-admin-1",
+    "subject": "user-1",
+    "at": "2026-06-05T10:00:00.000Z",
+    "details": { "role": "user" }
+  },
+  {
+    "id": "adm-2",
+    "type": "categories_changed",
+    "actor_id": "user-admin-1",
+    "subject": "settings/extraction_categories",
+    "at": "2026-06-10T14:00:00.000Z",
+    "details": { "added": ["LG"], "removed": [] }
+  }
+]

@@ -1,0 +1,54 @@
+[
+  {
+    "id": "roma-roma",
+    "provincia": "Roma",
+    "comune": "Roma",
+    "tipologia": "Abitazioni civili",
+    "stato": "NORMALE",
+    "min_mq": 2800,
+    "max_mq": 4200,
+    "zona": "Centro Storico",
+    "semestre": "20252",
+    "fetched_at": "2026-06-30T12:00:00.000Z",
+    "error": null
+  },
+  {
+    "id": "milano-milano",
+    "provincia": "Milano",
+    "comune": "Milano",
+    "tipologia": "Abitazioni civili",
+    "stato": "NORMALE",
+    "min_mq": 3500,
+    "max_mq": 6500,
+    "zona": "Centro",
+    "semestre": "20252",
+    "fetched_at": "2026-06-30T12:00:00.000Z",
+    "error": null
+  },
+  {
+    "id": "l-aquila-l-aquila",
+    "provincia": "L'Aquila",
+    "comune": "L'Aquila",
+    "tipologia": "Abitazioni civili",
+    "stato": "NORMALE",
+    "min_mq": 900,
+    "max_mq": 1600,
+    "zona": "Centro",
+    "semestre": "20252",
+    "fetched_at": "2026-06-30T12:00:00.000Z",
+    "error": null
+  },
+  {
+    "id": "napoli-napoli",
+    "provincia": "Napoli",
+    "comune": "Napoli",
+    "tipologia": null,
+    "stato": null,
+    "min_mq": null,
+    "max_mq": null,
+    "zona": null,
+    "semestre": "20252",
+    "fetched_at": "2026-06-30T12:00:00.000Z",
+    "error": "OMI service returned no residential row for this comune"
+  }
+]

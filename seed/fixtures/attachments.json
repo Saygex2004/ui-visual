@@ -1,0 +1,13 @@
+[
+  {
+    "id": "att-1",
+    "listing_id": "1001",
+    "message_id": "m2",
+    "uploader_id": "user-admin-1",
+    "filename": "perizia.pdf",
+    "content_type": "application/pdf",
+    "size_bytes": 284512,
+    "storage_path": "attachments/1001/att-1",
+    "uploaded_at": "2026-07-02T09:12:00.000Z"
+  }
+]

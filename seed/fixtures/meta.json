@@ -1,0 +1,18 @@
+{
+  "immobili": {
+    "last_success_at": "2026-07-01T06:00:00.000Z",
+    "total_active": 30,
+    "total_stored": 27,
+    "detail_errors": 2
+  },
+  "corporate": {
+    "last_success_at": "2026-07-01T06:30:00.000Z",
+    "total_active": 6,
+    "total_stored": 6,
+    "detail_errors": 0
+  },
+  "omi": {
+    "fetched_at": "2026-06-30T12:00:00.000Z",
+    "semestre": "20252"
+  }
+}

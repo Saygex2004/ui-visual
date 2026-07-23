@@ -1,0 +1,41 @@
+[
+  {
+    "id": "immobili-20260701T060000",
+    "scope": "immobili",
+    "status": "success",
+    "started_at": "2026-07-01T05:30:00.000Z",
+    "finished_at": "2026-07-01T06:00:00.000Z",
+    "total_enumerated": 30,
+    "written": 27,
+    "archived": 3,
+    "errors": 2,
+    "selection_codes": [
+      "ASP",
+      "COPR",
+      "CP",
+      "LCAM",
+      "LCA",
+      "LG",
+      "LIQUVOLGIU",
+      "NUCP",
+      "FALL",
+      "NFAL"
+    ],
+    "excluded_by_selection": 1,
+    "error_samples": ["detail fetch timeout for lot 999001"]
+  },
+  {
+    "id": "corporate-20260701T063000",
+    "scope": "corporate",
+    "status": "degraded",
+    "started_at": "2026-07-01T06:10:00.000Z",
+    "finished_at": "2026-07-01T06:30:00.000Z",
+    "total_enumerated": 6,
+    "written": 6,
+    "archived": 0,
+    "errors": 0,
+    "selection_codes": null,
+    "excluded_by_selection": 0,
+    "error_samples": []
+  }
+]
