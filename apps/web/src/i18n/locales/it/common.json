@@ -1,0 +1,12 @@
+{
+  "app": {
+    "name": "PVP Aste Dashboard",
+    "tagline": "Revisione delle vendite giudiziarie italiane"
+  },
+  "bootstrap": {
+    "proof": "Ambiente inizializzato correttamente."
+  },
+  "actions": {
+    "loading": "Caricamento…"
+  }
+}

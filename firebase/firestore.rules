@@ -1,0 +1,13 @@
+rules_version = '2';
+
+// Production security stance: deny ALL direct client access. Every read and
+// write goes through the Fastify API using the Admin SDK (which bypasses these
+// rules). The browser never talks to Firestore. (SPECIFICATIONS.md §2; the
+// rules are hardened and verified in Phase 10.)
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

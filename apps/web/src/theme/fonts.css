@@ -1,0 +1,12 @@
+/*
+ * Local font faces (bundled via @fontsource — no CDN, builds/runs offline).
+ * Cobalt type pairing: Space Grotesk (display) + Inter (body) + JetBrains Mono
+ * (mono labels / code). Only the weights the system uses are imported.
+ */
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/space-grotesk/600.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';

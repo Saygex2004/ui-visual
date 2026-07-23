@@ -1,0 +1,8 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+allowBuilds:
+  esbuild: true
+minimumReleaseAgeExclude:
+  - html-parse-stringify@4.0.1
+  - react-i18next@17.0.11

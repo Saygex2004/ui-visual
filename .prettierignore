@@ -1,0 +1,15 @@
+# Dependencies & build output
+node_modules/
+**/dist/
+**/coverage/
+**/*.gen.ts
+
+# Lockfile
+pnpm-lock.yaml
+
+# Vendored / external content (not our source)
+docs/
+.agents/
+
+# Emulator data
+firebase/emulator-data/

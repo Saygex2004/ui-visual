@@ -1,0 +1,123 @@
+/*
+ * Design tokens — the single source of truth for the app's visual system.
+ * Produced by the Hallmark foundations pass (Phase 0 task 7).
+ *   genre:  modern-minimal
+ *   theme:  Cobalt — cool engineered near-white, ONE electric cobalt signal,
+ *           hairline structure, code/mono voice. Suited to a dense, data-heavy,
+ *           Italian-language professional dashboard.
+ *
+ * Contract: components and the PrimeReact preset reference ONLY these variables
+ * — no raw hex/oklch or font literals elsewhere (lint/review enforced).
+ * Palette values are Cobalt's OKLCH anchors (references/themes/cobalt.md).
+ * Dark mode is out of scope for v1 (FRONTEND.md §5); the token layer makes it
+ * an additive later step.
+ */
+:root {
+  /* --- Palette: grounds & ink (cool, never pure #fff/#000) --- */
+  --color-paper: oklch(98.5% 0.004 250); /* cool engineered near-white */
+  --color-surface: oklch(100% 0 0); /* raised surface (tables, panels) */
+  --color-surface-2: oklch(96.5% 0.006 250); /* subtle fill / zebra */
+  --color-border: oklch(90% 0.008 252); /* hairline rules do the work */
+  --color-border-strong: oklch(84% 0.01 254);
+  --color-text: oklch(24% 0.02 258); /* cool charcoal — headings */
+  --color-text-body: oklch(34% 0.018 257); /* body copy, a notch lighter */
+  --color-text-muted: oklch(52% 0.016 256); /* meta, captions */
+  --color-graphite: oklch(22% 0.016 260); /* code/terminal surfaces */
+
+  /* --- The one cobalt signal (used < 5% of a viewport) --- */
+  --color-accent: oklch(58% 0.2 256); /* electric cobalt */
+  --color-accent-strong: oklch(52% 0.2 256); /* hover/active */
+  --color-accent-soft: oklch(95% 0.03 256); /* tint fills (active row) */
+  --color-accent-contrast: oklch(99% 0.004 250); /* ink on the accent button */
+  --color-focus: oklch(58% 0.2 256);
+
+  /* --- Status (kept desaturated to sit beside the cobalt signal) --- */
+  --color-success: oklch(58% 0.13 155);
+  --color-warning: oklch(70% 0.13 75);
+  --color-danger: oklch(56% 0.18 27);
+  --color-info: var(--color-accent);
+
+  /* --- Typography: 2 + 1 (bundled locally, see fonts.css) --- */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem; /* dense-dashboard base is a touch smaller */
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.625rem;
+  --text-2xl: 2.125rem;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --tracking-label: 0.06em; /* JetBrains Mono UPPERCASE labels */
+
+  /* --- Spacing (4pt scale) --- */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* --- Radius: tight technical radii ("drawn with a ruler") --- */
+  --radius-sm: 4px;
+  --radius-md: 6px; /* buttons / inputs */
+  --radius-lg: 10px; /* code cards / panels */
+  --radius-pill: 999px;
+
+  /* --- Shadow: depth from borders, not blur (single barely-there lift) --- */
+  --shadow-1: 0 1px 2px oklch(24% 0.02 258 / 0.06);
+  --shadow-2: 0 4px 16px oklch(24% 0.02 258 / 0.08);
+
+  /* --- Motion --- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 0.15s;
+  --dur-base: 0.3s;
+}
+
+/* Reduced motion: ship static, fully visible. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 400;
+  line-height: var(--leading-normal);
+  color: var(--color-text-body);
+  background: var(--color-paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  color: var(--color-text);
+}
