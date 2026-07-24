@@ -12,20 +12,24 @@
     "lint": "eslint . && prettier --check .",
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "pnpm -r --parallel test",
-    "test:integration": "pnpm -r --parallel test:integration",
+    "test:integration": "firebase emulators:exec --config firebase/firebase.json --project demo-pvp-dashboard \"pnpm -r test:integration\"",
     "e2e": "playwright test",
     "build": "pnpm -r build",
     "dev:server": "pnpm --filter @pvp/server dev",
     "dev:web": "pnpm --filter @pvp/web dev",
-    "emulators": "cd firebase && firebase emulators:start --project demo-pvp-dashboard"
+    "emulators": "cd firebase && firebase emulators:start --project demo-pvp-dashboard",
+    "seed": "tsx seed/seed.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^26.1.1",
     "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
+    "firebase-admin": "^14.2.0",
     "globals": "^17.7.0",
     "prettier": "^3.9.6",
+    "tsx": "^4.23.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.65.0"
   }
