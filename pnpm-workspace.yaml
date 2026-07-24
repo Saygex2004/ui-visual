@@ -4,6 +4,7 @@ packages:
   - 'seed'
 allowBuilds:
   '@firebase/util': true
+  argon2: true
   esbuild: true
   protobufjs: true
 minimumReleaseAgeExclude:

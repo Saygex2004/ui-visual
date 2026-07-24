@@ -2,7 +2,7 @@
   {
     "id": "user-admin-1",
     "username": "admin",
-    "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$c2FsdHNhbHRzYWx0$ZmFrZWhhc2hmb3JmaXh0dXJlc29ubHk",
+    "password_hash": "$argon2id$v=19$m=65536,p=4,t=3$VA1C/qoPdUn5yJ9PGvT5bA$+1Zh8v9OtHboGeGwMzuwyPcrBtvi/0Nc7GiZZs6dPnI",
     "role": "admin",
     "disabled": false,
     "must_change_password": false,
@@ -12,7 +12,7 @@
   {
     "id": "user-1",
     "username": "mrossi",
-    "password_hash": "$argon2id$v=19$m=65536,t=3,p=4$c2FsdHNhbHRzYWx0$YW5vdGhlcmZha2VoYXNoZm9ydGVzdA",
+    "password_hash": "$argon2id$v=19$m=65536,p=4,t=3$fHgpVK9qQEx6yutkCZuBMw$d8Hsp8xBMsB//pmEU+cjo2f9qJyG808LIXWNhCbDKrk",
     "role": "user",
     "disabled": false,
     "must_change_password": true,

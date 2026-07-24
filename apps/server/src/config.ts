@@ -43,6 +43,14 @@ const ConfigSchema = z.object({
   // --- Emulator / test environment (CONFIGURATION.md §3) ---
   FIRESTORE_EMULATOR_HOST: z.string().optional(),
   FIREBASE_STORAGE_EMULATOR_HOST: z.string().optional(),
+  // '1' to wipe users/usernames/sessions before bootstrap runs, so every boot
+  // starts from a fresh admin — the e2e webServer sets this (see
+  // playwright.config.ts). NOT z.coerce.boolean(): that coerces any non-empty
+  // string (including "0") to true.
+  PVPDASH_RESET_ACCOUNTS_ON_BOOT: z
+    .enum(['0', '1'])
+    .default('0')
+    .transform((v) => v === '1'),
 });
 
 export type Config = Readonly<z.infer<typeof ConfigSchema>> & {

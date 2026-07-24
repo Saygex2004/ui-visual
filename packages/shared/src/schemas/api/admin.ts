@@ -68,7 +68,9 @@ export const AdminSearchResultSchema = z.object({
 export const AdminSearchResponseSchema = z.object({ results: z.array(AdminSearchResultSchema) });
 
 export type AdminUser = z.infer<typeof AdminUserSchema>;
+export type UsersResponse = z.infer<typeof UsersResponseSchema>;
 export type CreateUserRequest = z.infer<typeof CreateUserRequestSchema>;
+export type CreateUserResponse = z.infer<typeof CreateUserResponseSchema>;
 export type CategoriesResponse = z.infer<typeof CategoriesResponseSchema>;
 export type SetCategoriesRequest = z.infer<typeof SetCategoriesRequestSchema>;
 export type AdminSearchResult = z.infer<typeof AdminSearchResultSchema>;

@@ -20,6 +20,8 @@ export const TOP_LEVEL_COLLECTIONS = [
   'runs',
   'settings',
   'users',
+  'usernames',
+  'sessions',
   'ratings',
   'calendar_days',
   'assignment_index',
@@ -139,6 +141,13 @@ async function seedUsers(db: Firestore): Promise<number> {
       ...withoutId(row),
       created_at: toTs(row.created_at as string),
       updated_at: toTs(row.updated_at as string),
+    });
+    // The usernames/{lowercased} uniqueness claim is derivable from each
+    // user's username — seeded here rather than as a separate fixture file,
+    // so the two can never drift apart (DATA_MODEL.md §9).
+    const username = String(row.username);
+    bw.set(db.collection('usernames').doc(username.toLowerCase()), {
+      user_id: String(row.id),
     });
   }
   await bw.close();

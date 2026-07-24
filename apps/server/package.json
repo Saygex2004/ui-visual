@@ -12,7 +12,9 @@
     "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
+    "@fastify/cookie": "^11.1.2",
     "@pvp/shared": "workspace:*",
+    "argon2": "^0.45.1",
     "fastify": "^5.10.0",
     "firebase-admin": "^14.2.0",
     "zod": "^4.4.3"

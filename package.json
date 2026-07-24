@@ -13,7 +13,7 @@
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "pnpm -r --parallel test",
     "test:integration": "firebase emulators:exec --config firebase/firebase.json --project demo-pvp-dashboard \"pnpm -r test:integration\"",
-    "e2e": "playwright test",
+    "e2e": "firebase emulators:exec --config firebase/firebase.json --project demo-pvp-dashboard \"playwright test\"",
     "build": "pnpm -r build",
     "dev:server": "pnpm --filter @pvp/server dev",
     "dev:web": "pnpm --filter @pvp/web dev",
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.1",
     "@types/node": "^26.1.1",
     "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",

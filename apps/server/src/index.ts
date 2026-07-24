@@ -1,5 +1,5 @@
 // Server bootstrap: validate config (fail-fast), connect Firestore, build the
-// app (primes the snapshot cache), listen.
+// app (primes the snapshot cache, runs first-run admin bootstrap), listen.
 import { loadConfig } from './config.js';
 import { buildApp } from './app.js';
 import { getDb } from './firestore.js';
@@ -15,7 +15,28 @@ async function main(): Promise<void> {
   }
 
   const db = getDb(config.PVPDASH_FIRESTORE_PROJECT_ID);
-  const { app } = await buildApp(config, db);
+
+  if (config.PVPDASH_RESET_ACCOUNTS_ON_BOOT) {
+    // e2e-only escape hatch (playwright.config.ts). Must run here, ahead of
+    // buildApp's bootstrap call, rather than in Playwright's globalSetup:
+    // globalSetup runs AFTER webServer processes are already started and
+    // healthy, so a wipe there deletes the admin bootstrap just created
+    // instead of preceding it.
+    await Promise.all(
+      ['users', 'usernames', 'sessions'].map((name) => db.recursiveDelete(db.collection(name))),
+    );
+  }
+
+  let app;
+  try {
+    ({ app } = await buildApp(config, db));
+  } catch (err) {
+    // Covers both the admin-bootstrap refusal (empty `users`, no bootstrap
+    // password) and any other startup failure — fail closed and loud.
+    console.error(err instanceof Error ? err.message : String(err));
+    process.exit(1);
+  }
+
   try {
     await app.listen({ port: config.listenPort, host: '0.0.0.0' });
   } catch (err) {

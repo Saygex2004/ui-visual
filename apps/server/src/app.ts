@@ -1,15 +1,21 @@
 // Application factory: builds a configured Fastify instance without listening,
 // so tests can inject requests against it. When `db` is supplied, the data
-// layer (snapshot cache + listings routes) is wired in and readiness becomes
-// cache-driven; without it (pure offline unit tests) the app stays a health-
-// and-error-envelope skeleton, matching the Phase 0 stub behaviour.
+// layer (snapshot cache + auth + admin + listings routes) is wired in and
+// readiness becomes cache-driven; without it (pure offline unit tests) the app
+// stays a health-and-error-envelope skeleton, matching the Phase 0 stub
+// behaviour. Bootstrap (SPECIFICATIONS.md §7) runs here too, ahead of route
+// registration, so it is fatal (throws) before the server ever listens.
 import Fastify, { type FastifyInstance } from 'fastify';
 import type { Firestore } from 'firebase-admin/firestore';
 import type { Config } from './config.js';
 import { registerErrorEnvelope } from './plugins/errorEnvelope.js';
 import { registerHealthModule } from './modules/health/index.js';
 import { registerListingsModule } from './modules/listings/index.js';
+import { registerAuthPlugin } from './plugins/auth.js';
+import { registerAuthModule } from './modules/auth/index.js';
+import { registerAdminModule } from './modules/admin/index.js';
 import { SnapshotCache } from './cache/index.js';
+import { bootstrapAdmin } from './bootstrap.js';
 
 function buildLoggerOptions(config: Config) {
   // pino is Fastify's native logger. Pretty console in development,
@@ -43,6 +49,8 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
 
   let cache: SnapshotCache | null = null;
   if (db) {
+    await bootstrapAdmin(db, config.PVPDASH_BOOTSTRAP_ADMIN_PASSWORD, app.log);
+
     cache = new SnapshotCache(db, {
       metaPollSeconds: config.PVPDASH_META_POLL_SECONDS,
       snapshotMaxAgeHours: config.PVPDASH_SNAPSHOT_MAX_AGE_HOURS,
@@ -54,6 +62,18 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
     const primedCache = cache;
     await app.register(
       async (instance) => {
+        await registerAuthPlugin(instance, {
+          db,
+          cookieSecret: config.PVPDASH_SESSION_SECRET,
+          sessionTtlDays: config.PVPDASH_SESSION_TTL_DAYS,
+          isProduction: config.isProduction,
+        });
+        registerAuthModule(instance, {
+          db,
+          sessionTtlDays: config.PVPDASH_SESSION_TTL_DAYS,
+          isProduction: config.isProduction,
+        });
+        registerAdminModule(instance, { db });
         registerListingsModule(instance, { cache: primedCache, db });
       },
       { prefix: '/api' },

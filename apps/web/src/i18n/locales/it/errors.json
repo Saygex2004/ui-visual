@@ -1,1 +1,19 @@
-{}
+{
+  "auth": {
+    "invalidCredentials": "Nome utente o password non corretti.",
+    "mustChangePassword": "Devi impostare una nuova password prima di continuare.",
+    "unauthenticated": "Devi accedere per continuare.",
+    "forbidden": "Non hai i permessi necessari per questa operazione.",
+    "passwordMismatch": "Le due password non coincidono."
+  },
+  "admin": {
+    "usernameTaken": "Questo nome utente è già in uso.",
+    "lastAdmin": "Impossibile completare l'operazione: è l'ultimo amministratore attivo."
+  },
+  "common": {
+    "notFound": "Risorsa non trovata.",
+    "validation": "I dati inviati non sono validi.",
+    "internal": "Si è verificato un errore imprevisto. Riprova più tardi.",
+    "unknown": "Si è verificato un errore imprevisto."
+  }
+}
