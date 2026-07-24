@@ -34,7 +34,7 @@
 |---|---|
 | `FIRESTORE_EMULATOR_HOST` | Set (e.g. `127.0.0.1:8081`) to route the Admin SDK to the Firestore emulator — the integration suites and the seeded dev environment set this; its **absence** is what "production access" means. |
 | `FIREBASE_STORAGE_EMULATOR_HOST` | Same for the Storage emulator. |
-| `PVPDASH_SEED` | `1` to run the seed script's fixtures into the emulator at dev startup. |
+| `PVPDASH_SEED` | `1` to load the listings/OMI/meta/runs/settings fixtures into the emulator at boot (`seed/lib.ts`'s `seedContent`). Deliberately excludes `users`/`sessions` and every other Part B collection, so it composes safely with `PVPDASH_RESET_ACCOUNTS_ON_BOOT` regardless of which runs first — the dashboard-browse e2e flow sets both together. |
 | `PVPDASH_RESET_ACCOUNTS_ON_BOOT` | `1` to wipe `users`/`usernames`/`sessions` before bootstrap runs, so this boot creates a fresh admin (`SPECIFICATIONS.md` §7). The e2e `webServer` sets this — see `playwright.config.ts`; never set in dev or production. |
 
 Emulator ports and the hosting emulator config live in `firebase/firebase.json`; tests must never run without the emulator variables set (`TESTING.md` §1).

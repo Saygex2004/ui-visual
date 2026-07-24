@@ -1,1 +1,102 @@
-{}
+{
+  "landing": {
+    "title": "Scegli una vista",
+    "immobiliTitle": "Cluster Immobiliari",
+    "immobiliDescription": "Aste immobiliari, organizzate per cluster di rischio geografico.",
+    "creditiTitle": "Cluster Crediti",
+    "creditiDescription": "Aste di quote societarie e crediti ceduti da procedure giudiziarie."
+  },
+  "area": {
+    "title": {
+      "immobili": "Cluster Immobiliari",
+      "crediti": "Cluster Crediti"
+    },
+    "backControl": "← Torna alla scelta",
+    "loading": "Caricamento…",
+    "loadError": "Non è stato possibile caricare i dati dell'area.",
+    "metadata": {
+      "lastFetched": "Ultimo aggiornamento",
+      "neverFetched": "Mai aggiornato",
+      "analyzed": "Analizzati / Trovati",
+      "analyzedValue": "{{stored}} / {{total}}",
+      "excluded": "Esclusi dalle regole di esclusione"
+    },
+    "refreshDeferralNote": "L'aggiornamento dei dati avviene automaticamente in base alla pianificazione dello scraper."
+  },
+  "cluster": {
+    "title": "Cluster {{number}}: {{name}}",
+    "name": {
+      "red": "Red Zone — Core Tradizionale",
+      "blue_chip": "Blue Chip Zone — Cash Flow Generativi",
+      "green": "Green Zone — Basso Rischio / Basso Rendimento",
+      "grey": "Grey Zone — Volumi Ridotti",
+      "black": "Black Zone — Non Geolocalizzati",
+      "crediti": "Crediti — Cessione di Crediti",
+      "partecipazioni": "Partecipazioni — Quote Societarie"
+    },
+    "subtitle": {
+      "red": "Alto rendimento, alto rischio operativo: presenza di criminalità organizzata, tribunali molto lenti.",
+      "blue_chip": "Alta liquidità, assorbimento rapido: infiltrazione economica silenziosa.",
+      "green": "Basso rischio operativo, burocrazia difendibile.",
+      "grey": "Micro-mercati, bassa liquidità: rischio di immobilizzo del capitale.",
+      "black": "Listing che PVP non geolocalizza nei campi strutturati.",
+      "crediti": "Cessioni di crediti da procedure giudiziarie.",
+      "partecipazioni": "Quote societarie da procedure giudiziarie."
+    }
+  },
+  "bucket": {
+    "principali": "Procedure principali",
+    "fallimenti": "Fallimenti"
+  },
+  "archive": {
+    "navLabel": "Archivio",
+    "title": "Archivio",
+    "empty": "L'archivio è vuoto."
+  },
+  "table": {
+    "empty": "Nessun listing corrisponde ai filtri attuali.",
+    "goToListing": "Vai all'annuncio →",
+    "bloccoBadgeTitle": "{{count}} lotti nello stesso blocco",
+    "columns": {
+      "tipoImmobile": "Tipo di immobile",
+      "tipoBene": "Tipo di bene",
+      "tipoProcedura": "Tipo di procedura",
+      "disponibilita": "Disponibilità",
+      "descrizione": "Descrizione",
+      "numeroAnno": "N° / Anno",
+      "blocco": "Blocco",
+      "tribunale": "Tribunale",
+      "comuneProvincia": "Comune / Provincia",
+      "valoreRichiesto": "Valore richiesto",
+      "dataPubblicazione": "Data pubblicazione",
+      "dataVendita": "Data vendita",
+      "cluster": "Cluster",
+      "actions": "Annuncio"
+    }
+  },
+  "toolbar": {
+    "searchLabel": "Ricerca libera",
+    "searchPlaceholder": "Ricerca libera…",
+    "tipoLabel": "Tipo",
+    "proceduraLabel": "Tipo di procedura",
+    "disponibilitaLabel": "Disponibilità",
+    "tribunaleLabel": "Tribunale",
+    "allOption": "Tutti",
+    "minLabel": "Valore da €",
+    "maxLabel": "Valore a €",
+    "resetFilters": "Reset filtri",
+    "countTotal": "{{count}} listing",
+    "countFiltered": "{{visible}} / {{total}} listing"
+  },
+  "occupancy": {
+    "libero": "Libero",
+    "occupato": "Occupato",
+    "occupato_senza_titolo": "Occupato senza titolo",
+    "in_liberazione": "In corso di liberazione",
+    "parzialmente_occupato": "Parzialmente occupato",
+    "non_specificato": "Non specificato"
+  },
+  "workspace": {
+    "placeholder": "Scheda del listing {{id}} — la vista completa arriva nella Fase 6."
+  }
+}

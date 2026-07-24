@@ -3,6 +3,7 @@
 import { loadConfig } from './config.js';
 import { buildApp } from './app.js';
 import { getDb } from './firestore.js';
+import { seedContent } from '@pvp/seed';
 
 async function main(): Promise<void> {
   let config;
@@ -25,6 +26,12 @@ async function main(): Promise<void> {
     await Promise.all(
       ['users', 'usernames', 'sessions'].map((name) => db.recursiveDelete(db.collection(name))),
     );
+  }
+
+  if (config.PVPDASH_SEED) {
+    // e2e/dev-only (CONFIGURATION.md §3) — content fixtures only, never
+    // accounts; see seedContent's own doc comment for why the split matters.
+    await seedContent(db);
   }
 
   let app;

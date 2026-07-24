@@ -16,7 +16,8 @@
     "build": "echo \"(seed/ ships as source, run via tsx)\" && exit 0"
   },
   "dependencies": {
-    "firebase-admin": "^14.2.0"
+    "firebase-admin": "^14.2.0",
+    "@pvp/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

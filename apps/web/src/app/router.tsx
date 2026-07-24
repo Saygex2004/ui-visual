@@ -14,11 +14,14 @@ import {
 } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
-import type { MeResponse } from '@pvp/shared';
-import { Landing } from '../routes/Landing.js';
+import { AREA_SLUGS, type AreaSlug, type MeResponse } from '@pvp/shared';
 import { ComingSoon } from '../routes/ComingSoon.js';
 import { LoginScreen } from '../features/auth/LoginScreen.js';
 import { AccountsScreen } from '../features/admin/AccountsScreen.js';
+import { LandingScreen } from '../features/dashboard/LandingScreen.js';
+import { AreaView } from '../features/dashboard/AreaView.js';
+import { WorkspacePlaceholder } from '../features/dashboard/WorkspacePlaceholder.js';
+import { areaSearchSchema, listingSearchSchema } from '../features/dashboard/urlState.js';
 import { ProtectedLayout } from './ProtectedLayout.js';
 import { meQueryKey } from '../features/auth/hooks.js';
 import { fetchMe } from '../features/auth/api.js';
@@ -79,7 +82,29 @@ const protectedRoute = createRoute({
 const indexRoute = createRoute({
   getParentRoute: () => protectedRoute,
   path: '/',
-  component: Landing,
+  component: LandingScreen,
+});
+
+const areaRoute = createRoute({
+  getParentRoute: () => protectedRoute,
+  path: '/aste/$area',
+  validateSearch: areaSearchSchema,
+  beforeLoad: ({ params }) => {
+    // Not a search param (FRONTEND.md §2's "fall back silently" rule) — an
+    // unrecognized area segment isn't a valid page at all, so it redirects
+    // rather than degrading in place.
+    if (!AREA_SLUGS.includes(params.area as AreaSlug)) {
+      throw redirect({ to: '/' });
+    }
+  },
+  component: AreaView,
+});
+
+const listingRoute = createRoute({
+  getParentRoute: () => areaRoute,
+  path: '/lotto/$id',
+  validateSearch: listingSearchSchema,
+  component: WorkspacePlaceholder,
 });
 
 const adminRoute = createRoute({
@@ -111,7 +136,13 @@ const chatRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   loginRoute,
-  protectedRoute.addChildren([indexRoute, adminRoute, calendarRoute, chatRoute]),
+  protectedRoute.addChildren([
+    indexRoute,
+    areaRoute.addChildren([listingRoute]),
+    adminRoute,
+    calendarRoute,
+    chatRoute,
+  ]),
 ]);
 
 export function createAppRouter(queryClient: QueryClient) {

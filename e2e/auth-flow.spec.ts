@@ -2,12 +2,12 @@
 // change → sign-in lands on requested URL. Also covers: anonymous access is
 // refused and redirected, and the session survives a page reload.
 import { test, expect } from '@playwright/test';
-import { E2E_BOOTSTRAP_PASSWORD } from '../playwright.config.js';
+import { E2E_BOOTSTRAP_PASSWORD, ADMIN_ROTATED_PASSWORD } from '../playwright.config.js';
 
 const NEW_USERNAME = `nuovoutente-${Date.now()}`;
 const NEW_TEMP_PASSWORD = 'TempPass123!';
 const NEW_FINAL_PASSWORD = 'NuovoUtentePass1!';
-const ADMIN_NEW_PASSWORD = 'AdminChosenPass1!';
+const ADMIN_NEW_PASSWORD = ADMIN_ROTATED_PASSWORD;
 
 test.describe.serial('auth flow 1: bootstrap, forced change, redirect-preserving sign-in', () => {
   test('anonymous access to a protected route redirects to /login', async ({ page }) => {

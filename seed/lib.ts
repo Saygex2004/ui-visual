@@ -289,6 +289,22 @@ async function seedAdminEvents(db: Firestore): Promise<number> {
   return rows.length;
 }
 
+/** Load only the listing-browsing content (listings, OMI, meta, runs,
+ *  settings) — deliberately excludes users/sessions and every other Part B
+ *  collection, so it composes safely with the server's own account
+ *  reset/bootstrap boot step (PVPDASH_RESET_ACCOUNTS_ON_BOOT) regardless of
+ *  which runs first. Used by `PVPDASH_SEED=1` (CONFIGURATION.md §3) and the
+ *  e2e browse flow. Does NOT wipe first. */
+export async function seedContent(db: Firestore): Promise<Record<string, number>> {
+  return {
+    listings: await seedListings(db),
+    omi_prices: await seedOmiPrices(db),
+    meta: await seedMeta(db),
+    runs: await seedRuns(db),
+    settings: await seedSettings(db),
+  };
+}
+
 /** Load every fixture collection into `db`. Does NOT wipe first — call
  *  `wipeAll(db)` beforehand for wipe-and-load idempotency. Returns per-
  *  collection counts. */

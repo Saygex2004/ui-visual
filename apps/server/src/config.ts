@@ -51,6 +51,13 @@ const ConfigSchema = z.object({
     .enum(['0', '1'])
     .default('0')
     .transform((v) => v === '1'),
+  // '1' to load the listings/OMI/meta/runs/settings fixtures on boot
+  // (CONFIGURATION.md §3) — deliberately excludes users/sessions, so it
+  // composes safely with PVPDASH_RESET_ACCOUNTS_ON_BOOT either way round.
+  PVPDASH_SEED: z
+    .enum(['0', '1'])
+    .default('0')
+    .transform((v) => v === '1'),
 });
 
 export type Config = Readonly<z.infer<typeof ConfigSchema>> & {

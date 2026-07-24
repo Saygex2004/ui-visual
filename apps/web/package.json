@@ -12,14 +12,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@pvp/shared": "workspace:*",
     "@fontsource/inter": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
     "@fontsource/space-grotesk": "^5.3.0",
     "@primereact/core": "^11.0.0",
     "@primeuix/themes": "^3.0.0",
+    "@pvp/shared": "workspace:*",
     "@tanstack/react-query": "^5.101.4",
     "@tanstack/react-router": "^1.170.18",
+    "@tanstack/react-virtual": "^3.14.8",
     "i18next": "^26.3.6",
     "primeicons": "^8.0.0",
     "primereact": "^11.0.0",
