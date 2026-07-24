@@ -1,6 +1,8 @@
-// Server bootstrap: validate config (fail-fast), build the app, listen.
+// Server bootstrap: validate config (fail-fast), connect Firestore, build the
+// app (primes the snapshot cache), listen.
 import { loadConfig } from './config.js';
 import { buildApp } from './app.js';
+import { getDb } from './firestore.js';
 
 async function main(): Promise<void> {
   let config;
@@ -12,7 +14,8 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const app = await buildApp(config);
+  const db = getDb(config.PVPDASH_FIRESTORE_PROJECT_ID);
+  const { app } = await buildApp(config, db);
   try {
     await app.listen({ port: config.listenPort, host: '0.0.0.0' });
   } catch (err) {

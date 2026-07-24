@@ -1,0 +1,306 @@
+// Seed library — loads the canonical fixture dataset (seed/fixtures/) into a
+// Firestore instance. Exported so both the CLI (seed.ts) and the server's
+// integration suite can seed identical state (TESTING.md §1: "Fixtures are the
+// shared vocabulary"). Every function here is emulator-agnostic; the caller is
+// responsible for only ever connecting this to an emulator (see seed.ts's
+// FIRESTORE_EMULATOR_HOST guard).
+import { readFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { initializeApp, getApps } from 'firebase-admin/app';
+import { getFirestore, Timestamp, type Firestore } from 'firebase-admin/firestore';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const FIXTURES_DIR = join(__dirname, 'fixtures');
+
+export const TOP_LEVEL_COLLECTIONS = [
+  'listings',
+  'omi_prices',
+  'meta',
+  'runs',
+  'settings',
+  'users',
+  'ratings',
+  'calendar_days',
+  'assignment_index',
+  'listing_activity',
+  'chat_threads',
+  'attachments',
+  'user_counters',
+  'admin_events',
+] as const;
+
+export function connectDb(projectId: string): Firestore {
+  const app = getApps()[0] ?? initializeApp({ projectId });
+  const db = getFirestore(app);
+  db.settings({ ignoreUndefinedProperties: true });
+  return db;
+}
+
+function loadJson<T>(filename: string): T {
+  return JSON.parse(readFileSync(join(FIXTURES_DIR, filename), 'utf8')) as T;
+}
+
+function toTs(iso: string | null | undefined): Timestamp | null {
+  return iso == null ? null : Timestamp.fromDate(new Date(iso));
+}
+
+/** Fixtures carry a helper `id` field used to key the document; strip it before
+ *  writing (Firestore already keys the doc via `.doc(id)`). */
+function withoutId<T extends { id?: unknown }>(row: T): Omit<T, 'id'> {
+  const { id: _id, ...rest } = row;
+  return rest;
+}
+
+/** Wipe every seeded collection (and subcollections) — the wipe half of
+ *  wipe-and-load idempotency. */
+export async function wipeAll(db: Firestore): Promise<void> {
+  await Promise.all(TOP_LEVEL_COLLECTIONS.map((name) => db.recursiveDelete(db.collection(name))));
+}
+
+// ---- per-collection loaders -------------------------------------------
+
+async function seedListings(db: Firestore): Promise<number> {
+  const rows = loadJson<Array<Record<string, unknown>>>('listings.json');
+  const bw = db.bulkWriter();
+  for (const row of rows) {
+    bw.set(db.collection('listings').doc(String(row.id)), {
+      ...row,
+      first_seen_at: toTs(row.first_seen_at as string),
+      last_seen_at: toTs(row.last_seen_at as string),
+      archived_at: toTs(row.archived_at as string | null),
+    });
+  }
+  await bw.close();
+  return rows.length;
+}
+
+async function seedOmiPrices(db: Firestore): Promise<number> {
+  const rows = loadJson<Array<Record<string, unknown>>>('omi_prices.json');
+  const bw = db.bulkWriter();
+  for (const row of rows) {
+    bw.set(db.collection('omi_prices').doc(String(row.id)), {
+      ...withoutId(row),
+      fetched_at: toTs(row.fetched_at as string),
+    });
+  }
+  await bw.close();
+  return rows.length;
+}
+
+async function seedMeta(db: Firestore): Promise<number> {
+  const meta = loadJson<Record<string, Record<string, unknown>>>('meta.json');
+  const bw = db.bulkWriter();
+  bw.set(db.collection('meta').doc('immobili'), {
+    ...meta.immobili,
+    last_success_at: toTs(meta.immobili?.last_success_at as string),
+  });
+  bw.set(db.collection('meta').doc('corporate'), {
+    ...meta.corporate,
+    last_success_at: toTs(meta.corporate?.last_success_at as string),
+  });
+  bw.set(db.collection('meta').doc('omi'), {
+    ...meta.omi,
+    fetched_at: toTs(meta.omi?.fetched_at as string),
+  });
+  await bw.close();
+  return 3;
+}
+
+async function seedRuns(db: Firestore): Promise<number> {
+  const rows = loadJson<Array<Record<string, unknown>>>('runs.json');
+  const bw = db.bulkWriter();
+  for (const row of rows) {
+    bw.set(db.collection('runs').doc(String(row.id)), {
+      ...withoutId(row),
+      started_at: toTs(row.started_at as string),
+      finished_at: toTs(row.finished_at as string),
+    });
+  }
+  await bw.close();
+  return rows.length;
+}
+
+async function seedSettings(db: Firestore): Promise<number> {
+  const settings = loadJson<{ extraction_categories: Record<string, unknown> }>('settings.json');
+  const doc = settings.extraction_categories;
+  await db
+    .collection('settings')
+    .doc('extraction_categories')
+    .set({ ...doc, updated_at: toTs(doc.updated_at as string) });
+  return 1;
+}
+
+async function seedUsers(db: Firestore): Promise<number> {
+  const rows = loadJson<Array<Record<string, unknown>>>('users.json');
+  const bw = db.bulkWriter();
+  for (const row of rows) {
+    bw.set(db.collection('users').doc(String(row.id)), {
+      ...withoutId(row),
+      created_at: toTs(row.created_at as string),
+      updated_at: toTs(row.updated_at as string),
+    });
+  }
+  await bw.close();
+  return rows.length;
+}
+
+async function seedRatings(db: Firestore): Promise<number> {
+  const rows = loadJson<Array<Record<string, unknown>>>('ratings.json');
+  const bw = db.bulkWriter();
+  for (const row of rows) {
+    bw.set(db.collection('ratings').doc(String(row.id)), {
+      ...withoutId(row),
+      set_at: toTs(row.set_at as string),
+    });
+  }
+  await bw.close();
+  return rows.length;
+}
+
+async function seedCalendarDays(db: Firestore): Promise<number> {
+  const rows = loadJson<Array<Record<string, unknown>>>('calendar_days.json');
+  const bw = db.bulkWriter();
+  for (const row of rows) {
+    bw.set(db.collection('calendar_days').doc(String(row.id)), {
+      ...withoutId(row),
+      created_at: toTs(row.created_at as string),
+      updated_at: toTs(row.updated_at as string),
+    });
+  }
+  await bw.close();
+  return rows.length;
+}
+
+async function seedAssignmentIndex(db: Firestore): Promise<number> {
+  const rows = loadJson<Array<Record<string, unknown>>>('assignment_index.json');
+  const bw = db.bulkWriter();
+  for (const row of rows) {
+    bw.set(db.collection('assignment_index').doc(String(row.id)), {
+      ...withoutId(row),
+      assigned_at: toTs(row.assigned_at as string),
+      completed_at: toTs(row.completed_at as string | null),
+    });
+  }
+  await bw.close();
+  return rows.length;
+}
+
+async function seedListingActivity(db: Firestore): Promise<number> {
+  const rows = loadJson<Array<Record<string, unknown>>>('listing_activity.json');
+  const bw = db.bulkWriter();
+  for (const row of rows) {
+    bw.set(db.collection('listing_activity').doc(String(row.id)), {
+      ...withoutId(row),
+      at: toTs(row.at as string),
+    });
+  }
+  await bw.close();
+  return rows.length;
+}
+
+async function seedChatThreads(
+  db: Firestore,
+): Promise<{ threads: number; messages: number; reads: number }> {
+  type Fixture = Record<string, unknown> & {
+    id: string;
+    messages?: Array<Record<string, unknown>>;
+    reads?: Array<Record<string, unknown>>;
+  };
+  const rows = loadJson<Fixture[]>('chat_threads.json');
+  const bw = db.bulkWriter();
+  let messages = 0;
+  let reads = 0;
+
+  for (const row of rows) {
+    const { messages: msgs, reads: threadReads, ...thread } = row;
+    const threadRef = db.collection('chat_threads').doc(String(row.id));
+    bw.set(threadRef, {
+      ...withoutId(thread),
+      created_at: toTs(thread.created_at as string),
+      closed_at: toTs(thread.closed_at as string | null),
+      last_message_at: toTs(thread.last_message_at as string | null),
+    });
+
+    for (const msg of msgs ?? []) {
+      bw.set(threadRef.collection('messages').doc(String(msg.id)), {
+        ...withoutId(msg),
+        sent_at: toTs(msg.sent_at as string),
+      });
+      messages += 1;
+    }
+    for (const read of threadReads ?? []) {
+      bw.set(threadRef.collection('reads').doc(String(read.id)), {
+        last_read_at: toTs(read.last_read_at as string),
+      });
+      reads += 1;
+    }
+  }
+
+  await bw.close();
+  return { threads: rows.length, messages, reads };
+}
+
+async function seedAttachments(db: Firestore): Promise<number> {
+  const rows = loadJson<Array<Record<string, unknown>>>('attachments.json');
+  const bw = db.bulkWriter();
+  for (const row of rows) {
+    bw.set(db.collection('attachments').doc(String(row.id)), {
+      ...withoutId(row),
+      uploaded_at: toTs(row.uploaded_at as string),
+    });
+  }
+  await bw.close();
+  return rows.length;
+}
+
+async function seedUserCounters(db: Firestore): Promise<number> {
+  const rows = loadJson<Array<Record<string, unknown>>>('user_counters.json');
+  const bw = db.bulkWriter();
+  for (const row of rows) {
+    bw.set(db.collection('user_counters').doc(String(row.id)), {
+      ...withoutId(row),
+      updated_at: toTs(row.updated_at as string),
+    });
+  }
+  await bw.close();
+  return rows.length;
+}
+
+async function seedAdminEvents(db: Firestore): Promise<number> {
+  const rows = loadJson<Array<Record<string, unknown>>>('admin_events.json');
+  const bw = db.bulkWriter();
+  for (const row of rows) {
+    bw.set(db.collection('admin_events').doc(String(row.id)), {
+      ...withoutId(row),
+      at: toTs(row.at as string),
+    });
+  }
+  await bw.close();
+  return rows.length;
+}
+
+/** Load every fixture collection into `db`. Does NOT wipe first — call
+ *  `wipeAll(db)` beforehand for wipe-and-load idempotency. Returns per-
+ *  collection counts. */
+export async function seedAll(db: Firestore): Promise<Record<string, number>> {
+  const chat = await seedChatThreads(db);
+  return {
+    listings: await seedListings(db),
+    omi_prices: await seedOmiPrices(db),
+    meta: await seedMeta(db),
+    runs: await seedRuns(db),
+    settings: await seedSettings(db),
+    users: await seedUsers(db),
+    ratings: await seedRatings(db),
+    calendar_days: await seedCalendarDays(db),
+    assignment_index: await seedAssignmentIndex(db),
+    listing_activity: await seedListingActivity(db),
+    chat_threads: chat.threads,
+    'chat_threads/messages': chat.messages,
+    'chat_threads/reads': chat.reads,
+    attachments: await seedAttachments(db),
+    user_counters: await seedUserCounters(db),
+    admin_events: await seedAdminEvents(db),
+  };
+}

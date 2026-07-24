@@ -1,8 +1,13 @@
 // Snapshot builder (SPECIFICATIONS.md §8, API_CONTRACT.md §3). Reads a scope's
 // full active + archived sets (and, for immobili, the OMI map + meta), classifies
 // every listing with the shared domain rules, groups blocchi area-wide, trims
-// descriptions, and assembles the AreaSnapshot. Pure over its repository inputs;
-// the version is a content hash so the ETag changes exactly when content does.
+// descriptions, and assembles the AreaSnapshot. The version is a content hash
+// so the ETag changes exactly when content does.
+//
+// Split in two: `assembleSnapshot` is PURE (in-memory inputs → AreaSnapshot,
+// no I/O) — the payload-budget test drives it directly with a synthetic 10k
+// listing set, no emulator required. `buildSnapshot` is the I/O wrapper the
+// cache actually calls, fetching via the repository layer.
 import { createHash } from 'node:crypto';
 import type { Firestore } from 'firebase-admin/firestore';
 import {
@@ -13,6 +18,7 @@ import {
   CREDITS_CLUSTERS,
   SCOPE_TO_AREA_SLUG,
   type Scope,
+  type Listing,
   type AreaSnapshot,
   type ClusterBlock,
   type ListingRow,
@@ -46,17 +52,24 @@ function contentVersion(parts: Omit<AreaSnapshot, 'version' | 'built_at'>): stri
   return createHash('sha1').update(JSON.stringify(parts)).digest('hex').slice(0, 16);
 }
 
-export async function buildSnapshot(db: Firestore, scope: Scope): Promise<BuiltSnapshot> {
-  const { active, archived } = await listingsRepo.getByScope(db, scope);
+export interface ScopeMetaInput {
+  last_success_at: string;
+  total_active: number;
+  total_stored: number;
+  detail_errors: number;
+}
+
+/** Pure assembly: in-memory listings/OMI/meta → AreaSnapshot. No I/O. */
+export function assembleSnapshot(
+  scope: Scope,
+  active: readonly Listing[],
+  archived: readonly Listing[],
+  omiMap: Readonly<Record<string, OmiPrice>>,
+  scopeMeta: ScopeMetaInput | null,
+  omiMeta: { fetched_at: string; semestre: string } | null,
+): BuiltSnapshot {
   const isImmobili = scope === 'immobili';
 
-  const [scopeMeta, omiMeta, omiMap] = await Promise.all([
-    metaRepo.getScopeMeta(db, scope),
-    isImmobili ? metaRepo.getOmiMeta(db) : Promise.resolve(null),
-    isImmobili ? omiPricesRepo.getAllBySlug(db) : Promise.resolve<Record<string, OmiPrice>>({}),
-  ]);
-
-  // Cluster buckets, initialized empty for every declared cluster.
   const defs = clusterDefsFor(scope);
   const blocks = new Map<string, ClusterBlock>(
     defs.map((d) => [
@@ -111,7 +124,7 @@ export async function buildSnapshot(db: Firestore, scope: Scope): Promise<BuiltS
   const meta = mapRefreshMetadata({
     scope,
     meta: scopeMeta,
-    omiMeta: omiMeta,
+    omiMeta,
     excludedByRules: isImmobili ? excludedCount : null,
   });
 
@@ -136,6 +149,20 @@ export async function buildSnapshot(db: Firestore, scope: Scope): Promise<BuiltS
     summariesById,
     omiBySlug: omiMap,
   };
+}
+
+/** I/O wrapper: fetch a scope's data via the repository layer, then assemble. */
+export async function buildSnapshot(db: Firestore, scope: Scope): Promise<BuiltSnapshot> {
+  const { active, archived } = await listingsRepo.getByScope(db, scope);
+  const isImmobili = scope === 'immobili';
+
+  const [scopeMeta, omiMeta, omiMap] = await Promise.all([
+    metaRepo.getScopeMeta(db, scope),
+    isImmobili ? metaRepo.getOmiMeta(db) : Promise.resolve(null),
+    isImmobili ? omiPricesRepo.getAllBySlug(db) : Promise.resolve<Record<string, OmiPrice>>({}),
+  ]);
+
+  return assembleSnapshot(scope, active, archived, omiMap, scopeMeta, omiMeta);
 }
 
 // Re-exported for callers that map an area slug ⇄ scope.

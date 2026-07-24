@@ -1,6 +1,7 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  - 'seed'
 allowBuilds:
   '@firebase/util': true
   esbuild: true
