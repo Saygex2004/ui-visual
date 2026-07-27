@@ -48,6 +48,10 @@ export const CategoriesResponseSchema = z.object({
   is_default: z.boolean(), // absent doc → default set, flagged as such
   updated_at: instant.nullable(),
   updated_by: z.string().nullable(),
+  // Codes observed on real listings but not in the catalog (DOMAIN_RULES.md
+  // Appendix A) — rendered as a checked, non-uncheckable 5th group (UI §8.2)
+  // so the fail-open posture is visible rather than silent.
+  unrecognized_codes: z.array(z.string()),
 });
 export const SetCategoriesRequestSchema = z.object({ codes: z.array(z.string()) });
 export const SetCategoriesResponseSchema = z.object({ selection: z.array(z.string()) });
@@ -75,3 +79,6 @@ export type CategoriesResponse = z.infer<typeof CategoriesResponseSchema>;
 export type SetCategoriesRequest = z.infer<typeof SetCategoriesRequestSchema>;
 export type AdminSearchResult = z.infer<typeof AdminSearchResultSchema>;
 export type AdminEventView = z.infer<typeof AdminEventViewSchema>;
+export type EventsResponse = z.infer<typeof EventsResponseSchema>;
+export type SetCategoriesResponse = z.infer<typeof SetCategoriesResponseSchema>;
+export type RunsResponse = z.infer<typeof RunsResponseSchema>;

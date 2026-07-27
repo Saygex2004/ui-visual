@@ -1,8 +1,8 @@
 {
   "immobili": {
     "last_success_at": "2026-07-01T06:00:00.000Z",
-    "total_active": 30,
-    "total_stored": 27,
+    "total_active": 31,
+    "total_stored": 28,
     "detail_errors": 2
   },
   "corporate": {

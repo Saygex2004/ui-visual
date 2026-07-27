@@ -5,7 +5,7 @@
 // the "Vai all'annuncio →" action live in DataTable's frozen actions column,
 // not here (Valutazione is a Phase 6 placeholder this phase).
 import type { ReactNode } from 'react';
-import type { ListingRow, BloccoIndexEntry } from '@pvp/shared';
+import type { ListingRow, BloccoIndexEntry, ClusterBlock } from '@pvp/shared';
 import type { SortKey } from '../urlState.js';
 import { OccupancyIndicator } from './OccupancyIndicator.js';
 import { BloccoBadge } from './BloccoBadge.js';
@@ -21,6 +21,19 @@ export type AreaTableKind = 'real_estate' | 'credits';
 
 export interface ColumnContext {
   bloccoIndex: Readonly<Record<string, BloccoIndexEntry>>;
+  /** The blocco key currently isolated (URL `blocco`), or `null`. */
+  activeBlocco: string | null;
+  /** This table's own cluster (plain cluster tables); `null` for the
+   *  Archivio table, where every row already carries its own `cluster_key`. */
+  currentClusterKey: string | null;
+  /** The whole snapshot's cluster list — resolves a jump target's number/
+   *  buckets (UI §4.4's cross-cluster jump). */
+  clusters: readonly ClusterBlock[];
+  /** Toggle isolation of one block within its own cluster/table. */
+  onIsolate: (bloccoKey: string) => void;
+  /** Jump to another cluster: switches cluster + Principali/Fallimenti tab,
+   *  isolates the block there, and scrolls it into view. */
+  onJump: (targetClusterKey: string, bloccoKey: string) => void;
 }
 
 /** `cluster_key` is optional here (present only on archive rows) so the same
@@ -92,7 +105,14 @@ const BLOCCO: ColumnDef = {
   headerKey: 'table.columns.blocco',
   sortKey: 'blocco',
   width: '90px',
-  render: (row, ctx) => <BloccoBadge count={bloccoCount(row, ctx)} />,
+  render: (row, ctx) => (
+    <BloccoBadge
+      bloccoKey={row.blocco_key}
+      count={bloccoCount(row, ctx)}
+      effectiveClusterKey={row.cluster_key ?? ctx.currentClusterKey ?? ''}
+      ctx={ctx}
+    />
+  ),
 };
 
 const TRIBUNALE: ColumnDef = {

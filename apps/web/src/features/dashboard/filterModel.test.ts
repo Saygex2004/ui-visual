@@ -119,6 +119,47 @@ describe('applyFilterModel', () => {
     const result = applyFilterModel(withBlocco, { ...baseSearch, blocco: 'proc-A' });
     expect(result.rows.map((r) => r.id)).toEqual(['10', '11']);
   });
+
+  const geoRows: ListingRow[] = [
+    row({ id: '20', regione: 'Lazio', provincia: 'Roma', comune: 'Roma' }),
+    row({ id: '21', regione: 'Lazio', provincia: 'Roma', comune: 'Tivoli' }),
+    row({ id: '22', regione: 'Puglia', provincia: 'Bari', comune: 'Bari' }),
+  ];
+
+  it('filters by regione (UI §3.2, cluster-wide geo selection)', () => {
+    const result = applyFilterModel(geoRows, { ...baseSearch, regione: 'Puglia' });
+    expect(result.rows.map((r) => r.id)).toEqual(['22']);
+  });
+
+  it('filters by capoluogo (comune match)', () => {
+    const result = applyFilterModel(geoRows, { ...baseSearch, capoluogo: 'Roma' });
+    expect(result.rows.map((r) => r.id)).toEqual(['20']);
+  });
+
+  it('filters by provincia (spans capital and non-capital comuni)', () => {
+    const result = applyFilterModel(geoRows, { ...baseSearch, provincia: 'Roma' });
+    expect(result.rows.map((r) => r.id)).toEqual(['20', '21']);
+  });
+
+  it('AND-composes the geo filter with a non-geo filter', () => {
+    const result = applyFilterModel(geoRows, {
+      ...baseSearch,
+      provincia: 'Roma',
+      tipo: 'Villa',
+    });
+    expect(result.rows).toHaveLength(0);
+  });
+
+  it('skips geo predicates entirely when includeGeo is false (Archivio, UI §9.1)', () => {
+    const result = applyFilterModel(
+      geoRows,
+      { ...baseSearch, regione: 'Puglia' },
+      {
+        includeGeo: false,
+      },
+    );
+    expect(result.rows.map((r) => r.id)).toEqual(['20', '21', '22']);
+  });
 });
 
 describe('distinctValues', () => {

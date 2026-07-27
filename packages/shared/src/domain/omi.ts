@@ -84,3 +84,67 @@ export function selectOmiEntry(
 
   return null;
 }
+
+/**
+ * Structural twin of the API's `OmiEntry` (`schemas/api/snapshot.ts`) —
+ * `available: boolean` instead of `error: string|null`, since the server
+ * already resolves that distinction (`available = error === null`) before
+ * the snapshot ships. Domain files import nothing from `schemas/`, so this is
+ * hand-written rather than imported; `Record<string, OmiEntry>` is
+ * structurally assignable to `Record<string, OmiDisplayDoc>` with no cast.
+ */
+export interface OmiDisplayDoc {
+  provincia: string;
+  comune: string;
+  tipologia: string | null;
+  stato: string | null;
+  min_mq: number | null;
+  max_mq: number | null;
+  zona: string | null;
+  semestre: string;
+  available: boolean;
+}
+
+function usableDisplay(doc: OmiDisplayDoc | undefined): doc is OmiDisplayDoc {
+  return doc !== undefined && doc.available;
+}
+
+function toSelectionFromDisplay(doc: OmiDisplayDoc): OmiSelection {
+  return {
+    provincia: doc.provincia,
+    comune: doc.comune,
+    tipologia: doc.tipologia,
+    stato: doc.stato,
+    min_mq: doc.min_mq,
+    max_mq: doc.max_mq,
+    zona: doc.zona,
+    semestre: doc.semestre,
+    available: true,
+  };
+}
+
+/**
+ * Client-side equivalent of `selectOmiEntry`, operating on the already-
+ * resolved `omi_by_comune` map the browser actually receives in the
+ * `AreaSnapshot` (§9's fallback semantics are identical; only the input
+ * shape differs from the server-side `OmiDoc`/`error` form).
+ */
+export function selectOmiDisplayEntry(
+  omiByComune: Readonly<Record<string, OmiDisplayDoc>>,
+  params: { provincia: string | null; comune: string | null; capitalComune?: string | null },
+): OmiSelection | null {
+  const { provincia, comune, capitalComune } = params;
+  if (provincia == null) return null;
+
+  if (comune != null) {
+    const doc = omiByComune[omiSlug(provincia, comune)];
+    if (usableDisplay(doc)) return toSelectionFromDisplay(doc);
+  }
+
+  if (capitalComune != null && capitalComune !== comune) {
+    const capital = omiByComune[omiSlug(provincia, capitalComune)];
+    if (usableDisplay(capital)) return toSelectionFromDisplay(capital);
+  }
+
+  return null;
+}

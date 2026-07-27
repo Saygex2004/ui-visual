@@ -16,7 +16,11 @@ beforeAll(async () => {
 describe('Part A repository surface is structurally read-only', () => {
   // No repository module may export anything that looks like a write
   // operation on a Part A collection (00_OVERVIEW.md §5) — the guarantee is
-  // structural, asserted over the module's actual public surface.
+  // structural, asserted over the module's actual public surface. The ONE
+  // deliberate exception (DATA_MODEL.md §7, UI §8.2): the
+  // settings/extraction_categories write — named explicitly here, not
+  // silently exempted, so this test still fails loud if a second write ever
+  // appears anywhere in Part A.
   const FORBIDDEN_NAME = /^(create|update|delete|remove|write|set|put|save|upsert)/i;
   const partAModules: Record<string, Record<string, unknown>> = {
     listingsRepo,
@@ -25,15 +29,26 @@ describe('Part A repository surface is structurally read-only', () => {
     runsRepo,
     settingsRepo,
   };
+  const ALLOWED_WRITE_EXPORTS = new Set(['settingsRepo.setExtractionCategories']);
 
-  it('exports no write function for any Part A collection', () => {
+  it('exports no write function for any Part A collection, except the one named exception', () => {
     for (const [moduleName, mod] of Object.entries(partAModules)) {
       for (const exportName of Object.keys(mod)) {
-        expect(
-          FORBIDDEN_NAME.test(exportName),
-          `${moduleName}.${exportName} looks like a write function`,
-        ).toBe(false);
+        const qualified = `${moduleName}.${exportName}`;
+        if (ALLOWED_WRITE_EXPORTS.has(qualified)) continue;
+        expect(FORBIDDEN_NAME.test(exportName), `${qualified} looks like a write function`).toBe(
+          false,
+        );
       }
+    }
+  });
+
+  it('the one allowed exception still exists and is callable (guards a silent rename)', () => {
+    for (const qualified of ALLOWED_WRITE_EXPORTS) {
+      const [moduleName, exportName] = qualified.split('.') as [string, string];
+      const mod = partAModules[moduleName];
+      expect(mod, `unknown module ${moduleName} in ALLOWED_WRITE_EXPORTS`).toBeDefined();
+      expect(typeof mod![exportName], `${qualified} should be a function`).toBe('function');
     }
   });
 });
@@ -42,7 +57,7 @@ describe('listingsRepo (Part A, read-only)', () => {
   it('getByScope partitions active/archived and matches hand-counted fixture totals', async () => {
     const db = testDb();
     const immobili = await listingsRepo.getByScope(db, 'immobili');
-    expect(immobili.active).toHaveLength(27);
+    expect(immobili.active).toHaveLength(28);
     expect(immobili.archived).toHaveLength(2);
 
     const corporate = await listingsRepo.getByScope(db, 'corporate');
@@ -85,7 +100,7 @@ describe('metaRepo (Part A, read-only, the cache-invalidation signal)', () => {
   it('reads the three well-known documents', async () => {
     const db = testDb();
     const immobili = await metaRepo.getScopeMeta(db, 'immobili');
-    expect(immobili?.total_active).toBe(30);
+    expect(immobili?.total_active).toBe(31);
     const omi = await metaRepo.getOmiMeta(db);
     expect(omi?.semestre).toBe('20252');
   });
@@ -98,10 +113,22 @@ describe('runsRepo (Part A, read-only, display-only audit trail)', () => {
   });
 });
 
-describe('settingsRepo (Part A, read side only in this phase)', () => {
+describe('settingsRepo (Part A — read side, plus the one deliberate write)', () => {
   it('reads the extraction-category selection', async () => {
     const selection = await settingsRepo.getExtractionCategories(testDb());
     expect(selection?.codes).toContain('LG');
     expect(selection?.updated_by).toBe('user-admin-1');
+  });
+
+  it('setExtractionCategories round-trips codes/updated_at/updated_by', async () => {
+    const db = testDb();
+    await settingsRepo.setExtractionCategories(db, {
+      codes: ['FALL', 'NFAL', 'LG'],
+      updatedBy: 'user-admin-1',
+    });
+    const selection = await settingsRepo.getExtractionCategories(db);
+    expect(selection?.codes).toEqual(['FALL', 'NFAL', 'LG']);
+    expect(selection?.updated_by).toBe('user-admin-1');
+    expect(selection?.updated_at).toBeTruthy();
   });
 });

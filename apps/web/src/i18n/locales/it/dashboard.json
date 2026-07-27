@@ -48,15 +48,39 @@
     "principali": "Procedure principali",
     "fallimenti": "Fallimenti"
   },
+  "drilldown": {
+    "regionLabel": "Regione",
+    "allRegions": "Tutte le regioni",
+    "capitalLabel": "Comune capoluogo",
+    "capitalChip": "{{comune}} (capoluogo)",
+    "provinceLabel": "Provincia",
+    "allProvinces": "Tutte le provincie"
+  },
+  "omi": {
+    "title": "Prezzo di riferimento OMI",
+    "range": "{{min}} – {{max}} al m²",
+    "tipologia": "Tipologia: {{value}}",
+    "stato": "Stato: {{value}}",
+    "caption": "Comune di {{comune}}, zona {{zona}} · Fonte: Agenzia delle Entrate — Osservatorio Mercato Immobiliare · Semestre {{semestre}}",
+    "residentialCaveat": "Il valore si riferisce sempre alla tipologia residenziale, anche per immobili di altro tipo: è un riferimento di contesto, non una valutazione del lotto.",
+    "unavailable": "Dati OMI non disponibili per la provincia di {{provincia}}."
+  },
   "archive": {
     "navLabel": "Archivio",
     "title": "Archivio",
-    "empty": "L'archivio è vuoto."
+    "empty": "L'archivio è vuoto.",
+    "refreshControl": "Aggiorna alla data odierna",
+    "refreshReport": "{{moved}} vendite spostate in archivio in questa sessione. Totale in archivio: {{total}}.",
+    "svuotaControl": "Svuota archivio",
+    "svuotaNothing": "Non c'è nulla da svuotare. I listing scomparsi dalla fonte restano comunque in archivio.",
+    "svuotaConfirm": "Verranno rimosse {{count}} righe ancora attive ma con vendita ormai passata. I listing archiviati in modo permanente restano in archivio. Continuare?"
   },
   "table": {
     "empty": "Nessun listing corrisponde ai filtri attuali.",
     "goToListing": "Vai all'annuncio →",
     "bloccoBadgeTitle": "{{count}} lotti nello stesso blocco",
+    "bloccoJumpTitle": "Vai al blocco in {{name}}",
+    "bloccoJumpChooserTitle": "Il blocco continua in altri cluster",
     "columns": {
       "tipoImmobile": "Tipo di immobile",
       "tipoBene": "Tipo di bene",

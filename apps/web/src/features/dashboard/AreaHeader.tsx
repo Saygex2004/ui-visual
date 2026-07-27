@@ -4,7 +4,10 @@
 // caption belongs to the price panel (UI §3.3, Phase 5), not this header.
 // The §10.2 refresh region is the approved v1 deferral: a static note, no
 // interactive re-fetch control, and no fabricated "next refresh at HH:MM"
-// claim — the API carries no such field to back one.
+// claim — the API carries no such field to back one. `onRefreshToday` (§9.2)
+// is an entirely different, unrelated control: it re-evaluates which already-
+// loaded rows now have a past sale date, client-side only — never a data
+// re-fetch.
 import { useTranslation } from 'react-i18next';
 import type { AreaSlug, SnapshotMeta } from '@pvp/shared';
 import { formatTimestamp, NOT_AVAILABLE } from './DataTable/formatting.js';
@@ -13,9 +16,10 @@ export interface AreaHeaderProps {
   area: AreaSlug;
   meta: SnapshotMeta;
   onBack: () => void;
+  onRefreshToday: () => void;
 }
 
-export function AreaHeader({ area, meta, onBack }: AreaHeaderProps) {
+export function AreaHeader({ area, meta, onBack, onRefreshToday }: AreaHeaderProps) {
   const { t } = useTranslation('dashboard');
 
   return (
@@ -50,6 +54,9 @@ export function AreaHeader({ area, meta, onBack }: AreaHeaderProps) {
         ) : null}
       </dl>
       <p className="area-refresh-note">{t('area.refreshDeferralNote')}</p>
+      <button type="button" className="area-refresh-today-control" onClick={onRefreshToday}>
+        {t('archive.refreshControl')}
+      </button>
     </header>
   );
 }

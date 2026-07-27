@@ -17,6 +17,7 @@ import {
   REAL_ESTATE_CLUSTERS,
   CREDITS_CLUSTERS,
   SCOPE_TO_AREA_SLUG,
+  KNOWN_CATEGORY_CODES,
   type Scope,
   type Listing,
   type AreaSnapshot,
@@ -40,6 +41,11 @@ export interface BuiltSnapshot {
   summariesById: Map<string, BloccoSibling>;
   /** Raw OMI docs by slug (immobili only), for the detail OMI selection. */
   omiBySlug: Record<string, OmiPrice>;
+  /** `cod_tipo_rito` values observed on active immobili listings but not in
+   *  the catalog (DOMAIN_RULES.md Appendix A) — admin-only data, deliberately
+   *  not part of `AreaSnapshot` itself (no reason to grow the payload-budget-
+   *  tested dashboard response). Empty for the corporate scope. */
+  unrecognizedCategoryCodes: string[];
 }
 
 function clusterDefsFor(
@@ -79,6 +85,7 @@ export function assembleSnapshot(
   );
 
   const summariesById = new Map<string, BloccoSibling>();
+  const unrecognizedCodes = new Set<string>();
   let excludedCount = 0;
   for (const listing of active) {
     const { clusterKey, bucket, excluded } = classifyListing(listing);
@@ -91,6 +98,13 @@ export function assembleSnapshot(
       comune: listing.comune,
       valore_richiesto: listing.valore_richiesto,
     });
+    if (
+      isImmobili &&
+      listing.cod_tipo_rito != null &&
+      !KNOWN_CATEGORY_CODES.has(listing.cod_tipo_rito)
+    ) {
+      unrecognizedCodes.add(listing.cod_tipo_rito);
+    }
     if (excluded) {
       excludedCount += 1; // counted, not shown in any cluster (§5)
       continue;
@@ -148,6 +162,7 @@ export function assembleSnapshot(
     archivedIds: new Set(archived.map((l) => String(l.id))),
     summariesById,
     omiBySlug: omiMap,
+    unrecognizedCategoryCodes: [...unrecognizedCodes].sort(),
   };
 }
 

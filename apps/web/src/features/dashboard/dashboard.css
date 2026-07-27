@@ -144,6 +144,31 @@
   color: var(--color-text-muted);
 }
 
+.area-refresh-today-control {
+  align-self: flex-start;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-body);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.area-refresh-today-control:hover {
+  border-color: var(--color-accent);
+}
+
+.area-refresh-today-control:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.area-refresh-today-control:active {
+  background: var(--color-surface-2);
+}
+
 /* Cluster navigation bar (UI §2.3/§2.4) — a PrimeReact TabsList, sideways
    scrollable. */
 .cluster-nav {
@@ -220,6 +245,39 @@
   font-size: var(--text-sm);
 }
 
+/* Archivio header — title + Svuota archivio (UI §9.3). */
+.archive-section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.archive-svuota-control {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.archive-svuota-control:hover {
+  border-color: var(--color-danger);
+}
+
+.archive-svuota-control:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.archive-svuota-control:active {
+  background: var(--color-surface-2);
+}
+
 /* Bucket tabs (UI §3.1) — Fallimenti set visually apart. */
 .bucket-tabs {
   display: flex;
@@ -276,6 +334,128 @@
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   font-variant-numeric: tabular-nums;
+}
+
+/* Geographic drill-down (UI §3.2). */
+.drilldown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.drilldown-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.drilldown-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-body);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.drilldown-chip:hover {
+  border-color: var(--color-accent);
+}
+
+.drilldown-chip:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.drilldown-chip[data-active] {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+.drilldown-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.drilldown-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.drilldown-field label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  color: var(--color-text-muted);
+}
+
+.drilldown-field select {
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-paper);
+  color: var(--color-text-body);
+  font-size: var(--text-sm);
+}
+
+/* OMI price panel (UI §3.3). */
+.omi-panel {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.omi-panel-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+}
+
+.omi-panel-range {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.omi-panel-facts,
+.omi-panel-caption {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.omi-panel-caveat {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.omi-panel-unavailable {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
 }
 
 /* Per-table toolbar (UI §4.2). */

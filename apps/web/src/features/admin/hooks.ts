@@ -42,3 +42,29 @@ export function useSetDisabled() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: adminUsersQueryKey }),
   });
 }
+
+export const adminCategoriesQueryKey = ['admin', 'categories'] as const;
+
+export function useAdminCategories() {
+  return useQuery({ queryKey: adminCategoriesQueryKey, queryFn: adminApi.fetchCategories });
+}
+
+export function useSaveCategories() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (codes: readonly string[]) => adminApi.saveCategories(codes),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: adminCategoriesQueryKey }),
+  });
+}
+
+export const adminEventsQueryKey = ['admin', 'events'] as const;
+
+export function useAdminEvents() {
+  return useQuery({ queryKey: adminEventsQueryKey, queryFn: adminApi.fetchEvents });
+}
+
+export const adminRunsQueryKey = ['admin', 'runs'] as const;
+
+export function useAdminRuns() {
+  return useQuery({ queryKey: adminRunsQueryKey, queryFn: adminApi.fetchRuns });
+}

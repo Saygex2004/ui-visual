@@ -18,6 +18,8 @@ import { AREA_SLUGS, type AreaSlug, type MeResponse } from '@pvp/shared';
 import { ComingSoon } from '../routes/ComingSoon.js';
 import { LoginScreen } from '../features/auth/LoginScreen.js';
 import { AccountsScreen } from '../features/admin/AccountsScreen.js';
+import { CategoriesScreen } from '../features/admin/CategoriesScreen.js';
+import { AdminActivityScreen } from '../features/admin/AdminActivityScreen.js';
 import { LandingScreen } from '../features/dashboard/LandingScreen.js';
 import { AreaView } from '../features/dashboard/AreaView.js';
 import { WorkspacePlaceholder } from '../features/dashboard/WorkspacePlaceholder.js';
@@ -107,19 +109,36 @@ const listingRoute = createRoute({
   component: WorkspacePlaceholder,
 });
 
+// The parent's beforeLoad already populated the cache — this is a
+// synchronous read. Server-side role enforcement is the real control
+// (SPECIFICATIONS.md §7); this only avoids rendering the screen client-side.
+// Shared by every /admin/* route so the check lives in exactly one place.
+function requireAdmin({ context }: { context: RouterContext }) {
+  const me = context.queryClient.getQueryData<MeResponse>(meQueryKey);
+  if (me?.user.role !== 'admin') {
+    throw redirect({ to: '/' });
+  }
+}
+
 const adminRoute = createRoute({
   getParentRoute: () => protectedRoute,
   path: '/admin',
-  beforeLoad: ({ context }) => {
-    // The parent's beforeLoad already populated the cache — this is a
-    // synchronous read. Server-side role enforcement is the real control
-    // (SPECIFICATIONS.md §7); this only avoids rendering the screen client-side.
-    const me = context.queryClient.getQueryData<MeResponse>(meQueryKey);
-    if (me?.user.role !== 'admin') {
-      throw redirect({ to: '/' });
-    }
-  },
+  beforeLoad: requireAdmin,
   component: AccountsScreen,
+});
+
+const adminCategoriesRoute = createRoute({
+  getParentRoute: () => protectedRoute,
+  path: '/admin/categorie',
+  beforeLoad: requireAdmin,
+  component: CategoriesScreen,
+});
+
+const adminActivityRoute = createRoute({
+  getParentRoute: () => protectedRoute,
+  path: '/admin/attivita',
+  beforeLoad: requireAdmin,
+  component: AdminActivityScreen,
 });
 
 const calendarRoute = createRoute({
@@ -140,6 +159,8 @@ const routeTree = rootRoute.addChildren([
     indexRoute,
     areaRoute.addChildren([listingRoute]),
     adminRoute,
+    adminCategoriesRoute,
+    adminActivityRoute,
     calendarRoute,
     chatRoute,
   ]),

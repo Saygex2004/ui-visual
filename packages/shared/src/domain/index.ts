@@ -10,3 +10,4 @@ export * from './rng.js';
 export * from './calendar.js';
 export * from './omi.js';
 export * from './refreshMeta.js';
+export * from './geography.js';

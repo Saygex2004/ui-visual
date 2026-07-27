@@ -48,7 +48,11 @@ describe('SnapshotCache — snapshot content (hand-counted against the fixture)'
     expect(byCluster.blue_chip!.buckets.fallimenti.map((r) => r.id)).toEqual(['1003']);
     expect(byCluster.green!.buckets.principali.map((r) => r.id).sort()).toEqual(['1005', '1006']);
     expect(byCluster.green!.buckets.fallimenti).toHaveLength(0);
-    expect(byCluster.grey!.buckets.principali.map((r) => r.id).sort()).toEqual(['1007', '1033']);
+    expect(byCluster.grey!.buckets.principali.map((r) => r.id).sort()).toEqual([
+      '1007',
+      '1033',
+      '1061',
+    ]);
     expect(byCluster.black!.buckets.principali.map((r) => r.id).sort()).toEqual([
       '1009',
       '1010',

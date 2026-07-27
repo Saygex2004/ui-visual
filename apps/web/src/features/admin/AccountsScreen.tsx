@@ -1,7 +1,9 @@
 // Administration — Accounts (UI §8.1). The accounts table with lifecycle
 // actions, the create form, and two onward links (calendar assignment,
-// extraction categories) — disabled placeholders until Phases 5/8.
+// extraction categories) — calendar assignment stays a disabled placeholder
+// until Phase 8; extraction categories is a real link as of this phase.
 import { useTranslation } from 'react-i18next';
+import { Link } from '@tanstack/react-router';
 import type { AdminUser } from '@pvp/shared';
 import { useAdminUsers } from './hooks.js';
 import { CreateUserForm } from './CreateUserForm.js';
@@ -62,9 +64,12 @@ export function AccountsScreen() {
         <span className="admin-onward-link admin-onward-link-disabled" aria-disabled="true">
           {t('accounts.linkCalendarAssignment')}
         </span>
-        <span className="admin-onward-link admin-onward-link-disabled" aria-disabled="true">
+        <Link to="/admin/categorie" className="admin-onward-link">
           {t('accounts.linkCategories')}
-        </span>
+        </Link>
+        <Link to="/admin/attivita" className="admin-onward-link">
+          {t('accounts.linkActivity')}
+        </Link>
       </nav>
     </div>
   );

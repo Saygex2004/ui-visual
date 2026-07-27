@@ -1,6 +1,7 @@
-// Admin module (API_CONTRACT.md §8) — accounts lifecycle + events listing this
-// phase. Categories/calendar/runs admin routes belong to Phases 5/8; not
-// scaffolded here. Every route requires the admin role (config.auth.role).
+// Admin module (API_CONTRACT.md §8) — accounts lifecycle, events, and runs
+// listing. Categories live in their own module (modules/settings) per
+// SPECIFICATIONS.md §2; calendar admin routes belong to Phase 8. Every route
+// requires the admin role (config.auth.role).
 import type { Firestore } from 'firebase-admin/firestore';
 import type { FastifyInstance } from 'fastify';
 import {
@@ -10,7 +11,7 @@ import {
   type AdminUser,
   type UserPublic,
 } from '@pvp/shared';
-import { usersRepo, sessionsRepo, adminEventsRepo } from '../../repositories/index.js';
+import { usersRepo, sessionsRepo, adminEventsRepo, runsRepo } from '../../repositories/index.js';
 import { hashPassword } from '../../lib/passwords.js';
 import { UsernameTakenError } from '../../repositories/users.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
@@ -174,5 +175,10 @@ export function registerAdminModule(app: FastifyInstance, deps: AdminModuleDeps)
   app.get('/admin/events', adminOnly, async () => {
     const events = await adminEventsRepo.listRecent(db);
     return { events };
+  });
+
+  app.get('/admin/runs', adminOnly, async () => {
+    const runs = await runsRepo.getRecent(db);
+    return { runs };
   });
 }

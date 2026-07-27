@@ -30,6 +30,7 @@ interface ScopeState {
   archivedIds: Set<string>;
   summariesById: Map<string, BloccoSibling>;
   omiBySlug: Record<string, OmiPrice>;
+  unrecognizedCategoryCodes: string[];
   builtAtMs: number;
   hasPrevious: boolean;
 }
@@ -108,13 +109,24 @@ export class SnapshotCache {
     return selectOmiEntry(state.omiBySlug, { provincia, comune });
   }
 
+  /** `cod_tipo_rito` values observed on active immobili listings but not in
+   *  the catalog (DOMAIN_RULES.md Appendix A) — feeds the admin categories
+   *  screen's non-uncheckable 5th group (UI §8.2). Always empty for corporate. */
+  getUnrecognizedCategoryCodes(): string[] {
+    return this.states.get('immobili')?.unrecognizedCategoryCodes ?? [];
+  }
+
   /** Rebuild a scope; diff membership vs the previous build and record events. */
   async rebuild(scope: Scope): Promise<AreaSnapshot> {
     const prev = this.states.get(scope);
-    const { snapshot, activeIds, archivedIds, summariesById, omiBySlug } = await buildSnapshot(
-      this.db,
-      scope,
-    );
+    const {
+      snapshot,
+      activeIds,
+      archivedIds,
+      summariesById,
+      omiBySlug,
+      unrecognizedCategoryCodes,
+    } = await buildSnapshot(this.db, scope);
 
     if (prev) {
       await this.recordTransitions(prev, activeIds, archivedIds);
@@ -126,6 +138,7 @@ export class SnapshotCache {
       archivedIds,
       summariesById,
       omiBySlug,
+      unrecognizedCategoryCodes,
       builtAtMs: Date.now(),
       hasPrevious: true,
     });

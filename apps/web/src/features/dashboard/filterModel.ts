@@ -1,8 +1,10 @@
 // Pure filter + sort over one table's rows (UI §4.2), driven entirely by the
 // URL state (urlState.ts) — the toolbar, the live count, and the table all
 // read the SAME derived result, never their own local state. AND-composition
-// of every active filter. Geographic filters (regione/capoluogo/provincia,
-// Phase 5) are intentionally NOT applied here yet — reserved keys only.
+// of every active filter, including the cluster-wide geographic selection
+// (UI §3.2). `includeGeo: false` (Archivio, UI §9.1) skips regione/capoluogo/
+// provincia — the archive mixes clusters/regions and lists no geographic
+// filter of its own.
 import { compareValore, compareData, compareBloccoKey, type ListingRow } from '@pvp/shared';
 import type { AreaSearch, SortKey } from './urlState.js';
 
@@ -42,7 +44,9 @@ export interface FilterResult<T extends ListingRow> {
 export function applyFilterModel<T extends ListingRow>(
   rows: readonly T[],
   search: AreaSearch,
+  opts?: { includeGeo?: boolean },
 ): FilterResult<T> {
+  const includeGeo = opts?.includeGeo ?? true;
   let result = rows.filter((row) => {
     if (search.q && !matchesFreeText(row, search.q)) return false;
     if (search.tipo && row.tipo_bene !== search.tipo) return false;
@@ -58,9 +62,15 @@ export function applyFilterModel<T extends ListingRow>(
     if (search.max != null && (row.valore_richiesto == null || row.valore_richiesto > search.max)) {
       return false;
     }
-    // Reserved for Phase 5's isolate-click, but already honoured here so the
-    // interactive control can just start writing this key when it lands.
     if (search.blocco && row.blocco_key !== search.blocco) return false;
+    if (includeGeo) {
+      if (search.regione && row.regione !== search.regione) return false;
+      // Mutually exclusive by construction (DrillDown never sets both), but
+      // each is still applied independently so a hand-edited URL with both
+      // set is simply the AND of the two rather than undefined behaviour.
+      if (search.capoluogo && row.comune !== search.capoluogo) return false;
+      if (search.provincia && row.provincia !== search.provincia) return false;
+    }
     return true;
   });
 

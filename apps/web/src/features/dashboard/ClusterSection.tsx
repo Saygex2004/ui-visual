@@ -1,38 +1,96 @@
-// Cluster section (UI §3.1): header + subtitle, bucket tabs, the active
-// table. Region controls (UI §3.2 drill-down) are Phase 5 — every cluster is
-// shown uniformly here via its character/subtitle text, no region chips yet.
-// Owns the INNER `TabsRoot` (principali/fallimenti), lazy-mounted so only the
-// active bucket's table is ever in the DOM.
-import { useMemo } from 'react';
+// Cluster section (UI §3.1): header + subtitle, the geographic drill-down +
+// OMI panel for clusters that map to regions (UI §3.2/§3.3), bucket tabs, the
+// active table. Owns the INNER `TabsRoot` (principali/fallimenti),
+// lazy-mounted so only the active bucket's table is ever in the DOM. Scrolls
+// itself into view whenever a blocco isolation is active — covers both a
+// same-cluster isolate click (a harmless no-op nudge) and landing here via a
+// cross-cluster jump (UI §4.4: "brings it into view"), honouring reduced
+// motion since `scrollIntoView`'s `behavior` bypasses CSS `scroll-behavior`.
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TabsRoot, TabsPanels, TabsPanel } from 'primereact/tabs';
-import type { ClusterBlock, BloccoIndexEntry } from '@pvp/shared';
+import {
+  REAL_ESTATE_CLUSTERS,
+  type ClusterBlock,
+  type BloccoIndexEntry,
+  type OmiEntry,
+} from '@pvp/shared';
 import type { AreaSearch, BucketTab, SortKey } from './urlState.js';
 import { applyFilterModel, distinctValues } from './filterModel.js';
 import { BucketTabs } from './BucketTabs.js';
+import { DrillDown } from './DrillDown.js';
+import { OmiPanel } from './OmiPanel.js';
 import { Toolbar } from './DataTable/Toolbar.js';
 import { DataTable } from './DataTable/DataTable.js';
-import { getColumns, type AreaTableKind } from './DataTable/columns.js';
+import { getColumns, type AreaTableKind, type ColumnContext } from './DataTable/columns.js';
 
 export interface ClusterSectionProps {
   cluster: ClusterBlock;
+  clusters: readonly ClusterBlock[];
   areaKind: AreaTableKind;
   bloccoIndex: Readonly<Record<string, BloccoIndexEntry>>;
+  omiByComune: Readonly<Record<string, OmiEntry>>;
   search: AreaSearch;
   onPatch: (patch: Partial<AreaSearch>, opts?: { replace?: boolean }) => void;
   onReset: () => void;
+  onIsolate: (bloccoKey: string) => void;
+  onJump: (targetClusterKey: string, bloccoKey: string) => void;
+}
+
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
+  );
 }
 
 export function ClusterSection({
   cluster,
+  clusters,
   areaKind,
   bloccoIndex,
+  omiByComune,
   search,
   onPatch,
   onReset,
+  onIsolate,
+  onJump,
 }: ClusterSectionProps) {
   const { t } = useTranslation('dashboard');
   const columns = useMemo(() => getColumns(areaKind), [areaKind]);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const hasGeography = useMemo(() => {
+    if (areaKind !== 'real_estate') return false;
+    const def = REAL_ESTATE_CLUSTERS.find((c) => c.key === cluster.key);
+    return (def?.regions.length ?? 0) > 0;
+  }, [areaKind, cluster.key]);
+
+  const allRows = useMemo(
+    () => [...cluster.buckets.principali, ...cluster.buckets.fallimenti],
+    [cluster],
+  );
+
+  const columnContext: ColumnContext = useMemo(
+    () => ({
+      bloccoIndex,
+      activeBlocco: search.blocco ?? null,
+      currentClusterKey: cluster.key,
+      clusters,
+      onIsolate,
+      onJump,
+    }),
+    [bloccoIndex, search.blocco, cluster.key, clusters, onIsolate, onJump],
+  );
+
+  useEffect(() => {
+    if (search.blocco) {
+      sectionRef.current?.scrollIntoView({
+        behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+        block: 'start',
+      });
+    }
+  }, [search.blocco]);
 
   const principali = useMemo(
     () => applyFilterModel(cluster.buckets.principali, search),
@@ -68,11 +126,22 @@ export function ClusterSection({
   }
 
   return (
-    <section className="cluster-section" aria-labelledby={`cluster-title-${cluster.key}`}>
+    <section
+      className="cluster-section"
+      aria-labelledby={`cluster-title-${cluster.key}`}
+      ref={sectionRef}
+    >
       <h2 id={`cluster-title-${cluster.key}`} className="cluster-section-title">
         {t('cluster.title', { number: cluster.number, name: t(`cluster.name.${cluster.key}`) })}
       </h2>
       <p className="cluster-section-subtitle">{t(`cluster.subtitle.${cluster.key}`)}</p>
+
+      {hasGeography ? (
+        <>
+          <DrillDown rows={allRows} search={search} onPatch={onPatch} />
+          <OmiPanel rows={allRows} omiByComune={omiByComune} search={search} />
+        </>
+      ) : null}
 
       <TabsRoot
         value={search.tab}
@@ -104,7 +173,7 @@ export function ClusterSection({
             <DataTable
               rows={principali.rows}
               columns={columns}
-              bloccoIndex={bloccoIndex}
+              columnContext={columnContext}
               sortKey={search.sort}
               sortDir={search.dir}
               onSort={handleSort}
@@ -115,7 +184,7 @@ export function ClusterSection({
             <DataTable
               rows={fallimenti.rows}
               columns={columns}
-              bloccoIndex={bloccoIndex}
+              columnContext={columnContext}
               sortKey={search.sort}
               sortDir={search.dir}
               onSort={handleSort}

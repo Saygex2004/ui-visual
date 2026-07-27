@@ -10,9 +10,8 @@
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import type { BloccoIndexEntry } from '@pvp/shared';
 import type { SortDir, SortKey } from '../urlState.js';
-import type { ColumnDef, TableRow } from './columns.js';
+import type { ColumnContext, ColumnDef, TableRow } from './columns.js';
 import './dataTable.css';
 
 const ROW_HEIGHT_PX = 48;
@@ -22,7 +21,7 @@ const ACTIONS_COLUMN_WIDTH = '130px';
 export interface DataTableProps {
   rows: readonly TableRow[];
   columns: readonly ColumnDef[];
-  bloccoIndex: Readonly<Record<string, BloccoIndexEntry>>;
+  columnContext: ColumnContext;
   sortKey: SortKey | undefined;
   sortDir: SortDir;
   onSort: (key: SortKey) => void;
@@ -32,7 +31,7 @@ export interface DataTableProps {
 export function DataTable({
   rows,
   columns,
-  bloccoIndex,
+  columnContext,
   sortKey,
   sortDir,
   onSort,
@@ -123,7 +122,7 @@ export function DataTable({
                     className="data-table-cell"
                     style={{ flexBasis: col.width }}
                   >
-                    {col.render(row, { bloccoIndex })}
+                    {col.render(row, columnContext)}
                   </td>
                 ))}
                 <td

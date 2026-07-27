@@ -41,6 +41,67 @@
     "stateActive": "Attivo",
     "stateDisabled": "Disabilitato",
     "linkCalendarAssignment": "Assegnazione calendario (presto disponibile)",
-    "linkCategories": "Categorie di estrazione (presto disponibile)"
+    "linkCategories": "Categorie di estrazione",
+    "linkActivity": "Attività amministrativa"
+  },
+  "categories": {
+    "title": "Amministrazione — Categorie di estrazione",
+    "loading": "Caricamento…",
+    "loadError": "Non è stato possibile caricare le categorie.",
+    "noteNoShorten": "La selezione non abbrevia un aggiornamento: ogni aggiornamento analizza comunque l'intero insieme attivo; la selezione decide solo cosa viene mantenuto in seguito.",
+    "noteArchivedNotDeleted": "I listing esclusi da una selezione più ristretta vengono archiviati, non cancellati.",
+    "group": {
+      "concorsuali": "Procedure concorsuali",
+      "liquidazione_volontaria": "Liquidazione volontaria e volontaria giurisdizione",
+      "esecuzioni": "Esecuzioni",
+      "contenzioso": "Contenzioso civile"
+    },
+    "entryLabel": "{{label}} ({{code}})",
+    "unrecognizedGroupTitle": "Codici non riconosciuti (sempre mantenuti)",
+    "unrecognizedGroupNote": "Questi codici sono stati osservati sui listing ma non sono nel catalogo: vengono sempre mantenuti (comportamento fail-open).",
+    "saveButton": "Salva selezione",
+    "saveSuccess": "Selezione salvata: si applicherà al prossimo aggiornamento degli immobili.",
+    "saveGenericError": "Non è stato possibile salvare la selezione.",
+    "defaultBadge": "Selezione predefinita — nessuna scelta salvata finora.",
+    "updatedBy": "Ultimo aggiornamento di {{username}} il {{date}}."
+  },
+  "activity": {
+    "title": "Amministrazione — Attività",
+    "loading": "Caricamento…",
+    "eventsTitle": "Eventi amministrativi",
+    "eventsLoadError": "Non è stato possibile caricare gli eventi amministrativi.",
+    "eventsEmpty": "Nessun evento registrato.",
+    "runsTitle": "Esecuzioni dello scraper",
+    "runsLoadError": "Non è stato possibile caricare le esecuzioni.",
+    "runsEmpty": "Nessuna esecuzione registrata.",
+    "columnAt": "Quando",
+    "columnType": "Tipo",
+    "columnActor": "Autore",
+    "columnSubject": "Oggetto",
+    "columnStartedAt": "Avviata il",
+    "columnScope": "Ambito",
+    "columnStatus": "Stato",
+    "columnEnumerated": "Enumerati",
+    "columnWritten": "Scritti",
+    "columnArchived": "Archiviati",
+    "columnErrors": "Errori",
+    "eventType": {
+      "account_created": "Account creato",
+      "password_changed": "Password modificata",
+      "role_changed": "Ruolo modificato",
+      "account_disabled": "Account disabilitato",
+      "account_enabled": "Account riabilitato",
+      "categories_changed": "Categorie di estrazione modificate"
+    },
+    "runScope": {
+      "immobili": "Immobili",
+      "corporate": "Crediti",
+      "omi": "OMI"
+    },
+    "runStatus": {
+      "success": "Riuscita",
+      "degraded": "Degradata",
+      "failed": "Fallita"
+    }
   }
 }

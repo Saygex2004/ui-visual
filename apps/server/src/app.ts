@@ -14,6 +14,7 @@ import { registerListingsModule } from './modules/listings/index.js';
 import { registerAuthPlugin } from './plugins/auth.js';
 import { registerAuthModule } from './modules/auth/index.js';
 import { registerAdminModule } from './modules/admin/index.js';
+import { registerSettingsModule } from './modules/settings/index.js';
 import { SnapshotCache } from './cache/index.js';
 import { bootstrapAdmin } from './bootstrap.js';
 
@@ -74,6 +75,7 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
           isProduction: config.isProduction,
         });
         registerAdminModule(instance, { db });
+        registerSettingsModule(instance, { db, cache: primedCache });
         registerListingsModule(instance, { cache: primedCache, db });
       },
       { prefix: '/api' },
