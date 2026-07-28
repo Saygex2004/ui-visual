@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { TabsRoot, TabsPanels, TabsPanel } from 'primereact/tabs';
 import {
   REAL_ESTATE_CLUSTERS,
+  type AreaSlug,
   type ClusterBlock,
   type BloccoIndexEntry,
   type OmiEntry,
@@ -23,11 +24,14 @@ import { OmiPanel } from './OmiPanel.js';
 import { Toolbar } from './DataTable/Toolbar.js';
 import { DataTable } from './DataTable/DataTable.js';
 import { getColumns, type AreaTableKind, type ColumnContext } from './DataTable/columns.js';
+import type { RatingsMap } from '../ratings/join.js';
 
 export interface ClusterSectionProps {
   cluster: ClusterBlock;
   clusters: readonly ClusterBlock[];
   areaKind: AreaTableKind;
+  area: AreaSlug;
+  ratings: RatingsMap;
   bloccoIndex: Readonly<Record<string, BloccoIndexEntry>>;
   omiByComune: Readonly<Record<string, OmiEntry>>;
   search: AreaSearch;
@@ -48,6 +52,8 @@ export function ClusterSection({
   cluster,
   clusters,
   areaKind,
+  area,
+  ratings,
   bloccoIndex,
   omiByComune,
   search,
@@ -174,6 +180,9 @@ export function ClusterSection({
               rows={principali.rows}
               columns={columns}
               columnContext={columnContext}
+              ratings={ratings}
+              area={area}
+              search={search}
               sortKey={search.sort}
               sortDir={search.dir}
               onSort={handleSort}
@@ -185,6 +194,9 @@ export function ClusterSection({
               rows={fallimenti.rows}
               columns={columns}
               columnContext={columnContext}
+              ratings={ratings}
+              area={area}
+              search={search}
               sortKey={search.sort}
               sortDir={search.dir}
               onSort={handleSort}

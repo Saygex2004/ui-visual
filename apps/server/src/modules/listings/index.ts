@@ -13,7 +13,7 @@ import {
   type AreaSlug,
 } from '@pvp/shared';
 import type { SnapshotCache } from '../../cache/index.js';
-import { listingsRepo } from '../../repositories/index.js';
+import { listingsRepo, ratingsRepo } from '../../repositories/index.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
 
 const VALID_AREA_SLUGS: ReadonlySet<string> = new Set(Object.keys(AREA_SLUG_TO_SCOPE));
@@ -69,6 +69,7 @@ export function registerListingsModule(app: FastifyInstance, deps: ListingsModul
       listing.scope === 'immobili'
         ? cache.selectOmi('immobili', listing.provincia, listing.comune)
         : null;
+    const rating = await ratingsRepo.getById(db, id);
 
     const detail = {
       id: String(listing.id),
@@ -102,8 +103,8 @@ export function registerListingsModule(app: FastifyInstance, deps: ListingsModul
       },
       blocco,
       omi,
-      // Placeholders — Phase 6 (ratings) and Phase 7 (chat) fill these.
-      rating: null,
+      rating,
+      // Placeholder-false until Phase 7 fills the chat module in.
       thread: { exists: false, closed: false, unread: 0 },
     };
 

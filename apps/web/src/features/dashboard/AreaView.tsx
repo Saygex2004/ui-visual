@@ -16,7 +16,7 @@
 // resolution, since `blocco_index` itself is computed server-side over ALL
 // active listings and knows nothing of this session's reorg.
 import { useMemo, useState } from 'react';
-import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
+import { Outlet, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { TabsRoot, TabsPanels, TabsPanel } from 'primereact/tabs';
 import type { AreaSlug } from '@pvp/shared';
@@ -28,6 +28,7 @@ import { ClusterSection } from './ClusterSection.js';
 import { ArchiveSection } from './ArchiveSection.js';
 import { findBucketForBlocco } from './blocco.js';
 import { computeSessionMoves, eligibleMoved, todayIso } from './sessionArchive.js';
+import { useRatingsMap } from '../ratings/hooks.js';
 import type { AreaTableKind } from './DataTable/columns.js';
 import './dashboard.css';
 
@@ -50,6 +51,7 @@ export function AreaView() {
 
   const { data: snapshot, isLoading, isError } = useAreaSnapshot(area as AreaSlug);
   const areaKind: AreaTableKind = area === 'immobili' ? 'real_estate' : 'credits';
+  const ratings = useRatingsMap();
 
   const [today, setToday] = useState(todayIso);
   const [clearedIds, setClearedIds] = useState<ReadonlySet<string>>(new Set());
@@ -169,6 +171,8 @@ export function AreaView() {
                 cluster={cluster}
                 clusters={snapshot.clusters}
                 areaKind={areaKind}
+                area={area as AreaSlug}
+                ratings={ratings}
                 bloccoIndex={snapshot.blocco_index}
                 omiByComune={snapshot.omi_by_comune}
                 search={search}
@@ -184,6 +188,8 @@ export function AreaView() {
               rows={archiveRows}
               clusters={snapshot.clusters}
               areaKind={areaKind}
+              area={area as AreaSlug}
+              ratings={ratings}
               bloccoIndex={snapshot.blocco_index}
               search={search}
               onPatch={patch}
@@ -195,6 +201,10 @@ export function AreaView() {
           </TabsPanel>
         </TabsPanels>
       </TabsRoot>
+      {/* The listing workspace (UI §4.5) — renders only when the URL is
+          /aste/:area/lotto/:id; a Drawer portal, so its position here is not
+          visually significant, but without an Outlet at all it never mounts. */}
+      <Outlet />
     </div>
   );
 }

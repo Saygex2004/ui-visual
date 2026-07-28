@@ -7,21 +7,40 @@
 // accessibility requirement). Sticky header (vertical scroll) and the frozen
 // actions column (horizontal scroll) both use `position: sticky` against the
 // same scrolling container — verified in a real browser, not assumed.
+//
+// The actions column (UI §4.1/§4.5) always carries: the shared Valutazione
+// control (also marking the row via `data-rating`, UI §5), a link opening the
+// listing workspace, a quick-chat link (opens the workspace on its chat tab —
+// chat itself stays a placeholder until Phase 7), and "Vai all'annuncio →".
+// The workspace links carry `search` built from the caller's own already-
+// resolved `AreaSearch` object (a `search` prop here), not a `(prev) => ...`
+// router callback — `<Link>` embedded in a route-context-agnostic component
+// like this one can't have `prev` inferred against a specific route's search
+// type, which `tsc` rejects the moment the target route's schema has
+// required fields (`cluster`/`tab`/`dir`, all `.catch()`-defaulted but still
+// required in the parsed output type).
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import type { SortDir, SortKey } from '../urlState.js';
+import type { AreaSlug } from '@pvp/shared';
+import type { AreaSearch, SortDir, SortKey } from '../urlState.js';
 import type { ColumnContext, ColumnDef, TableRow } from './columns.js';
+import { RatingControl } from '../../ratings/RatingControl.js';
+import type { RatingsMap } from '../../ratings/join.js';
 import './dataTable.css';
 
 const ROW_HEIGHT_PX = 48;
 const VIEWPORT_HEIGHT_PX = 560;
-const ACTIONS_COLUMN_WIDTH = '130px';
+const ACTIONS_COLUMN_WIDTH = '260px';
 
 export interface DataTableProps {
   rows: readonly TableRow[];
   columns: readonly ColumnDef[];
   columnContext: ColumnContext;
+  ratings: RatingsMap;
+  area: AreaSlug;
+  search: AreaSearch;
   sortKey: SortKey | undefined;
   sortDir: SortDir;
   onSort: (key: SortKey) => void;
@@ -32,6 +51,9 @@ export function DataTable({
   rows,
   columns,
   columnContext,
+  ratings,
+  area,
+  search,
   sortKey,
   sortDir,
   onSort,
@@ -105,11 +127,13 @@ export function DataTable({
         >
           {virtualizer.getVirtualItems().map((virtualRow) => {
             const row = rows[virtualRow.index]!;
+            const rating = ratings.get(row.id) ?? null;
             return (
               <tr
                 key={row.id}
                 role="row"
                 className="data-table-row data-table-body-row"
+                data-rating={rating ?? undefined}
                 style={{
                   height: virtualRow.size,
                   transform: `translateY(${virtualRow.start}px)`,
@@ -130,6 +154,25 @@ export function DataTable({
                   className="data-table-cell data-table-actions-cell"
                   style={{ flexBasis: ACTIONS_COLUMN_WIDTH }}
                 >
+                  <RatingControl listingId={row.id} value={rating} compact />
+                  <Link
+                    to="/aste/$area/lotto/$id"
+                    params={{ area, id: row.id }}
+                    search={{ ...search, pannello: 'dettagli' }}
+                    className="data-table-action-link"
+                    title={t('table.openWorkspace')}
+                  >
+                    {t('table.openWorkspace')}
+                  </Link>
+                  <Link
+                    to="/aste/$area/lotto/$id"
+                    params={{ area, id: row.id }}
+                    search={{ ...search, pannello: 'chat' }}
+                    className="data-table-action-link"
+                    title={t('table.quickChat')}
+                  >
+                    {t('table.quickChat')}
+                  </Link>
                   <a
                     href={row.link}
                     target="_blank"

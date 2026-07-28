@@ -37,6 +37,19 @@ describe('Part B schemas round-trip (DATA_MODEL §§9–15)', () => {
     expect(entries.some((e) => e.completed_at === null)).toBe(true);
   });
 
+  it('assignment_index accepts a completion-only entry with no calendar assignment behind it', () => {
+    // A rating happens from any dashboard row, independent of ever being
+    // calendar-assigned (Phase 8) — a permanently valid state, not a gap.
+    expect(() =>
+      AssignmentIndexEntrySchema.parse({
+        assigned_to: null,
+        date: null,
+        assigned_at: null,
+        completed_at: '2026-07-02T09:00:00.000Z',
+      }),
+    ).not.toThrow();
+  });
+
   it('listing_activity (closed §12 vocabulary; system events have null actor)', () => {
     const events = loadFixture<unknown[]>('listing_activity.json').map((e) =>
       ActivityEventSchema.parse(e),

@@ -45,6 +45,27 @@
   background: var(--color-surface-2);
 }
 
+/* Row-level verdict marking (UI §5: a rating "marks the whole row") — same
+   semantic risk-coding tokens the occupancy indicator already uses. */
+.data-table-body-row[data-rating='ottimo_affare'] {
+  border-left: 3px solid var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 8%, transparent);
+}
+
+.data-table-body-row[data-rating='da_verificare'] {
+  border-left: 3px solid var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 8%, transparent);
+}
+
+.data-table-body-row[data-rating='da_evitare'] {
+  border-left: 3px solid var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+}
+
+.data-table-body-row[data-rating]:hover {
+  background: var(--color-surface-2);
+}
+
 .data-table-cell {
   flex-shrink: 0;
   display: flex;
@@ -125,6 +146,24 @@ th.data-table-actions-cell {
 
 .data-table-annuncio-link:active {
   color: var(--color-accent-strong);
+}
+
+.data-table-actions-cell {
+  gap: var(--space-2);
+}
+
+.data-table-action-link {
+  color: var(--color-text-body);
+  font-size: var(--text-xs);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 1px dotted var(--color-border-strong);
+}
+
+.data-table-action-link:hover,
+.data-table-action-link:focus-visible {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
 }
 
 .data-table-empty {

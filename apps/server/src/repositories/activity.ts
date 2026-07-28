@@ -1,9 +1,11 @@
-// Repository — `listing_activity` (Part B, APP-OWNED, writable). Full ownership
-// belongs to Phase 6; this phase writes ONLY the two system-observed transition
-// events the snapshot rebuild detects (`listing_archived` /
-// `listing_reactivated`, DATA_MODEL.md §12). Append-only.
+// Repository — `listing_activity` (Part B, APP-OWNED, writable). Append-only;
+// no update/delete ever. `appendEvent` was introduced in an earlier phase for
+// the two system-observed transition events the snapshot rebuild detects
+// (`listing_archived` / `listing_reactivated`); Phase 6 adds the first read
+// (the workspace timeline) and starts writing rating events too.
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
-import { ActivityEventSchema, type ActivityEventType } from '@pvp/shared';
+import { ActivityEventSchema, type ActivityEvent, type ActivityEventType } from '@pvp/shared';
+import { firestoreToPlain } from './convert.js';
 
 const COLLECTION = 'listing_activity';
 
@@ -31,4 +33,19 @@ export async function appendEvent(db: Firestore, event: NewActivityEvent): Promi
     at: FieldValue.serverTimestamp(),
     details: event.details ?? {},
   });
+}
+
+/** One listing's timeline, newest first (UI §4.5). */
+export async function listByListingId(
+  db: Firestore,
+  listingId: string,
+  limit = 200,
+): Promise<ActivityEvent[]> {
+  const snap = await db
+    .collection(COLLECTION)
+    .where('listing_id', '==', listingId)
+    .orderBy('at', 'desc')
+    .limit(limit)
+    .get();
+  return snap.docs.map((doc) => ActivityEventSchema.parse(firestoreToPlain(doc.data())));
 }

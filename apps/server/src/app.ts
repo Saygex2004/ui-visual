@@ -15,6 +15,8 @@ import { registerAuthPlugin } from './plugins/auth.js';
 import { registerAuthModule } from './modules/auth/index.js';
 import { registerAdminModule } from './modules/admin/index.js';
 import { registerSettingsModule } from './modules/settings/index.js';
+import { registerRatingsModule } from './modules/ratings/index.js';
+import { registerActivityModule } from './modules/activity/index.js';
 import { SnapshotCache } from './cache/index.js';
 import { bootstrapAdmin } from './bootstrap.js';
 
@@ -76,6 +78,8 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
         });
         registerAdminModule(instance, { db });
         registerSettingsModule(instance, { db, cache: primedCache });
+        registerRatingsModule(instance, { db });
+        registerActivityModule(instance, { db });
         registerListingsModule(instance, { cache: primedCache, db });
       },
       { prefix: '/api' },

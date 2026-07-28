@@ -13,9 +13,13 @@ export const CalendarDaySchema = z.object({
 });
 
 export const AssignmentIndexEntrySchema = z.object({
-  assigned_to: z.string(),
-  date: calendarDate,
-  assigned_at: instant,
+  // Null when the entry exists only to record a completion with no calendar
+  // assignment behind it — rating happens from any dashboard row, entirely
+  // independent of calendar assignment (Phase 8), so this is a permanently
+  // valid state, not just a pre-Phase-8 gap (DATA_MODEL.md §11).
+  assigned_to: z.string().nullable(),
+  date: calendarDate.nullable(),
+  assigned_at: instant.nullable(),
   // Set when any user rates the listing; NEVER cleared (completion is permanent).
   completed_at: instant.nullable(),
 });

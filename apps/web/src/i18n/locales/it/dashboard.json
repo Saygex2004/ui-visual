@@ -48,6 +48,14 @@
     "principali": "Procedure principali",
     "fallimenti": "Fallimenti"
   },
+  "rating": {
+    "groupLabel": "Valutazione",
+    "value": {
+      "ottimo_affare": "Ottimo affare",
+      "da_verificare": "Da verificare",
+      "da_evitare": "Da evitare"
+    }
+  },
   "drilldown": {
     "regionLabel": "Regione",
     "allRegions": "Tutte le regioni",
@@ -81,6 +89,8 @@
     "bloccoBadgeTitle": "{{count}} lotti nello stesso blocco",
     "bloccoJumpTitle": "Vai al blocco in {{name}}",
     "bloccoJumpChooserTitle": "Il blocco continua in altri cluster",
+    "openWorkspace": "Scheda",
+    "quickChat": "Chat",
     "columns": {
       "tipoImmobile": "Tipo di immobile",
       "tipoBene": "Tipo di bene",
@@ -95,7 +105,7 @@
       "dataPubblicazione": "Data pubblicazione",
       "dataVendita": "Data vendita",
       "cluster": "Cluster",
-      "actions": "Annuncio"
+      "actions": "Azioni"
     }
   },
   "toolbar": {
@@ -119,8 +129,5 @@
     "in_liberazione": "In corso di liberazione",
     "parzialmente_occupato": "Parzialmente occupato",
     "non_specificato": "Non specificato"
-  },
-  "workspace": {
-    "placeholder": "Scheda del listing {{id}} — la vista completa arriva nella Fase 6."
   }
 }

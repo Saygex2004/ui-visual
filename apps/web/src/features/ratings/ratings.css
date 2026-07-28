@@ -1,0 +1,86 @@
+/* Shared Valutazione control (UI §5) — tokens only. Compact mode (table
+   actions column) renders a dot per option, no visible text; full mode (the
+   workspace) renders the label. Same success/warning/danger risk-coding as
+   the row marking (dataTable.css) and the occupancy indicator. */
+.rating-control {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.rating-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-body);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.rating-option:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rating-option:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.rating-control:not(.rating-control-compact) .rating-option {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.rating-control-compact .rating-option {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+}
+
+.rating-dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-text-muted);
+}
+
+.rating-option-ottimo_affare[aria-pressed='true'] {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-accent-contrast);
+}
+
+.rating-option-da_verificare[aria-pressed='true'] {
+  background: var(--color-warning);
+  border-color: var(--color-warning);
+  color: var(--color-accent-contrast);
+}
+
+.rating-option-da_evitare[aria-pressed='true'] {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--color-accent-contrast);
+}
+
+.rating-option-ottimo_affare:hover:not(:disabled) {
+  border-color: var(--color-success);
+}
+
+.rating-option-da_verificare:hover:not(:disabled) {
+  border-color: var(--color-warning);
+}
+
+.rating-option-da_evitare:hover:not(:disabled) {
+  border-color: var(--color-danger);
+}
+
+.rating-option[aria-pressed='true'] .rating-dot {
+  background: var(--color-accent-contrast);
+}

@@ -62,4 +62,5 @@ export const api = {
       method: 'PUT',
       body: body === undefined ? undefined : JSON.stringify(body),
     }),
+  delete: <T>(path: string): Promise<T> => request<T>(path, { method: 'DELETE' }),
 };

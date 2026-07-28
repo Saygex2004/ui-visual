@@ -276,6 +276,7 @@ Part A queries are equality-shaped and served by automatic single-field indexes 
 
 - `calendar_days`: `user_id ASC, date DESC` (month view).
 - `listing_activity`: `listing_id ASC, at DESC` (timeline).
+- `listing_activity`: `type ASC, at ASC` (Phase 6 — reconstructing rating-cleared tombstones for `GET /ratings?since` from the activity log, §10/§12; clearing a rating deletes the `ratings` document, so the delta poll's tombstone can only be found here).
 - `chat_threads`: `participant_ids ARRAY_CONTAINS, last_message_at DESC` (*Le mie chat*).
 - `messages` (collection group): `sent_at ASC` per thread is automatic; no composite needed in v1.
 

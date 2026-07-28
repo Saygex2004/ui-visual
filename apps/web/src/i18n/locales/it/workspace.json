@@ -1,1 +1,49 @@
-{}
+{
+  "title": "Scheda del listing",
+  "close": "Chiudi",
+  "loading": "Caricamento…",
+  "loadError": "Non è stato possibile caricare la scheda.",
+  "chatPlaceholder": "La chat arriva nella Fase 7.",
+  "tabs": {
+    "dettagli": "Dettagli",
+    "storico": "Storico",
+    "chat": "Chat"
+  },
+  "details": {
+    "tipoBene": "Tipo di bene",
+    "tipoProcedura": "Tipo di procedura",
+    "numeroAnno": "N° / Anno",
+    "tribunale": "Tribunale",
+    "comuneProvincia": "Comune / Provincia",
+    "regione": "Regione",
+    "valoreRichiesto": "Valore richiesto",
+    "dataPubblicazione": "Data pubblicazione",
+    "dataVendita": "Data vendita",
+    "disponibilita": "Disponibilità",
+    "descrizioneTitle": "Descrizione",
+    "goToListing": "Vai all'annuncio →"
+  },
+  "relatedLots": {
+    "title": "Lotti correlati ({{count}})",
+    "empty": "Nessun altro lotto attivo in questo blocco."
+  },
+  "activity": {
+    "loading": "Caricamento…",
+    "loadError": "Non è stato possibile caricare lo storico.",
+    "empty": "Nessuna attività registrata.",
+    "systemActor": "Sistema",
+    "event": {
+      "rating_set": "ha valutato: {{value}}",
+      "rating_changed": "ha cambiato la valutazione da {{from}} a {{to}}",
+      "rating_cleared": "ha rimosso la valutazione ({{value}})",
+      "thread_opened": "ha aperto la chat",
+      "thread_closed": "ha chiuso la chat",
+      "thread_reopened": "ha riaperto la chat",
+      "attachment_added": "ha aggiunto un allegato ({{filename}})",
+      "calendar_assigned": "è stato assegnato per il {{date}}",
+      "calendar_removed": "ha rimosso l'assegnazione",
+      "listing_archived": "il listing è stato archiviato (rilevato dal sistema)",
+      "listing_reactivated": "il listing è tornato attivo (rilevato dal sistema)"
+    }
+  }
+}

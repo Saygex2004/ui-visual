@@ -8,17 +8,20 @@
 // same as any other table).
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { ArchiveRow, BloccoIndexEntry, ClusterBlock } from '@pvp/shared';
+import type { AreaSlug, ArchiveRow, BloccoIndexEntry, ClusterBlock } from '@pvp/shared';
 import type { AreaSearch, SortKey } from './urlState.js';
 import { applyFilterModel } from './filterModel.js';
 import { Toolbar } from './DataTable/Toolbar.js';
 import { DataTable } from './DataTable/DataTable.js';
 import { getColumns, type AreaTableKind, type ColumnContext } from './DataTable/columns.js';
+import type { RatingsMap } from '../ratings/join.js';
 
 export interface ArchiveSectionProps {
   rows: readonly ArchiveRow[];
   clusters: readonly ClusterBlock[];
   areaKind: AreaTableKind;
+  area: AreaSlug;
+  ratings: RatingsMap;
   bloccoIndex: Readonly<Record<string, BloccoIndexEntry>>;
   search: AreaSearch;
   onPatch: (patch: Partial<AreaSearch>, opts?: { replace?: boolean }) => void;
@@ -32,6 +35,8 @@ export function ArchiveSection({
   rows,
   clusters,
   areaKind,
+  area,
+  ratings,
   bloccoIndex,
   search,
   onPatch,
@@ -85,6 +90,9 @@ export function ArchiveSection({
         rows={filtered.rows}
         columns={columns}
         columnContext={columnContext}
+        ratings={ratings}
+        area={area}
+        search={search}
         sortKey={search.sort}
         sortDir={search.dir}
         onSort={handleSort}

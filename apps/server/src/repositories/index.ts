@@ -14,3 +14,5 @@ export * as activityRepo from './activity.js';
 export * as usersRepo from './users.js';
 export * as sessionsRepo from './sessions.js';
 export * as adminEventsRepo from './adminEvents.js';
+export * as ratingsRepo from './ratings.js';
+export * as assignmentIndexRepo from './assignmentIndex.js';

@@ -22,7 +22,7 @@ import { CategoriesScreen } from '../features/admin/CategoriesScreen.js';
 import { AdminActivityScreen } from '../features/admin/AdminActivityScreen.js';
 import { LandingScreen } from '../features/dashboard/LandingScreen.js';
 import { AreaView } from '../features/dashboard/AreaView.js';
-import { WorkspacePlaceholder } from '../features/dashboard/WorkspacePlaceholder.js';
+import { WorkspacePanel } from '../features/workspace/WorkspacePanel.js';
 import { areaSearchSchema, listingSearchSchema } from '../features/dashboard/urlState.js';
 import { ProtectedLayout } from './ProtectedLayout.js';
 import { meQueryKey } from '../features/auth/hooks.js';
@@ -106,7 +106,7 @@ const listingRoute = createRoute({
   getParentRoute: () => areaRoute,
   path: '/lotto/$id',
   validateSearch: listingSearchSchema,
-  component: WorkspacePlaceholder,
+  component: WorkspacePanel,
 });
 
 // The parent's beforeLoad already populated the cache — this is a

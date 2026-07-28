@@ -135,6 +135,20 @@ describe('listings module (HTTP, over the emulator)', () => {
     expect(body.blocco).toBeNull(); // 1055 has no blocco key fields
   });
 
+  it('GET /api/listings/:id embeds the current rating when one exists', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/listings/1001',
+      headers: { cookie },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().rating).toEqual({
+      value: 'ottimo_affare',
+      set_by: 'user-1',
+      set_at: '2026-07-02T09:00:00.000Z',
+    });
+  });
+
   it('GET /api/listings/:id returns blocco siblings for a grouped lot, spanning clusters', async () => {
     const res = await app.inject({
       method: 'GET',

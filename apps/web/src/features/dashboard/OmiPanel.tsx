@@ -12,16 +12,12 @@ import { useTranslation } from 'react-i18next';
 import { selectOmiDisplayEntry, type ListingRow, type OmiEntry } from '@pvp/shared';
 import type { AreaSearch } from './urlState.js';
 import { capitalComuneForProvince } from './drilldownHelpers.js';
-import { formatCurrency, formatText, NOT_AVAILABLE } from './DataTable/formatting.js';
+import { OmiFacts } from './OmiFacts.js';
 
 export interface OmiPanelProps {
   rows: readonly ListingRow[];
   omiByComune: Readonly<Record<string, OmiEntry>>;
   search: AreaSearch;
-}
-
-function formatPerSqm(value: number | null): string {
-  return value == null ? NOT_AVAILABLE : formatCurrency(value);
 }
 
 export function OmiPanel({ rows, omiByComune, search }: OmiPanelProps) {
@@ -41,27 +37,7 @@ export function OmiPanel({ rows, omiByComune, search }: OmiPanelProps) {
     <div className="omi-panel" role="status">
       <h3 className="omi-panel-title">{t('omi.title')}</h3>
       {selection ? (
-        <>
-          <p className="omi-panel-range">
-            {t('omi.range', {
-              min: formatPerSqm(selection.min_mq),
-              max: formatPerSqm(selection.max_mq),
-            })}
-          </p>
-          <p className="omi-panel-facts">
-            {t('omi.tipologia', { value: formatText(selection.tipologia) })}
-            {' · '}
-            {t('omi.stato', { value: formatText(selection.stato) })}
-          </p>
-          <p className="omi-panel-caption">
-            {t('omi.caption', {
-              comune: selection.comune,
-              zona: formatText(selection.zona),
-              semestre: selection.semestre,
-            })}
-          </p>
-          <p className="omi-panel-caveat">{t('omi.residentialCaveat')}</p>
-        </>
+        <OmiFacts data={selection} />
       ) : (
         <p className="omi-panel-unavailable">{t('omi.unavailable', { provincia })}</p>
       )}
