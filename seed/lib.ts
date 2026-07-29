@@ -7,11 +7,63 @@
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { initializeApp, getApps } from 'firebase-admin/app';
+import { initializeApp, getApps, cert, type ServiceAccount } from 'firebase-admin/app';
 import { getFirestore, Timestamp, type Firestore } from 'firebase-admin/firestore';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = join(__dirname, 'fixtures');
+
+// A throwaway RSA key, unrelated to any real GCP project or account — its
+// only job is letting `@google-cloud/storage`'s `getSignedUrl()` complete its
+// LOCAL signing math against the Storage emulator. Verified against the real
+// emulator: the signer has no emulator-aware branch at all, so it always
+// tries to load real Application Default Credentials regardless of
+// `FIRESTORE_EMULATOR_HOST`/`FIREBASE_STORAGE_EMULATOR_HOST` — every other
+// Storage operation (upload/download/delete/exists) works fine emulated
+// without this, only signing needs it. The emulator never cryptographically
+// verifies the resulting signature.
+const EMULATOR_FAKE_PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCyKJjO0Lfi0isS
+NCk5kTgkvvYdO2hCbyQAyWNxfy7sjyX0s8bENWHjYbQ/O/er31JzxUNg1nRSuHc+
+Vb77UkY9ELAdG527DNmtTp8dsuwFNsafXy3Z0fgF1A1kAkT7o3z2aqDs2htM0sdN
+u2cbHs27HhmYOvZarvyT0SY/TdAU628GFRCjtNcm2wAY5995ZI3JmP5TqmlJi8/q
+NwaiTCzLlOb0wFnNXQa1ShSfFuqdkn7LwY9VhiiSkUZ52o20OffnW5FTbqLbMpv4
+utf6Z1dSbn+zW9KvQtULebdfCv/J8IFQW0uuxCr0Z+HqwMU+DGAtJlbeQpcQBp+j
+NBGOl0ybAgMBAAECggEAJZiXlp1JEN6VJERJptJUbLy3pzeQKuTVTi0xhRP3zQfw
+VJFTkrhJLfjCVs3K2ERKXA/2xgq7hXFUCJ2DrfmQxPYulBXt1TlC/mWnAldtozQJ
++jvVqy+6DVDQephYAlpf1oht6U2lkTKxyF+RxJFdjO0vLYbT0hM3TeJHFfjPvnoN
+m9+mW3nQnw3VyTO2FuqtbarjcbYBK0HuA/9JrvQa0UNAsS+1MEvb/rqpdFwnabeM
+mWBKh5IHoEhzB4XqZmW8SaRuFYP4fAGN8B1VhEsL9AJf+CgCOJSYEFnE5fdS/Fgy
+CmGQMMKf9F9S3y8cAHsgkY2p1Ni6mluzRQ8ybppL4QKBgQDyOpdu2irKLIHHJKbX
+Y43iJIWNFxdsIPZ3xAsLCel2a5eTEG5J6qTrTRnEWcZ+DfmbHVaBaOyP8yjcaGB6
+3OuSPQMG9S+fuYvJeKmbOOANUKN7GPA13wivKr2De4W0C8PsWLAHztiS/GFCd3/V
+kEzzFPMTMkA7mICCUMgzL87UIwKBgQC8SYYbApXbzEk2wCzB2EumfhZFudOJhMhC
++Xafe4zYtIHTmyjjRnil0UdywWDwiwadGit0QLOGlnKIpenXYSt5QtJrKRVAqSXO
+I05nHWdyTaSXMkfhXYVmUFtCOIRHV+/4sPdeooZBBnC9KyyW++pG6c8F391+nd87
+HBpbnasRKQKBgCo9FVL7MCL5B9hWB9HfRkp829zyfd8ZEGFqChLus4s2z8ORReoV
+xJRTaX7XuMkaXsAxqXf/d+DSIfntKYXDKEDj6rc34goULNAA/nJWxJsNyLQacSiz
+r6v74/gdff8bXhrEjE2QQCvBXqRceiofc4ufx5M9W/4IZcBTndVvLL3JAoGBALlZ
+24VNVz7HbK9UIPs2NMqSRtSe6Mnwh7++mfLHilBt6Xvouyh44B3D1gT2rro88ebH
+s00+wDvWcKtqQLeAdW5qxH8vMzezC39QrEa/4GzaWBNrMO1+xeqBYkTfJACjZZ04
+gFuNvIHYmDTwgnWjSe5DDkQnK4EQYodq09uqa5N5AoGADVVg1gcM7YzyRBfJEWww
+pm19NQAFumgi1xdC0OuXUB3ShCgmAmEn7yXZ3/TZW3C4Z9l19Ek4JBQ6S3nl8eY0
+S3x81aJyzNkelrODibasVBlMNA7BcYN3VslgX1+3hwAA3bFiHAJ0WhJx36Qt8LdM
+yHPRA5/T8O30dbZF0BqbCTQ=
+-----END PRIVATE KEY-----
+`;
+
+/** Exported so `apps/server`'s own `firestore.ts` can apply the identical
+ *  fix on whichever code path happens to initialize the process's one
+ *  shared Firebase Admin app first (this package's own `connectDb`, in the
+ *  integration-test flow, or `apps/server`'s `ensureApp`, in the real
+ *  dev/e2e server-boot flow). */
+export function emulatorSigningCredential(projectId: string): ServiceAccount {
+  return {
+    projectId,
+    clientEmail: `emulator-fake@${projectId}.iam.gserviceaccount.com`,
+    privateKey: EMULATOR_FAKE_PRIVATE_KEY,
+  };
+}
 
 export const TOP_LEVEL_COLLECTIONS = [
   'listings',
@@ -33,7 +85,14 @@ export const TOP_LEVEL_COLLECTIONS = [
 ] as const;
 
 export function connectDb(projectId: string): Firestore {
-  const app = getApps()[0] ?? initializeApp({ projectId });
+  const emulated = Boolean(process.env.FIRESTORE_EMULATOR_HOST);
+  const app =
+    getApps()[0] ??
+    initializeApp({
+      projectId,
+      storageBucket: `${projectId}.appspot.com`,
+      ...(emulated ? { credential: cert(emulatorSigningCredential(projectId)) } : {}),
+    });
   const db = getFirestore(app);
   db.settings({ ignoreUndefinedProperties: true });
   return db;

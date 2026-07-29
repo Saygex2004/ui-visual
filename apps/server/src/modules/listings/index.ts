@@ -13,7 +13,7 @@ import {
   type AreaSlug,
 } from '@pvp/shared';
 import type { SnapshotCache } from '../../cache/index.js';
-import { listingsRepo, ratingsRepo } from '../../repositories/index.js';
+import { listingsRepo, ratingsRepo, chatRepo } from '../../repositories/index.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
 
 const VALID_AREA_SLUGS: ReadonlySet<string> = new Set(Object.keys(AREA_SLUG_TO_SCOPE));
@@ -70,6 +70,8 @@ export function registerListingsModule(app: FastifyInstance, deps: ListingsModul
         ? cache.selectOmi('immobili', listing.provincia, listing.comune)
         : null;
     const rating = await ratingsRepo.getById(db, id);
+    const thread = await chatRepo.getThread(db, id);
+    const unread = thread ? await chatRepo.unreadCountFor(db, id, req.user!.id) : 0;
 
     const detail = {
       id: String(listing.id),
@@ -104,8 +106,7 @@ export function registerListingsModule(app: FastifyInstance, deps: ListingsModul
       blocco,
       omi,
       rating,
-      // Placeholder-false until Phase 7 fills the chat module in.
-      thread: { exists: false, closed: false, unread: 0 },
+      thread: { exists: thread !== null, closed: thread?.closed ?? false, unread },
     };
 
     return ListingDetailSchema.parse(detail);

@@ -5,7 +5,10 @@ import { instant } from '../common.js';
 
 export const AttachmentSchema = z.object({
   listing_id: z.string(),
-  message_id: z.string(),
+  // Uploads happen AHEAD of send (API_CONTRACT.md §6) — at upload time no
+  // message exists yet, so this is null until the sending transaction fills
+  // it in. Also what the startup orphan sweep filters on.
+  message_id: z.string().nullable(),
   uploader_id: z.string(),
   filename: z.string(),
   content_type: z.string(),

@@ -16,3 +16,6 @@ export * as sessionsRepo from './sessions.js';
 export * as adminEventsRepo from './adminEvents.js';
 export * as ratingsRepo from './ratings.js';
 export * as assignmentIndexRepo from './assignmentIndex.js';
+export * as chatRepo from './chat.js';
+export * as userCountersRepo from './userCounters.js';
+export * as attachmentsRepo from './attachments.js';

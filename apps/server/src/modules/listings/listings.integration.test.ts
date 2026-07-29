@@ -149,6 +149,16 @@ describe('listings module (HTTP, over the emulator)', () => {
     });
   });
 
+  it('GET /api/listings/:id reports real thread facts when one exists (fixture: 1001, open, admin has 1 unread)', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/listings/1001',
+      headers: { cookie },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().thread).toEqual({ exists: true, closed: false, unread: 1 });
+  });
+
   it('GET /api/listings/:id returns blocco siblings for a grouped lot, spanning clusters', async () => {
     const res = await app.inject({
       method: 'GET',

@@ -83,6 +83,21 @@ describe('Part B schemas round-trip (DATA_MODEL §§9–15)', () => {
     }
   });
 
+  it('attachment with message_id null (uploaded ahead of send, not yet referenced)', () => {
+    expect(() =>
+      AttachmentSchema.parse({
+        listing_id: '1055',
+        message_id: null,
+        uploader_id: 'user-1',
+        filename: 'foto.jpg',
+        content_type: 'image/jpeg',
+        size_bytes: 12345,
+        storage_path: 'attachments/1055/att-999',
+        uploaded_at: '2026-07-28T09:00:00.000Z',
+      }),
+    ).not.toThrow();
+  });
+
   it('admin_events (closed §15 vocabulary)', () => {
     for (const e of loadFixture<unknown[]>('admin_events.json')) {
       expect(() => AdminEventSchema.parse(e)).not.toThrow();

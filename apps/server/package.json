@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",
+    "@fastify/multipart": "^10.1.0",
     "@pvp/shared": "workspace:*",
     "argon2": "^0.45.1",
     "fastify": "^5.10.0",

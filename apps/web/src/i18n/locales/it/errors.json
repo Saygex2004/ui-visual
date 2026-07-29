@@ -10,6 +10,14 @@
     "usernameTaken": "Questo nome utente è già in uso.",
     "lastAdmin": "Impossibile completare l'operazione: è l'ultimo amministratore attivo."
   },
+  "chat": {
+    "threadClosed": "Questa chat è chiusa: non è possibile inviare messaggi o aggiungere partecipanti.",
+    "messageTooLong": "Il messaggio è troppo lungo."
+  },
+  "attachments": {
+    "tooLarge": "Il file è troppo grande.",
+    "type": "Questo tipo di file non è consentito."
+  },
   "common": {
     "notFound": "Risorsa non trovata.",
     "validation": "I dati inviati non sono validi.",

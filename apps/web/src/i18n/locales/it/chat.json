@@ -1,1 +1,57 @@
-{}
+{
+  "title": "Chat del listing",
+  "back": "← Le mie chat",
+  "loading": "Caricamento…",
+  "loadError": "Non è stato possibile caricare la chat.",
+  "removedListing": {
+    "notice": "Questo listing non è più nel database, ma la conversazione resta consultabile."
+  },
+  "listing": {
+    "valueLabel": "Valore richiesto",
+    "goToListing": "Vai all'annuncio →"
+  },
+  "closed": {
+    "badge": "Chiusa",
+    "notice": "Questa chat è chiusa: resta consultabile ma non accetta nuovi messaggi o partecipanti.",
+    "closeAction": "Chiudi chat",
+    "reopenAction": "Riapri chat",
+    "closeConfirm": "Chiudere questa chat? Resterà consultabile ma non accetterà più messaggi o nuovi partecipanti."
+  },
+  "participants": {
+    "title": "Partecipanti",
+    "add": "Aggiungi un collega",
+    "addPlaceholder": "Scegli un collega…",
+    "addAction": "Aggiungi",
+    "noCandidates": "Tutti i colleghi fanno già parte di questa chat."
+  },
+  "messages": {
+    "empty": "Nessun messaggio: scrivi il primo per avviare la conversazione.",
+    "you": "Tu"
+  },
+  "compose": {
+    "placeholder": "Scrivi un messaggio…",
+    "send": "Invia",
+    "attach": "Allega file",
+    "bold": "Grassetto",
+    "italic": "Corsivo",
+    "bulletList": "Elenco puntato",
+    "orderedList": "Elenco numerato",
+    "link": "Link",
+    "linkPrompt": "Indirizzo del link",
+    "mustContainSomething": "Scrivi un messaggio o allega un file prima di inviare.",
+    "sendError": "Non è stato possibile inviare il messaggio."
+  },
+  "attachments": {
+    "pending": "Allegati da inviare",
+    "download": "Scarica",
+    "remove": "Rimuovi"
+  },
+  "myChats": {
+    "title": "Le mie chat",
+    "empty": "Non partecipi ancora a nessuna chat. Puoi aprirne una dal controllo chat su un listing, nella dashboard, nell'archivio o nel calendario.",
+    "noMessagesYet": "Nessun messaggio ancora.",
+    "attachmentOnlyPreview": "📎 Allegato",
+    "removedListing": "Rimosso dall'archivio",
+    "open": "Apri"
+  }
+}

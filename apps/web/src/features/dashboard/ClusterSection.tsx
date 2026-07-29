@@ -15,6 +15,7 @@ import {
   type ClusterBlock,
   type BloccoIndexEntry,
   type OmiEntry,
+  type ThreadListItem,
 } from '@pvp/shared';
 import type { AreaSearch, BucketTab, SortKey } from './urlState.js';
 import { applyFilterModel, distinctValues } from './filterModel.js';
@@ -32,6 +33,7 @@ export interface ClusterSectionProps {
   areaKind: AreaTableKind;
   area: AreaSlug;
   ratings: RatingsMap;
+  chatsByListing: ReadonlyMap<string, ThreadListItem>;
   bloccoIndex: Readonly<Record<string, BloccoIndexEntry>>;
   omiByComune: Readonly<Record<string, OmiEntry>>;
   search: AreaSearch;
@@ -54,6 +56,7 @@ export function ClusterSection({
   areaKind,
   area,
   ratings,
+  chatsByListing,
   bloccoIndex,
   omiByComune,
   search,
@@ -181,6 +184,7 @@ export function ClusterSection({
               columns={columns}
               columnContext={columnContext}
               ratings={ratings}
+              chatsByListing={chatsByListing}
               area={area}
               search={search}
               sortKey={search.sort}
@@ -195,6 +199,7 @@ export function ClusterSection({
               columns={columns}
               columnContext={columnContext}
               ratings={ratings}
+              chatsByListing={chatsByListing}
               area={area}
               search={search}
               sortKey={search.sort}

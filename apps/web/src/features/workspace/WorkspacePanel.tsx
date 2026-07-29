@@ -29,6 +29,7 @@ import type { PanelTab } from '../dashboard/urlState.js';
 import { useListingDetail } from './hooks.js';
 import { DettagliTab } from './DettagliTab.js';
 import { ActivityTimeline } from './ActivityTimeline.js';
+import { ThreadView } from '../chat/ThreadView.js';
 import { formatText } from '../dashboard/DataTable/formatting.js';
 import './workspace.css';
 
@@ -107,7 +108,7 @@ export function WorkspacePanel() {
                     <ActivityTimeline listingId={id} />
                   </TabsPanel>
                   <TabsPanel value="chat">
-                    <p className="workspace-status">{t('chatPlaceholder')}</p>
+                    <ThreadView listingId={id} />
                   </TabsPanel>
                 </TabsPanels>
               </TabsRoot>

@@ -17,8 +17,11 @@ import { registerAdminModule } from './modules/admin/index.js';
 import { registerSettingsModule } from './modules/settings/index.js';
 import { registerRatingsModule } from './modules/ratings/index.js';
 import { registerActivityModule } from './modules/activity/index.js';
+import { registerChatModule } from './modules/chat/index.js';
+import { registerAttachmentsModule, sweepOrphanAttachments } from './modules/attachments/index.js';
 import { SnapshotCache } from './cache/index.js';
 import { bootstrapAdmin } from './bootstrap.js';
+import { getBucket } from './storage.js';
 
 function buildLoggerOptions(config: Config) {
   // pino is Fastify's native logger. Pretty console in development,
@@ -62,6 +65,17 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
     await cache.init();
     cache.startPolling();
 
+    const bucket = getBucket(config.PVPDASH_FIRESTORE_PROJECT_ID, config.PVPDASH_STORAGE_BUCKET);
+    try {
+      const swept = await sweepOrphanAttachments(db, bucket);
+      if (swept > 0) app.log.info({ swept }, 'swept orphaned attachment uploads');
+    } catch (err) {
+      // Best-effort cleanup — never blocks startup (SPECIFICATIONS.md §15's
+      // "fail closed and loud" is for correctness-critical paths; this isn't
+      // one, the same reasoning the snapshot cache applies to a failed rebuild).
+      app.log.warn({ err }, 'orphan attachment sweep failed, continuing startup');
+    }
+
     const primedCache = cache;
     await app.register(
       async (instance) => {
@@ -81,6 +95,14 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
         registerRatingsModule(instance, { db });
         registerActivityModule(instance, { db });
         registerListingsModule(instance, { cache: primedCache, db });
+        registerChatModule(instance, { db, messageMaxChars: config.PVPDASH_MESSAGE_MAX_CHARS });
+        await registerAttachmentsModule(instance, {
+          db,
+          bucket,
+          maxBytes: config.PVPDASH_ATTACH_MAX_MB * 1024 * 1024,
+          allowedTypes: config.PVPDASH_ATTACH_TYPES,
+          signedUrlTtlMinutes: config.PVPDASH_SIGNED_URL_TTL_MINUTES,
+        });
       },
       { prefix: '/api' },
     );

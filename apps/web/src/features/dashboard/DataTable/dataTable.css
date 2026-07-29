@@ -166,6 +166,21 @@ th.data-table-actions-cell {
   border-bottom-color: var(--color-accent);
 }
 
+.data-table-chat-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  margin-left: var(--space-1);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+}
+
 .data-table-empty {
   padding: var(--space-6);
   text-align: center;

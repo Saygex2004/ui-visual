@@ -1,12 +1,13 @@
 // App shell: the user-menu header (UI §2.5) — account name, Calendario /
 // Le mie chat / Amministrazione (admins only) / Esci, with the unread badge
-// (wired-but-zero placeholder until Phase 7 wires GET /chats/unread). Exposes
-// menu role/expanded state to assistive technology (UI §11).
+// (UI §6.1: "on the user-menu button ... on every screen"). Exposes menu
+// role/expanded state to assistive technology (UI §11).
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from '@tanstack/react-router';
 import type { UserPublic } from '@pvp/shared';
 import { useLogout } from '../features/auth/hooks.js';
+import { useUnreadTotal } from '../features/chat/hooks.js';
 import './shell.css';
 
 export function Shell({ user, children }: { user: UserPublic; children: React.ReactNode }) {
@@ -15,9 +16,7 @@ export function Shell({ user, children }: { user: UserPublic; children: React.Re
   const logout = useLogout();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  // Wired-but-zero placeholder (Phase 7 replaces with the real GET /chats/unread poll).
-  const unreadTotal = 0;
+  const unreadTotal = useUnreadTotal();
 
   useEffect(() => {
     if (!menuOpen) return;

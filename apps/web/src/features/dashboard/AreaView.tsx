@@ -29,6 +29,7 @@ import { ArchiveSection } from './ArchiveSection.js';
 import { findBucketForBlocco } from './blocco.js';
 import { computeSessionMoves, eligibleMoved, todayIso } from './sessionArchive.js';
 import { useRatingsMap } from '../ratings/hooks.js';
+import { useMyThreadsMap } from '../chat/hooks.js';
 import type { AreaTableKind } from './DataTable/columns.js';
 import './dashboard.css';
 
@@ -52,6 +53,7 @@ export function AreaView() {
   const { data: snapshot, isLoading, isError } = useAreaSnapshot(area as AreaSlug);
   const areaKind: AreaTableKind = area === 'immobili' ? 'real_estate' : 'credits';
   const ratings = useRatingsMap();
+  const chatsByListing = useMyThreadsMap();
 
   const [today, setToday] = useState(todayIso);
   const [clearedIds, setClearedIds] = useState<ReadonlySet<string>>(new Set());
@@ -173,6 +175,7 @@ export function AreaView() {
                 areaKind={areaKind}
                 area={area as AreaSlug}
                 ratings={ratings}
+                chatsByListing={chatsByListing}
                 bloccoIndex={snapshot.blocco_index}
                 omiByComune={snapshot.omi_by_comune}
                 search={search}
@@ -190,6 +193,7 @@ export function AreaView() {
               areaKind={areaKind}
               area={area as AreaSlug}
               ratings={ratings}
+              chatsByListing={chatsByListing}
               bloccoIndex={snapshot.blocco_index}
               search={search}
               onPatch={patch}

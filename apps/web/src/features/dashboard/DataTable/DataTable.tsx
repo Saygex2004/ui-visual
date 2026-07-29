@@ -10,20 +10,21 @@
 //
 // The actions column (UI §4.1/§4.5) always carries: the shared Valutazione
 // control (also marking the row via `data-rating`, UI §5), a link opening the
-// listing workspace, a quick-chat link (opens the workspace on its chat tab —
-// chat itself stays a placeholder until Phase 7), and "Vai all'annuncio →".
-// The workspace links carry `search` built from the caller's own already-
-// resolved `AreaSearch` object (a `search` prop here), not a `(prev) => ...`
-// router callback — `<Link>` embedded in a route-context-agnostic component
-// like this one can't have `prev` inferred against a specific route's search
-// type, which `tsc` rejects the moment the target route's schema has
-// required fields (`cluster`/`tab`/`dir`, all `.catch()`-defaulted but still
-// required in the parsed output type).
+// listing workspace, a quick-chat link (opens the workspace on its chat tab,
+// UI §6.1 — carrying that thread's own unread count, capped 9+, same display
+// rule as the user-menu badge), and "Vai all'annuncio →". The workspace links
+// carry `search` built from the caller's own already-resolved `AreaSearch`
+// object (a `search` prop here), not a `(prev) => ...` router callback —
+// `<Link>` embedded in a route-context-agnostic component like this one can't
+// have `prev` inferred against a specific route's search type, which `tsc`
+// rejects the moment the target route's schema has required fields
+// (`cluster`/`tab`/`dir`, all `.catch()`-defaulted but still required in the
+// parsed output type).
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import type { AreaSlug } from '@pvp/shared';
+import type { AreaSlug, ThreadListItem } from '@pvp/shared';
 import type { AreaSearch, SortDir, SortKey } from '../urlState.js';
 import type { ColumnContext, ColumnDef, TableRow } from './columns.js';
 import { RatingControl } from '../../ratings/RatingControl.js';
@@ -39,6 +40,7 @@ export interface DataTableProps {
   columns: readonly ColumnDef[];
   columnContext: ColumnContext;
   ratings: RatingsMap;
+  chatsByListing: ReadonlyMap<string, ThreadListItem>;
   area: AreaSlug;
   search: AreaSearch;
   sortKey: SortKey | undefined;
@@ -52,6 +54,7 @@ export function DataTable({
   columns,
   columnContext,
   ratings,
+  chatsByListing,
   area,
   search,
   sortKey,
@@ -128,6 +131,7 @@ export function DataTable({
           {virtualizer.getVirtualItems().map((virtualRow) => {
             const row = rows[virtualRow.index]!;
             const rating = ratings.get(row.id) ?? null;
+            const unread = chatsByListing.get(row.id)?.unread ?? 0;
             return (
               <tr
                 key={row.id}
@@ -172,6 +176,14 @@ export function DataTable({
                     title={t('table.quickChat')}
                   >
                     {t('table.quickChat')}
+                    {unread > 0 ? (
+                      <span
+                        className="data-table-chat-badge"
+                        aria-label={t('common:userMenu.unread', { count: unread })}
+                      >
+                        {unread > 9 ? '9+' : unread}
+                      </span>
+                    ) : null}
                   </Link>
                   <a
                     href={row.link}
