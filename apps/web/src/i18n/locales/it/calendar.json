@@ -1,1 +1,28 @@
-{}
+{
+  "loading": "Caricamento…",
+  "loadError": "Non è stato possibile caricare il calendario.",
+  "back": "← Mese",
+  "month": {
+    "previous": "Mese precedente",
+    "next": "Mese successivo"
+  },
+  "weekday": {
+    "mon": "Lun",
+    "tue": "Mar",
+    "wed": "Mer",
+    "thu": "Gio",
+    "fri": "Ven",
+    "sat": "Sab",
+    "sun": "Dom"
+  },
+  "legend": {
+    "autoAssign": "Gli annunci di un giorno vengono assegnati automaticamente alla prima apertura (solo immobili, solo il giorno corrente).",
+    "badge": "Il badge mostra completate / assegnate.",
+    "permanent": "Una valutazione segna il completamento in modo permanente.",
+    "actionable": "Contiene un annuncio da valutare (Ottimo affare o Da verificare)"
+  },
+  "day": {
+    "progress": "{{completed}} di {{total}} completate",
+    "empty": "Nessun annuncio assegnato per questo giorno."
+  }
+}

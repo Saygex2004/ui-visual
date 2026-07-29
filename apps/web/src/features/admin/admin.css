@@ -18,6 +18,38 @@
   background: var(--color-surface);
 }
 
+/* Admin calendar assignment tabs (UI §8.3) — mirrors workspace.css's
+   .workspace-tabs/.workspace-tab pattern. */
+.admin-calendar-tabs {
+  display: flex;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-4);
+}
+
+.admin-calendar-tab {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.admin-calendar-tab[data-active] {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-body);
+  font-weight: 600;
+}
+
+.admin-calendar-tab:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 .admin-form-title {
   margin: 0;
   font-size: var(--text-lg);

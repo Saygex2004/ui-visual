@@ -23,6 +23,14 @@
         { "fieldPath": "participant_ids", "arrayConfig": "CONTAINS" },
         { "fieldPath": "last_message_at", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "calendar_days",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

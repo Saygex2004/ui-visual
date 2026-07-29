@@ -132,6 +132,7 @@ export function DataTable({
             const row = rows[virtualRow.index]!;
             const rating = ratings.get(row.id) ?? null;
             const unread = chatsByListing.get(row.id)?.unread ?? 0;
+            const rowArea = row.area ?? area;
             return (
               <tr
                 key={row.id}
@@ -161,7 +162,7 @@ export function DataTable({
                   <RatingControl listingId={row.id} value={rating} compact />
                   <Link
                     to="/aste/$area/lotto/$id"
-                    params={{ area, id: row.id }}
+                    params={{ area: rowArea, id: row.id }}
                     search={{ ...search, pannello: 'dettagli' }}
                     className="data-table-action-link"
                     title={t('table.openWorkspace')}
@@ -170,7 +171,7 @@ export function DataTable({
                   </Link>
                   <Link
                     to="/aste/$area/lotto/$id"
-                    params={{ area, id: row.id }}
+                    params={{ area: rowArea, id: row.id }}
                     search={{ ...search, pannello: 'chat' }}
                     className="data-table-action-link"
                     title={t('table.quickChat')}

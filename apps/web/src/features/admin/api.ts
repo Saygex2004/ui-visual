@@ -1,4 +1,5 @@
-// Admin accounts + categories + activity API calls (API_CONTRACT.md §8).
+// Admin accounts + categories + activity + calendar assignment API calls
+// (API_CONTRACT.md §7/§8).
 import { api } from '../../lib/apiClient.js';
 import type {
   UsersResponse,
@@ -9,6 +10,13 @@ import type {
   SetCategoriesResponse,
   EventsResponse,
   RunsResponse,
+  RandomAssignRequest,
+  RandomAssignResponse,
+  RemoveAssignResponse,
+  ByIdAssignRequest,
+  ByIdAssignResponse,
+  ListingSearchResponse,
+  CalendarRow,
 } from '@pvp/shared';
 
 export function fetchUsers(): Promise<UsersResponse> {
@@ -45,4 +53,33 @@ export function fetchEvents(): Promise<EventsResponse> {
 
 export function fetchRuns(): Promise<RunsResponse> {
   return api.get<RunsResponse>('/admin/runs');
+}
+
+export function randomAssign(body: RandomAssignRequest): Promise<RandomAssignResponse> {
+  return api.post<RandomAssignResponse>('/admin/calendar/random', body);
+}
+
+export function fetchAssignedForRemoval(
+  userId: string,
+  date: string,
+): Promise<{ listings: CalendarRow[] }> {
+  return api.get<{ listings: CalendarRow[] }>(`/admin/calendar/${userId}/${date}`);
+}
+
+export function removeAssignments(
+  userId: string,
+  date: string,
+  listingIds: readonly string[],
+): Promise<RemoveAssignResponse> {
+  return api.delete<RemoveAssignResponse>(`/admin/calendar/${userId}/${date}`, {
+    listing_ids: listingIds,
+  });
+}
+
+export function searchListings(q: string): Promise<ListingSearchResponse> {
+  return api.get<ListingSearchResponse>(`/admin/listings/search?q=${encodeURIComponent(q)}`);
+}
+
+export function byIdAssign(body: ByIdAssignRequest): Promise<ByIdAssignResponse> {
+  return api.post<ByIdAssignResponse>('/admin/calendar/by-id', body);
 }

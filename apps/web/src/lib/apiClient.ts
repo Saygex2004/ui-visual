@@ -65,7 +65,11 @@ export const api = {
       method: 'PUT',
       body: body === undefined ? undefined : JSON.stringify(body),
     }),
-  delete: <T>(path: string): Promise<T> => request<T>(path, { method: 'DELETE' }),
+  delete: <T>(path: string, body?: unknown): Promise<T> =>
+    request<T>(path, {
+      method: 'DELETE',
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }),
   /** Multipart upload (attachments, API_CONTRACT.md §6) — deliberately no
    *  `Content-Type` header: the browser computes the multipart boundary
    *  itself from the `FormData` body, and setting it by hand breaks the

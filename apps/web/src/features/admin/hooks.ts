@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { CreateUserRequest, Role } from '@pvp/shared';
+import type { CreateUserRequest, Role, RandomAssignRequest, ByIdAssignRequest } from '@pvp/shared';
 import * as adminApi from './api.js';
 
 export const adminUsersQueryKey = ['admin', 'users'] as const;
@@ -67,4 +67,46 @@ export const adminRunsQueryKey = ['admin', 'runs'] as const;
 
 export function useAdminRuns() {
   return useQuery({ queryKey: adminRunsQueryKey, queryFn: adminApi.fetchRuns });
+}
+
+export function useRandomAssign() {
+  return useMutation({
+    mutationFn: (body: RandomAssignRequest) => adminApi.randomAssign(body),
+  });
+}
+
+export function useAssignedForRemoval(userId: string, date: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['admin', 'calendar', 'assigned', userId, date],
+    queryFn: () => adminApi.fetchAssignedForRemoval(userId, date),
+    enabled,
+  });
+}
+
+export function useRemoveAssignments() {
+  return useMutation({
+    mutationFn: ({
+      userId,
+      date,
+      listingIds,
+    }: {
+      userId: string;
+      date: string;
+      listingIds: readonly string[];
+    }) => adminApi.removeAssignments(userId, date, listingIds),
+  });
+}
+
+export function useListingSearch(q: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['admin', 'listings', 'search', q],
+    queryFn: () => adminApi.searchListings(q),
+    enabled,
+  });
+}
+
+export function useByIdAssign() {
+  return useMutation({
+    mutationFn: (body: ByIdAssignRequest) => adminApi.byIdAssign(body),
+  });
 }

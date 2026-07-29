@@ -8,6 +8,9 @@ import { z } from 'zod';
  */
 export const calendarDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD');
 
+/** A calendar month, `YYYY-MM` — the month-view route/query shape (FRONTEND.md §2). */
+export const yearMonth = z.string().regex(/^\d{4}-\d{2}$/, 'expected YYYY-MM');
+
 /**
  * Instant. DATA_MODEL.md §2 stores native Firestore timestamps; the API
  * (API_CONTRACT.md §1) exposes ISO-8601 UTC strings, and the JSON fixtures use

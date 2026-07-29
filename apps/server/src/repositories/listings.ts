@@ -40,3 +40,13 @@ export async function getById(db: Firestore, id: string): Promise<Listing | null
   if (!doc.exists) return null;
   return ListingSchema.parse(firestoreToPlain(doc.data()));
 }
+
+/** Many listings by id, in one batched read (calendar day rows — up to ~200
+ *  ids, API_CONTRACT.md §7). Missing ids are simply absent from the result,
+ *  not an error — a frozen day can reference an id that later disappears. */
+export async function getByIds(db: Firestore, ids: readonly string[]): Promise<Listing[]> {
+  if (ids.length === 0) return [];
+  const refs = ids.map((id) => db.collection(COLLECTION).doc(id));
+  const docs = await db.getAll(...refs);
+  return docs.filter((d) => d.exists).map((d) => ListingSchema.parse(firestoreToPlain(d.data())));
+}

@@ -5,7 +5,7 @@
 // the "Vai all'annuncio →" action live in DataTable's frozen actions column,
 // not here (Valutazione is a Phase 6 placeholder this phase).
 import type { ReactNode } from 'react';
-import type { ListingRow, BloccoIndexEntry, ClusterBlock } from '@pvp/shared';
+import type { AreaSlug, ListingRow, BloccoIndexEntry, ClusterBlock } from '@pvp/shared';
 import type { SortKey } from '../urlState.js';
 import { OccupancyIndicator } from './OccupancyIndicator.js';
 import { BloccoBadge } from './BloccoBadge.js';
@@ -17,7 +17,7 @@ import {
   formatNumeroAnno,
 } from './formatting.js';
 
-export type AreaTableKind = 'real_estate' | 'credits';
+export type AreaTableKind = 'real_estate' | 'credits' | 'calendar';
 
 export interface ColumnContext {
   bloccoIndex: Readonly<Record<string, BloccoIndexEntry>>;
@@ -38,8 +38,10 @@ export interface ColumnContext {
 
 /** `cluster_key` is optional here (present only on archive rows) so the same
  *  column configs render both plain cluster tables and the archive without a
- *  cast at the call site. */
-export type TableRow = ListingRow & { cluster_key?: string };
+ *  cast at the call site. `area` is optional too (present only on calendar
+ *  day rows, which can mix immobili + corporate — DataTable falls back to
+ *  its own table-wide `area` prop when a row doesn't carry one). */
+export type TableRow = ListingRow & { cluster_key?: string; area?: AreaSlug };
 
 export interface ColumnDef {
   key: string;
@@ -160,6 +162,44 @@ const CLUSTER_ORIGIN: ColumnDef = {
   render: (row) => formatText(row.cluster_key ?? null),
 };
 
+const CALENDAR_ID: ColumnDef = {
+  key: 'id',
+  headerKey: 'table.columns.id',
+  width: '80px',
+  render: (row) => row.id,
+};
+
+const CALENDAR_REGIONE: ColumnDef = {
+  key: 'regione',
+  headerKey: 'table.columns.regione',
+  width: '140px',
+  render: (row) => formatText(row.regione),
+};
+
+/** A day's rows have no cluster/tab context to isolate or jump into (unlike
+ *  an area-view table), so this is a plain presence indicator — not
+ *  `BloccoBadge`, whose count and click-to-isolate/jump both depend on the
+ *  area-wide `bloccoIndex` + nav callbacks a calendar page doesn't have. */
+const CALENDAR_BLOCCO: ColumnDef = {
+  key: 'blocco',
+  headerKey: 'table.columns.blocco',
+  width: '90px',
+  render: (row) =>
+    row.blocco_key ? <span className="calendar-blocco-indicator" title={row.blocco_key} /> : null,
+};
+
+const CALENDAR_COLUMNS: ColumnDef[] = [
+  TIPO_BENE_CREDITS,
+  TIPO_PROCEDURA,
+  CALENDAR_BLOCCO,
+  TRIBUNALE,
+  CALENDAR_REGIONE,
+  COMUNE_PROVINCIA,
+  DISPONIBILITA,
+  VALORE,
+  DATA_VENDITA,
+];
+
 const REAL_ESTATE_COLUMNS: ColumnDef[] = [
   TIPO_IMMOBILE,
   TIPO_PROCEDURA,
@@ -188,8 +228,11 @@ const CREDITS_COLUMNS: ColumnDef[] = [
 
 export function getColumns(
   kind: AreaTableKind,
-  opts?: { showClusterColumn?: boolean },
+  opts?: { showClusterColumn?: boolean; showIdColumn?: boolean },
 ): ColumnDef[] {
+  if (kind === 'calendar') {
+    return opts?.showIdColumn ? [CALENDAR_ID, ...CALENDAR_COLUMNS] : CALENDAR_COLUMNS;
+  }
   const base = kind === 'real_estate' ? REAL_ESTATE_COLUMNS : CREDITS_COLUMNS;
   return opts?.showClusterColumn ? [...base, CLUSTER_ORIGIN] : base;
 }

@@ -40,9 +40,58 @@
     "disableGenericError": "Non è stato possibile aggiornare lo stato dell'account.",
     "stateActive": "Attivo",
     "stateDisabled": "Disabilitato",
-    "linkCalendarAssignment": "Assegnazione calendario (presto disponibile)",
+    "linkCalendarAssignment": "Assegnazione calendario",
     "linkCategories": "Categorie di estrazione",
     "linkActivity": "Attività amministrativa"
+  },
+  "calendarAssignment": {
+    "title": "Amministrazione — Assegnazione calendario",
+    "loading": "Caricamento…",
+    "genericError": "Operazione non riuscita.",
+    "userLabel": "Utente",
+    "userPlaceholder": "Scegli un utente…",
+    "dateLabel": "Giorno",
+    "countLabel": "Quantità",
+    "tabs": {
+      "random": "Assegnazione casuale",
+      "removal": "Rimozione",
+      "byId": "Assegnazione per ID"
+    },
+    "random": {
+      "submit": "Assegna",
+      "confirm": "Assegnare {{count}} annunci a {{date}}?",
+      "result": "{{count}} annunci assegnati."
+    },
+    "removal": {
+      "empty": "Nessun annuncio assegnato per questo utente e giorno.",
+      "selectAll": "Seleziona tutti",
+      "submit": "Rimuovi selezionati",
+      "confirm": "Rimuovere {{count}} annunci dal calendario? L'annuncio e le eventuali valutazioni restano intatti.",
+      "result": "{{count}} annunci rimossi dal calendario."
+    },
+    "byId": {
+      "searchLabel": "Cerca",
+      "searchPlaceholder": "ID, tribunale, comune, regione o descrizione…",
+      "searchSubmit": "Cerca",
+      "noResults": "Nessun risultato.",
+      "columnId": "ID",
+      "columnArea": "Area",
+      "columnType": "Tipo",
+      "columnCourt": "Tribunale",
+      "columnPlace": "Comune",
+      "columnValue": "Valore",
+      "columnCompleted": "Completato",
+      "realEstate": "Immobili",
+      "corporate": "Crediti",
+      "completedYes": "Sì",
+      "completedNo": "No",
+      "assignSubmit": "Assegna selezionati",
+      "assignedResult": "{{count}} annunci assegnati.",
+      "skipReason": {
+        "not_found": "id inesistente",
+        "completed": "già completato"
+      }
+    }
   },
   "categories": {
     "title": "Amministrazione — Categorie di estrazione",

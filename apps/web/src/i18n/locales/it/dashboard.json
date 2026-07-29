@@ -105,6 +105,8 @@
       "dataPubblicazione": "Data pubblicazione",
       "dataVendita": "Data vendita",
       "cluster": "Cluster",
+      "regione": "Regione",
+      "id": "ID",
       "actions": "Azioni"
     }
   },

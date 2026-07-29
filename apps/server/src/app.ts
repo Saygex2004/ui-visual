@@ -19,6 +19,8 @@ import { registerRatingsModule } from './modules/ratings/index.js';
 import { registerActivityModule } from './modules/activity/index.js';
 import { registerChatModule } from './modules/chat/index.js';
 import { registerAttachmentsModule, sweepOrphanAttachments } from './modules/attachments/index.js';
+import { registerCalendarModule } from './modules/calendar/index.js';
+import { registerAdminCalendarModule } from './modules/admin/calendar.js';
 import { SnapshotCache } from './cache/index.js';
 import { bootstrapAdmin } from './bootstrap.js';
 import { getBucket } from './storage.js';
@@ -91,6 +93,8 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
           isProduction: config.isProduction,
         });
         registerAdminModule(instance, { db });
+        registerAdminCalendarModule(instance, { db });
+        registerCalendarModule(instance, { db });
         registerSettingsModule(instance, { db, cache: primedCache });
         registerRatingsModule(instance, { db });
         registerActivityModule(instance, { db });
