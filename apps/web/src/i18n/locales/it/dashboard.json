@@ -29,6 +29,12 @@
     },
     "refreshDeferralNote": "L'aggiornamento dei dati avviene automaticamente in base alla pianificazione dello scraper."
   },
+  "selector": {
+    "clusterLabel": "Cluster",
+    "clusterSearchPlaceholder": "Cerca cluster o zona…",
+    "clusterEmpty": "Nessun cluster trovato",
+    "clusterListingCount": "{{count}} listing"
+  },
   "cluster": {
     "title": "Cluster {{number}}: {{name}}",
     "name": {
@@ -83,9 +89,12 @@
     "navLabel": "Archivio",
     "title": "Archivio",
     "empty": "L'archivio è vuoto.",
-    "refreshControl": "📅 Aggiorna alla data odierna",
+    "refreshControl": "Aggiorna alla data odierna",
+    "refreshReportTitle": "Archivio aggiornato",
     "refreshReport": "{{moved}} vendite spostate in archivio in questa sessione. Totale in archivio: {{total}}.",
-    "svuotaControl": "🗑️ Svuota archivio",
+    "svuotaControl": "Svuota archivio",
+    "svuotaTitle": "Svuota archivio",
+    "svuotaNothingTitle": "Nulla da svuotare",
     "svuotaNothing": "Non c'è nulla da svuotare. I listing scomparsi dalla fonte restano comunque in archivio.",
     "svuotaConfirm": "Verranno rimosse {{count}} righe ancora attive ma con vendita ormai passata. I listing archiviati in modo permanente restano in archivio. Continuare?"
   },

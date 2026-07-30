@@ -1,6 +1,7 @@
-// Cluster section (UI §3.1): header + subtitle, the geographic drill-down +
-// OMI panel for clusters that map to regions (UI §3.2/§3.3), bucket tabs, the
-// active table. Owns the INNER `TabsRoot` (principali/fallimenti); Radix
+// Cluster section (UI §3.1, Phase 13): header (colored cluster dot + title)
+// + subtitle, bucket tabs, the active table. The geographic drill-down and
+// OMI panel moved up into AreaView's selector toolbar (Phase 13 layout).
+// Owns the INNER `TabsRoot` (principali/fallimenti); Radix
 // only renders the active bucket's children (see components/Tabs.tsx), so
 // its table is the only one ever mounted. Scrolls
 // itself into view whenever a blocco isolation is active — covers both a
@@ -10,19 +11,10 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TabsRoot, TabsPanel } from '../../components/Tabs.js';
-import {
-  REAL_ESTATE_CLUSTERS,
-  type AreaSlug,
-  type ClusterBlock,
-  type BloccoIndexEntry,
-  type OmiEntry,
-  type ThreadListItem,
-} from '@pvp/shared';
+import type { AreaSlug, ClusterBlock, BloccoIndexEntry, ThreadListItem } from '@pvp/shared';
 import type { AreaSearch, BucketTab, SortKey } from './urlState.js';
 import { applyFilterModel, distinctValues } from './filterModel.js';
 import { BucketTabs } from './BucketTabs.js';
-import { DrillDown } from './DrillDown.js';
-import { OmiPanel } from './OmiPanel.js';
 import { Toolbar } from './DataTable/Toolbar.js';
 import { DataTable } from './DataTable/DataTable.js';
 import { getColumns, type AreaTableKind, type ColumnContext } from './DataTable/columns.js';
@@ -36,7 +28,6 @@ export interface ClusterSectionProps {
   ratings: RatingsMap;
   chatsByListing: ReadonlyMap<string, ThreadListItem>;
   bloccoIndex: Readonly<Record<string, BloccoIndexEntry>>;
-  omiByComune: Readonly<Record<string, OmiEntry>>;
   search: AreaSearch;
   onPatch: (patch: Partial<AreaSearch>, opts?: { replace?: boolean }) => void;
   onReset: () => void;
@@ -51,6 +42,8 @@ function prefersReducedMotion(): boolean {
   );
 }
 
+const CAT_COUNT = 7;
+
 export function ClusterSection({
   cluster,
   clusters,
@@ -59,7 +52,6 @@ export function ClusterSection({
   ratings,
   chatsByListing,
   bloccoIndex,
-  omiByComune,
   search,
   onPatch,
   onReset,
@@ -69,17 +61,6 @@ export function ClusterSection({
   const { t } = useTranslation('dashboard');
   const columns = useMemo(() => getColumns(areaKind), [areaKind]);
   const sectionRef = useRef<HTMLElement>(null);
-
-  const hasGeography = useMemo(() => {
-    if (areaKind !== 'real_estate') return false;
-    const def = REAL_ESTATE_CLUSTERS.find((c) => c.key === cluster.key);
-    return (def?.regions.length ?? 0) > 0;
-  }, [areaKind, cluster.key]);
-
-  const allRows = useMemo(
-    () => [...cluster.buckets.principali, ...cluster.buckets.fallimenti],
-    [cluster],
-  );
 
   const columnContext: ColumnContext = useMemo(
     () => ({
@@ -141,17 +122,16 @@ export function ClusterSection({
       aria-labelledby={`cluster-title-${cluster.key}`}
       ref={sectionRef}
     >
-      <h2 id={`cluster-title-${cluster.key}`} className="cluster-section-title">
-        {t('cluster.title', { number: cluster.number, name: t(`cluster.name.${cluster.key}`) })}
-      </h2>
+      <div className="cluster-section-heading">
+        <span
+          className={`cluster-dot cluster-dot-lg cluster-dot-${((cluster.number - 1) % CAT_COUNT) + 1}`}
+          aria-hidden="true"
+        />
+        <h2 id={`cluster-title-${cluster.key}`} className="cluster-section-title">
+          {t('cluster.title', { number: cluster.number, name: t(`cluster.name.${cluster.key}`) })}
+        </h2>
+      </div>
       <p className="cluster-section-subtitle">{t(`cluster.subtitle.${cluster.key}`)}</p>
-
-      {hasGeography ? (
-        <>
-          <DrillDown rows={allRows} search={search} onPatch={onPatch} />
-          <OmiPanel rows={allRows} omiByComune={omiByComune} search={search} />
-        </>
-      ) : null}
 
       <TabsRoot value={search.tab} onValueChange={(value) => onPatch({ tab: value as BucketTab })}>
         <BucketTabs

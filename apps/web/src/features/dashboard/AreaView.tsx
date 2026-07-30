@@ -1,14 +1,11 @@
-// Area view (UI §2.3): back control + header + cluster nav + the active
-// section (a cluster, or Archivio), one at a time. Owns the outer
-// `TabsRoot` (Radix's `Tabs.Content` only renders its children for the
-// active tab — see components/Tabs.tsx — so only the active section's
-// table(s) are ever mounted) and the
-// single `useSearch`/`useNavigate` pair every child reads/writes through —
+// Area view (UI §2.3, redesigned in Execution Plan Phase 13): header, the
+// selector toolbar (cluster combobox + geographic drill-down as progressive
+// disclosure + OMI panel), and the active section (a cluster, or Archivio),
+// one at a time — conditionally rendered off the same URL `cluster` param
+// the old outer Tabs used (`resolveClusterSelector` semantics unchanged),
+// so only the active section's table is ever mounted. Owns the single
+// `useSearch`/`useNavigate` pair every child reads/writes through —
 // `urlState.ts`'s schema is the single source of truth (FRONTEND.md §3).
-// Cluster nav entries come from `snapshot.clusters` itself (always one entry
-// per cluster definition, even empty ones — apps/server/src/cache/build.ts
-// pre-seeds every cluster before placing listings) rather than a second,
-// separately-imported constant, so nav and panels can never diverge.
 //
 // Also owns the same-session past-sale reorganization (UI §9.2/§9.3):
 // `today` + `clearedIds` are local-only state, never persisted (§14 — the API
@@ -16,19 +13,23 @@
 // buckets) is what each `ClusterSection` renders; `snapshot.clusters` (raw,
 // unfiltered) is kept as the separate `clusters` prop for blocco jump-target
 // resolution, since `blocco_index` itself is computed server-side over ALL
-// active listings and knows nothing of this session's reorg.
-import { useMemo, useState } from 'react';
+// active listings and knows nothing of this session's reorg. The former
+// window.alert/confirm flows now go through the shared ConfirmDialog.
+import { useState } from 'react';
 import { Outlet, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { TabsRoot, TabsPanel } from '../../components/Tabs.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
-import type { AreaSlug } from '@pvp/shared';
+import { ConfirmDialog } from '../../components/ConfirmDialog.js';
+import { Field } from '../../components/Field.js';
+import { REAL_ESTATE_CLUSTERS, type AreaSlug } from '@pvp/shared';
 import { useAreaSnapshot } from './hooks.js';
 import { resolveClusterSelector, type AreaSearch } from './urlState.js';
 import { AreaHeader } from './AreaHeader.js';
-import { ClusterNav, type ClusterNavEntry } from './ClusterNav.js';
+import { ClusterSelect } from './ClusterSelect.js';
 import { ClusterSection } from './ClusterSection.js';
 import { ArchiveSection } from './ArchiveSection.js';
+import { DrillDown } from './DrillDown.js';
+import { OmiPanel } from './OmiPanel.js';
 import { findBucketForBlocco } from './blocco.js';
 import { computeSessionMoves, eligibleMoved, todayIso } from './sessionArchive.js';
 import { useRatingsMap } from '../ratings/hooks.js';
@@ -47,6 +48,11 @@ const RESET_KEYS = [
   'blocco',
 ] as const satisfies ReadonlyArray<keyof AreaSearch>;
 
+type AreaDialog =
+  | { kind: 'refreshReport'; moved: number; total: number }
+  | { kind: 'svuotaNothing' }
+  | { kind: 'svuotaConfirm'; count: number; ids: readonly string[] };
+
 export function AreaView() {
   const { t } = useTranslation('dashboard');
   const { area } = useParams({ from: '/protected-layout/aste/$area' });
@@ -60,6 +66,7 @@ export function AreaView() {
 
   const [today, setToday] = useState(todayIso);
   const [clearedIds, setClearedIds] = useState<ReadonlySet<string>>(new Set());
+  const [dialog, setDialog] = useState<AreaDialog | null>(null);
 
   function patch(partial: Partial<AreaSearch>, opts?: { replace?: boolean }) {
     void navigate({
@@ -107,12 +114,11 @@ export function AreaView() {
     const newToday = todayIso();
     const after = eligibleMoved(computeSessionMoves(snapshot.clusters, newToday).moved, clearedIds);
     setToday(newToday);
-    window.alert(
-      t('archive.refreshReport', {
-        moved: after.length - before.length,
-        total: snapshot.archive.length + after.length,
-      }),
-    );
+    setDialog({
+      kind: 'refreshReport',
+      moved: after.length - before.length,
+      total: snapshot.archive.length + after.length,
+    });
   }
 
   /** "Svuota archivio" (UI §9.3) — removes only this session's still-active-
@@ -122,22 +128,15 @@ export function AreaView() {
     if (!snapshot) return;
     const eligible = eligibleMoved(computeSessionMoves(snapshot.clusters, today).moved, clearedIds);
     if (eligible.length === 0) {
-      window.alert(t('archive.svuotaNothing'));
+      setDialog({ kind: 'svuotaNothing' });
       return;
     }
-    if (!window.confirm(t('archive.svuotaConfirm', { count: eligible.length }))) return;
-    setClearedIds((prev) => new Set([...prev, ...eligible.map((r) => r.id)]));
+    setDialog({
+      kind: 'svuotaConfirm',
+      count: eligible.length,
+      ids: eligible.map((r) => r.id),
+    });
   }
-
-  const navEntries: ClusterNavEntry[] = useMemo(() => {
-    if (!snapshot) return [];
-    const clusterEntries = snapshot.clusters.map((c) => ({
-      value: String(c.number),
-      labelKey: `cluster.name.${c.key}`,
-      number: c.number,
-    }));
-    return [...clusterEntries, { value: 'archivio', labelKey: 'archive.navLabel' }];
-  }, [snapshot]);
 
   if (isLoading) {
     return <StatusDisplay variant="loading" message={t('area.loading')} />;
@@ -147,11 +146,24 @@ export function AreaView() {
   }
 
   const resolvedCluster = resolveClusterSelector(search.cluster, snapshot.clusters.length);
-  const tabsValue = resolvedCluster === 'archivio' ? 'archivio' : String(resolvedCluster);
 
   const sessionMoves = computeSessionMoves(snapshot.clusters, today);
   const eligible = eligibleMoved(sessionMoves.moved, clearedIds);
   const archiveRows = [...snapshot.archive, ...eligible];
+
+  const activeCluster =
+    resolvedCluster === 'archivio'
+      ? null
+      : (sessionMoves.clusters.find((c) => c.number === resolvedCluster) ?? null);
+
+  const hasGeography =
+    areaKind === 'real_estate' &&
+    activeCluster != null &&
+    (REAL_ESTATE_CLUSTERS.find((c) => c.key === activeCluster.key)?.regions.length ?? 0) > 0;
+
+  const activeClusterRows = activeCluster
+    ? [...activeCluster.buckets.principali, ...activeCluster.buckets.fallimenti]
+    : [];
 
   return (
     <div className="area-view">
@@ -161,50 +173,93 @@ export function AreaView() {
         onBack={goToLanding}
         onRefreshToday={handleRefreshToday}
       />
-      <TabsRoot
-        value={tabsValue}
-        onValueChange={(value) => {
-          patch({ cluster: value === 'archivio' ? 'archivio' : Number(value) });
-        }}
-      >
-        <ClusterNav entries={navEntries} />
-        {sessionMoves.clusters.map((cluster) => (
-          <TabsPanel key={cluster.key} value={String(cluster.number)}>
-            <ClusterSection
-              cluster={cluster}
-              clusters={snapshot.clusters}
-              areaKind={areaKind}
-              area={area as AreaSlug}
-              ratings={ratings}
-              chatsByListing={chatsByListing}
-              bloccoIndex={snapshot.blocco_index}
-              omiByComune={snapshot.omi_by_comune}
-              search={search}
-              onPatch={patch}
-              onReset={resetFilters}
-              onIsolate={handleIsolate}
-              onJump={handleJump}
-            />
-          </TabsPanel>
-        ))}
-        <TabsPanel value="archivio">
-          <ArchiveSection
-            rows={archiveRows}
-            clusters={snapshot.clusters}
-            areaKind={areaKind}
-            area={area as AreaSlug}
-            ratings={ratings}
-            chatsByListing={chatsByListing}
-            bloccoIndex={snapshot.blocco_index}
-            search={search}
-            onPatch={patch}
-            onReset={resetFilters}
-            onIsolate={handleIsolate}
-            onJump={handleJump}
-            onSvuota={handleSvuota}
+
+      <div className="selector-toolbar">
+        <Field label={t('selector.clusterLabel')} className="selector-field-cluster">
+          <ClusterSelect
+            clusters={sessionMoves.clusters}
+            value={resolvedCluster}
+            archiveCount={archiveRows.length}
+            onChange={(value) => patch({ cluster: value })}
           />
-        </TabsPanel>
-      </TabsRoot>
+        </Field>
+        {hasGeography ? (
+          <DrillDown rows={activeClusterRows} search={search} onPatch={patch} />
+        ) : null}
+      </div>
+
+      {hasGeography ? (
+        <OmiPanel rows={activeClusterRows} omiByComune={snapshot.omi_by_comune} search={search} />
+      ) : null}
+
+      {activeCluster ? (
+        <ClusterSection
+          key={activeCluster.key}
+          cluster={activeCluster}
+          clusters={snapshot.clusters}
+          areaKind={areaKind}
+          area={area as AreaSlug}
+          ratings={ratings}
+          chatsByListing={chatsByListing}
+          bloccoIndex={snapshot.blocco_index}
+          search={search}
+          onPatch={patch}
+          onReset={resetFilters}
+          onIsolate={handleIsolate}
+          onJump={handleJump}
+        />
+      ) : (
+        <ArchiveSection
+          rows={archiveRows}
+          clusters={snapshot.clusters}
+          areaKind={areaKind}
+          area={area as AreaSlug}
+          ratings={ratings}
+          chatsByListing={chatsByListing}
+          bloccoIndex={snapshot.blocco_index}
+          search={search}
+          onPatch={patch}
+          onReset={resetFilters}
+          onIsolate={handleIsolate}
+          onJump={handleJump}
+          onSvuota={handleSvuota}
+        />
+      )}
+
+      <ConfirmDialog
+        open={dialog != null}
+        title={
+          dialog?.kind === 'svuotaConfirm'
+            ? t('archive.svuotaTitle')
+            : dialog?.kind === 'svuotaNothing'
+              ? t('archive.svuotaNothingTitle')
+              : t('archive.refreshReportTitle')
+        }
+        description={
+          dialog?.kind === 'svuotaConfirm'
+            ? t('archive.svuotaConfirm', { count: dialog.count })
+            : dialog?.kind === 'svuotaNothing'
+              ? t('archive.svuotaNothing')
+              : dialog?.kind === 'refreshReport'
+                ? t('archive.refreshReport', { moved: dialog.moved, total: dialog.total })
+                : undefined
+        }
+        confirmLabel={
+          dialog?.kind === 'svuotaConfirm' ? t('common:actions.confirm') : t('common:actions.ok')
+        }
+        cancelLabel={dialog?.kind === 'svuotaConfirm' ? t('common:actions.cancel') : undefined}
+        destructive={dialog?.kind === 'svuotaConfirm'}
+        onConfirm={() => {
+          if (dialog?.kind === 'svuotaConfirm') {
+            const ids = dialog.ids;
+            setClearedIds((prev) => new Set([...prev, ...ids]));
+          }
+        }}
+        onOpenChange={(open) => {
+          if (!open) setDialog(null);
+        }}
+      />
+
       {/* The listing workspace (UI §4.5) — renders only when the URL is
           /aste/:area/lotto/:id; a Drawer portal, so its position here is not
           visually significant, but without an Outlet at all it never mounts. */}

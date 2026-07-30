@@ -10,7 +10,10 @@
     "proof": "Ambiente inizializzato correttamente."
   },
   "actions": {
-    "loading": "Caricamento…"
+    "loading": "Caricamento…",
+    "ok": "OK",
+    "confirm": "Conferma",
+    "cancel": "Annulla"
   },
   "comingSoon": "Questa sezione sarà disponibile in un prossimo aggiornamento.",
   "userMenu": {
