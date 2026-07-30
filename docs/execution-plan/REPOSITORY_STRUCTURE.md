@@ -19,7 +19,7 @@ pvp-dashboard/
 │   ├── specifications/           # SPECIFICATIONS, DATA_MODEL, DOMAIN_RULES, API_CONTRACT,
 │   │                             #   FRONTEND, CONFIGURATION, TESTING, DEPLOYMENT
 │   ├── execution-plan/           # this folder, incl. handoffs/ (filled as phases run)
-│   └── RUNBOOK.md                # written by Phase 10
+│   └── RUNBOOK.md                # written by Phase 12
 ├── .agents/
 │   └── skills/hallmark/          # Hallmark design skill — installed in Phase 0 via `npx skills add nutlope/hallmark` (never copied in)
 ├── apps/
@@ -27,10 +27,11 @@ pvp-dashboard/
 │   │   ├── index.html  vite.config.ts  package.json  tsconfig.json
 │   │   └── src/
 │   │       ├── app/              # router, providers, auth guard, shell (user menu, unread badge)
+│   │       ├── components/       # shared Radix-based UI primitives (Button, Tabs, Dialog, …)
 │   │       ├── features/
 │   │       │   ├── auth/  dashboard/  workspace/  ratings/  chat/  calendar/  archive/  admin/
 │   │       ├── i18n/             # setup + locales/it/<namespace>.json
-│   │       ├── theme/            # tokens.css (Hallmark output), PrimeReact preset
+│   │       ├── theme/            # tokens.css (Hallmark output: light + dark)
 │   │       └── lib/              # typed api client, cadences, Intl formatting
 │   └── server/
 │       ├── package.json  tsconfig.json
@@ -69,7 +70,7 @@ pvp-dashboard/
 
 | Phase | Creates / completes |
 |---|---|
-| 0 | Repo root (workspace, tooling, lint, `.env.example`, `.gitignore`, README), `docs/`, `.agents/skills/hallmark/`, `apps/web` skeleton (Vite + PrimeReact + router/query/i18n providers, `theme/tokens.css`, PrimeReact preset stub, AI CLI plugin installed), `apps/server` skeleton (config, plugins, `modules/health/`), `packages/shared` stub, `firebase/firebase.json` (emulators) |
+| 0 | Repo root (workspace, tooling, lint, `.env.example`, `.gitignore`, README), `docs/`, `.agents/skills/hallmark/`, `apps/web` skeleton (Vite + PrimeReact + router/query/i18n providers, `theme/tokens.css`, PrimeReact preset stub *(removed in Phase 9)*, AI CLI plugin installed), `apps/server` skeleton (config, plugins, `modules/health/`), `packages/shared` stub, `firebase/firebase.json` (emulators) |
 | 1 | `packages/shared` in full: `schemas/`, `domain/`, `constants/`; `seed/fixtures/`; the §2-TESTING unit suites |
 | 2 | `apps/server`: `repositories/`, `cache/`, `modules/listings/`, `modules/settings/` (read side); `seed/seed.ts`; `firebase/firestore.indexes.json`; integration-suite harness |
 | 3 | `apps/server`: `modules/auth/`, `modules/admin/` (accounts + events); `apps/web`: `features/auth/`, `app/` shell + guard; `features/admin/` (accounts screen) |
@@ -78,8 +79,10 @@ pvp-dashboard/
 | 6 | `features/workspace/`, `features/ratings/`; `modules/ratings/`, `modules/activity/`; `GET /listings/:id` + activity endpoints |
 | 7 | `modules/chat/`, `modules/attachments/`; `features/chat/`; storage emulator wiring; unread counters |
 | 8 | `modules/calendar/`; `features/calendar/`; admin assignment screens |
-| 9 | No new areas — audits and fixes across `apps/web`, `e2e/` consolidated regression, easter-egg constants + dialogs, payload/perf assertions |
-| 10 | `deploy/`, `firebase/` production values, `docs/RUNBOOK.md` |
+| 9 | `apps/web/src/components/` (shared Radix primitives); PrimeReact removed everywhere; `theme/preset.ts` deleted — behaviour- and appearance-preserving |
+| 10 | `theme/tokens.css` rewritten (light + dark token sets); theme toggle in the shell; every surface restyled to the modern-enterprise design system |
+| 11 | No new areas — audits and fixes across `apps/web`, `e2e/` consolidated regression, easter-egg constants + dialogs, payload/perf assertions |
+| 12 | `deploy/`, `firebase/` production values, `docs/RUNBOOK.md` |
 
 ## 3. Never committed
 

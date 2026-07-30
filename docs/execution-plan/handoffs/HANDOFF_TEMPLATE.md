@@ -21,7 +21,8 @@ Write for a reader with zero context beyond 00_OVERVIEW.md and the phase documen
 
 <!-- Decisions taken within the bounds of the Specifications (and why), deviations from the
      phase document's letter (and why), gotchas discovered (library quirks, emulator
-     behaviour, PrimeReact specifics), anything that would save the next session time. -->
+     behaviour, UI-library specifics — Radix primitives, headless-hook behaviours),
+     anything that would save the next session time. -->
 
 ## 3. Blockers and unresolved issues
 

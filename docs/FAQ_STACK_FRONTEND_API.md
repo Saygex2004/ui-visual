@@ -11,12 +11,12 @@ Lo stack attorno a React è (vedi [`specifications/FRONTEND.md`](specifications/
 | Ambito | Tecnologia | Note |
 |---|---|---|
 | Build / dev server | **Vite** | `index.html` + `vite.config.ts`; nessun bundler/framework meta |
-| Componenti UI | **PrimeReact** | `DataTable` con `virtualScroller` per le tabelle da migliaia di righe (FRONTEND §4) |
+| Componenti UI | **Radix UI** (primitive open-source) | tabella custom (`<table>` + `@tanstack/react-virtual`) per le migliaia di righe; primitive Radix stilizzate a mano sui token (FRONTEND §4–§5) |
 | Routing | **TanStack Router** | route tipizzate, search params validati con Zod da `packages/shared` (FRONTEND §2) |
 | Data layer | **TanStack Query** | polling per-key con le cadenze dell'API contract (FRONTEND §3) |
 | Validazione tipi | **Zod** (da `packages/shared`) | gli stessi schemi validati dal server sono importati dal client |
 | i18n | **react-i18next** | locale unico iniziale `it`; nessuna stringa hardcoded (FRONTEND §6) |
-| Design system | **Hallmark** → `theme/tokens.css` + preset PrimeReact | token come unica fonte, no hex/font literal nei componenti (FRONTEND §5) |
+| Design system | **Hallmark** → `theme/tokens.css` (chiaro + scuro) | token come unica fonte, no hex/font literal; stile modern-enterprise blu/bianco + dark mode (FRONTEND §5) |
 
 Punti chiave dell'uso di React:
 - **Organizzazione per feature** (`features/auth`, `dashboard`, `workspace`, `ratings`, `chat`, `calendar`, `archive`, `admin`) più `app/` (router, provider, auth guard, shell), `i18n/`, `theme/`, `lib/`. Il riuso cross-feature passa solo da `ratings/` e `lib/`, non da import profondi tra feature.
@@ -28,7 +28,7 @@ Punti chiave dell'uso di React:
 **No, non viene usato Next.js** — né alcun framework con SSR/SSG.
 
 - L'architettura è **React SPA con Vite**, servita come **asset statici da Firebase Hosting (CDN)**. Non c'è rendering lato server dell'HTML: `Browser → Firebase Hosting (SPA statica)`, con rewrite `/** → /index.html` (vedi [`specifications/DEPLOYMENT.md`](specifications/DEPLOYMENT.md) §1).
-- Il "backend" **non è** una funzionalità del framework frontend: è un servizio separato, l'**API Fastify** `apps/server`, che gira su **Cloud Run** e a cui l'Hosting inoltra `/api/**` tramite rewrite. Descritto in [`execution-plan/00_OVERVIEW.md`](execution-plan/00_OVERVIEW.md) §1 come «una SPA React + PrimeReact (`apps/web`) e un'API Fastify (`apps/server`)».
+- Il "backend" **non è** una funzionalità del framework frontend: è un servizio separato, l'**API Fastify** `apps/server`, che gira su **Cloud Run** e a cui l'Hosting inoltra `/api/**` tramite rewrite. Descritto in [`execution-plan/00_OVERVIEW.md`](execution-plan/00_OVERVIEW.md) §1 come «una SPA React + Radix UI (`apps/web`) e un'API Fastify (`apps/server`)».
 
 Quindi il modello è **due deploy distinti** (SPA statica + API container), non un'app Next.js full-stack unica.
 
@@ -136,5 +136,5 @@ Inoltre, nella parte **admin** c'è una ricerca più strutturata: la schermata d
 - [`specifications/FRONTEND.md`](specifications/FRONTEND.md) — architettura SPA, routing, data layer, design system, i18n
 - [`specifications/API_CONTRACT.md`](specifications/API_CONTRACT.md) — superficie REST completa, autenticazione, versionamento
 - [`specifications/DEPLOYMENT.md`](specifications/DEPLOYMENT.md) — topologia Hosting + Cloud Run, same-origin, regole deny-all
-- [`execution-plan/00_OVERVIEW.md`](execution-plan/00_OVERVIEW.md) — «SPA React + PrimeReact + API Fastify»
+- [`execution-plan/00_OVERVIEW.md`](execution-plan/00_OVERVIEW.md) — «SPA React + Radix UI + API Fastify»
 - [`execution-plan/REPOSITORY_STRUCTURE.md`](execution-plan/REPOSITORY_STRUCTURE.md) — layout `apps/web` (Vite) e `apps/server` (Fastify)

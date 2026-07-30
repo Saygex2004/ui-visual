@@ -7,6 +7,7 @@
 ```
 apps/web/src/
 ├── app/                # bootstrap: router, providers (Query, i18n, theme), auth guard, shell (user menu, badges)
+├── components/         # shared hand-styled UI primitives (Button, TextInput, Tabs, Dialog) over Radix UI
 ├── features/
 │   ├── auth/           # login screen, forced password change, session boot
 │   ├── dashboard/      # landing, area view, cluster sections, tables, toolbar, drill-down, OMI panel
@@ -17,11 +18,11 @@ apps/web/src/
 │   ├── archive/        # Archivio section, same-session moves, svuota flow
 │   └── admin/          # accounts, categories, calendar assignment, events, runs
 ├── i18n/               # locales/it/<namespace>.json, i18next setup
-├── theme/              # tokens.css (Hallmark output), PrimeReact theme preset
+├── theme/              # tokens.css (Hallmark output: light + dark token sets)
 └── lib/                # api client (typed fetch over shared schemas), poll cadences, formatting (Intl it-IT)
 ```
 
-Feature folders own their components, hooks, and route definitions; cross-feature reuse goes through `ratings/` and `lib/` — not deep imports between features. Domain logic is **never** re-implemented here: classification arrives pre-computed in the snapshot, and any client-side rule (same-session archive, §11-DOMAIN_RULES) is imported from `packages/shared`.
+Feature folders own their components, hooks, and route definitions; cross-feature reuse goes through `components/`, `ratings/`, and `lib/` — not deep imports between features. Domain logic is **never** re-implemented here: classification arrives pre-computed in the snapshot, and any client-side rule (same-session archive, §11-DOMAIN_RULES) is imported from `packages/shared`.
 
 ## 2. Routing map and URL-state contract
 
@@ -58,18 +59,17 @@ Notes binding on the implementation:
 
 ## 4. Tables at scale
 
-- PrimeReact `DataTable` with **`virtualScroller`** — the thousands-of-rows requirement (UI §11) is carried by virtualization, not pagination (the UI spec has no pages).
+- A **custom virtualized table** — semantic `<table>` markup with `@tanstack/react-virtual`'s `useVirtualizer` for row windowing — carries the thousands-of-rows requirement (UI §11), not pagination (the UI spec has no pages). (The table was custom from the start: PrimeReact 11 shipped no working virtualized table.)
 - Row identity by listing id; memoized row rendering; the Valutazione cell and row actions (workspace, quick chat) rendered in a **frozen column** so they stay reachable under horizontal scroll (UI §4.1).
 - Column sets per table kind (real estate / credits / archive / calendar day) are declarative configs over one table component — the UI §4.1 show/hide matrix in one file.
 - Sorting implements the UI §4.2 rules exactly (nulls-lowest for value, chronological for dates, block identity for Blocco) via comparators from `packages/shared`.
 
-## 5. Design system: tokens, PrimeReact theming, Hallmark
+## 5. Design system: tokens, hand-styled Radix, Hallmark
 
-- **Tokens first.** At bootstrap (Execution Plan Phase 0) the **Hallmark** design skill (installed by the developer with `npx skills add nutlope/hallmark`, landing in `.agents/skills/hallmark/` — never installed by copying the folder) produces the project's design foundations — palette, type pairing, spacing scale, radius/shadow stance — emitted as CSS custom properties in `apps/web/src/theme/tokens.css`. Tokens are the single source: no raw hex/font literals in components (lint-enforced).
-- **PrimeReact styled preset.** A custom theme preset maps PrimeReact's design-token surface onto the project tokens, so every PrimeReact component inherits the system automatically; component-level overrides live in the preset, not scattered CSS.
-- **PrimeReact AI CLI plugin** (from primereact.dev's styled-mode guides) is installed in Phase 0 as a **dev-time aid** — it exposes PrimeReact's component/theming docs to the coding agent during development. It is not a runtime dependency and nothing may import from it. The agent installs it automatically where possible; if manual steps are needed, the Phase 0 document's fallback instructions apply.
-- **Hallmark cadence:** re-invoked on the first build of each major surface (dashboard tables, workspace, chat) and as a full **audit** in the hardening phase — its anti-slop gates (structural variety, no italic headers, token discipline, 8-state interactive components, mobile floors) are part of the quality bar, not decoration.
-- **Dark mode is out of scope for v1** (the UI spec does not require it); the token layer makes it an additive later step.
+- **Tokens first.** The **Hallmark** design skill (installed by the developer with `npx skills add nutlope/hallmark`, landing in `.agents/skills/hallmark/` — never installed by copying the folder) produces the project's design foundations — palette, type pairing, spacing scale, radius/shadow/elevation stance — emitted as CSS custom properties in `apps/web/src/theme/tokens.css`. Tokens are the single source: no raw hex/font literals in components (lint-enforced).
+- **Hand-styled Radix primitives.** UI primitives are **Radix UI** headless components (tabs, dialog) plus plain `<button>`/`<input>`, styled by hand with plain CSS that consumes the tokens directly — no component-library theme layer, no CSS-in-JS. The shared primitives live in `apps/web/src/components/`; per-feature `.css` files hold surface-specific styling, all against the same tokens. (This replaced PrimeReact, whose styled preset system required a commercial license — Execution Plan Phase 9.)
+- **Modern-enterprise language + dark mode.** The visual language is modern enterprise — a clean **blue/white** palette — with **full dark mode**: a `:root[data-theme="dark"]` token set overrides the light custom properties, driven by a theme toggle (default: OS `prefers-color-scheme`; the explicit choice persisted). Both themes live entirely in the token layer.
+- **Hallmark cadence:** the design system is defined and applied in a dedicated `redesign` pass (Execution Plan Phase 10) and re-audited (`audit`) during hardening (Phase 11), after earlier per-surface passes (Phases 4, 6, 7). Its anti-slop gates (structural variety, no italic headers, token discipline, 8-state interactive components, mobile floors) are part of the quality bar, not decoration.
 
 ## 6. Internationalization
 
@@ -83,8 +83,8 @@ Notes binding on the implementation:
 
 Implementation stances for UI §11, fixed here so they are built in, not retrofitted:
 
-- **Keyboard & ARIA:** cluster nav and bucket tabs are a `tablist`; the user menu a `menu` with expanded state; the workspace panel and confirmation dialogs are modal `dialog`s with focus trap and `Esc` close; every interactive element focusable with visible focus ring (token-defined).
+- **Keyboard & ARIA:** cluster nav and bucket tabs are a `tablist`; the user menu a `menu` with expanded state; the workspace panel and confirmation dialogs are modal `dialog`s (Radix `Dialog` — focus trap, `aria-modal`, and `Esc` close are native); every interactive element focusable with visible focus ring (token-defined).
 - **Reduced motion:** all transitions behind a `prefers-reduced-motion` guard in the token layer.
 - **Responsive:** tables scroll inside their own container (`overflow-x: auto`); the page body never scrolls horizontally; calendar and admin are width-capped and centred; toolbars wrap.
 - **Empty/loading/error states** are designed states with copy in the catalog — never blank panels or raw error text.
-- **Easter eggs** (UI Appendix B): the €5M confirmation and the Roccaraso/L'Aquila dialogs are ordinary modal dialogs behind constants in `packages/shared` (threshold, province, comune) — themed content is a Phase 9 concern; the media they present ships bundled (no external hosts).
+- **Easter eggs** (UI Appendix B): the €5M confirmation and the Roccaraso/L'Aquila dialogs are ordinary modal dialogs (Radix `Dialog`) behind constants in `packages/shared` (threshold, province, comune) — themed content is a Phase 11 (hardening) concern; the media they present ships bundled (no external hosts).

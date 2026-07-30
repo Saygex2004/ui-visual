@@ -1,6 +1,6 @@
 # Deployment — Production Topology and Operator Guide
 
-> Companion document to [`SPECIFICATIONS.md`](SPECIFICATIONS.md), expanding §18. The production shape, the operator's one-time onboarding, the security-rules stance, and the cost posture. The Execution Plan's Phase 10 executes this document and turns its checks into the operator runbook.
+> Companion document to [`SPECIFICATIONS.md`](SPECIFICATIONS.md), expanding §18. The production shape, the operator's one-time onboarding, the security-rules stance, and the cost posture. The Execution Plan's Phase 12 executes this document and turns its checks into the operator runbook.
 
 ## 1. Topology
 
@@ -18,7 +18,7 @@ Browser ──▶ Firebase Hosting (static SPA, CDN)
 - **`max-instances = 1`** is a correctness setting (the in-process snapshot cache, `SPECIFICATIONS.md` §8), not a budget one. **`min-instances`** is the operator's latency/cost knob: `0` = scale-to-zero with cold starts of a few seconds (and a cache re-prime); `1` ≈ a few €/month for an always-warm instance. Start at `0`; revisit with usage.
 - The container serves the API only; static assets never pass through Cloud Run.
 
-## 2. Operator onboarding (one-time, before Phase 10's deploy)
+## 2. Operator onboarding (one-time, before Phase 12's deploy)
 
 The scraper project's operator already owns the Firebase project; this adds:
 
@@ -53,7 +53,7 @@ service cloud.firestore {
 - **Server:** multi-stage `deploy/Dockerfile` (pnpm install → build `packages/shared` + `apps/server` → slim runtime image, non-root user, `NODE_ENV=production`). Deploy: `gcloud run deploy pvp-dashboard-api --region europe-west8 --max-instances 1 …` (scripted in `deploy/`).
 - **Frontend:** `pnpm --filter web build` → `firebase deploy --only hosting` with `firebase/firebase.json` carrying the SPA rewrite and the `/api/**` → Cloud Run rewrite.
 - **Rules/indexes:** `firebase deploy --only firestore:rules,firestore:indexes,storage`.
-- **Order on first go-live:** rules → server (with secrets set) → verify `/readyz` → hosting → bootstrap admin sign-in and forced password change → live smoke (Phase 10's checklist).
+- **Order on first go-live:** rules → server (with secrets set) → verify `/readyz` → hosting → bootstrap admin sign-in and forced password change → live smoke (Phase 12's checklist).
 - **Rollback:** Cloud Run keeps prior revisions (`gcloud run services update-traffic`); Hosting keeps prior releases (console one-click). Both are part of the runbook.
 
 ## 5. Operations

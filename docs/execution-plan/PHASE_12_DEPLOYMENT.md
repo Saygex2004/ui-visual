@@ -1,12 +1,12 @@
-# Phase 10 — Deployment, Go-Live, Runbook (Operator-Supervised)
+# Phase 12 — Deployment, Go-Live, Runbook (Operator-Supervised)
 
 > Goal: production — the server container on Cloud Run, the SPA on Firebase Hosting, deny-all security rules deployed and verified, the production bootstrap, a live round-trip of every write path against the real shared database, and the operator runbook with a drill. This is the only phase that touches production. Part of the Execution Plan — read [`00_OVERVIEW.md`](00_OVERVIEW.md) and follow its session protocol.
 
 ## Preamble (assume zero prior context)
 
-You are building **`pvp-dashboard`**: the web application with which a small investment team reviews Italian judicial auctions — a React + PrimeReact SPA over a Fastify + Zod API mediating a shared Cloud Firestore database kept current by a separate scraper project. The application is feature-complete and hardened (Phases 0–9), entirely on emulators so far. This session puts it in front of the team: same Google Cloud project as the database, Hosting + Cloud Run per [`../specifications/DEPLOYMENT.md`](../specifications/DEPLOYMENT.md), with the operator present — the scraper keeps running throughout and must be entirely unaffected.
+You are building **`pvp-dashboard`**: the web application with which a small investment team reviews Italian judicial auctions — a React + Radix UI SPA over a Fastify + Zod API mediating a shared Cloud Firestore database kept current by a separate scraper project. The application is feature-complete and hardened (Phases 0–11), entirely on emulators so far. This session puts it in front of the team: same Google Cloud project as the database, Hosting + Cloud Run per [`../specifications/DEPLOYMENT.md`](../specifications/DEPLOYMENT.md), with the operator present — the scraper keeps running throughout and must be entirely unaffected.
 
-**State when this phase starts:** Phases 0–9 complete with all gates green — see `HANDOFF_PHASE_0..9.md`. No Dockerfile, no deploy scripts, no production rules deployed, no production accounts exist.
+**State when this phase starts:** Phases 0–11 complete with all gates green — see `HANDOFF_PHASE_0..11.md`. No Dockerfile, no deploy scripts, no production rules deployed, no production accounts exist.
 
 ## Required reading
 
@@ -17,7 +17,7 @@ You are building **`pvp-dashboard`**: the web application with which a small inv
 
 ## Entry criteria
 
-1. `HANDOFF_PHASE_9.md` outcome `complete`; all gates green at the inherited commit.
+1. `HANDOFF_PHASE_11.md` outcome `complete`; all gates green at the inherited commit.
 2. The operator has completed `DEPLOYMENT.md` §2: Blaze + budget alerts, Cloud Run/Artifact Registry/Storage enabled, runtime + deploy service accounts created, `PVPDASH_SESSION_SECRET` and `PVPDASH_BOOTSTRAP_ADMIN_PASSWORD` in Secret Manager. If any item is missing, stop: handoff `blocked` naming the item.
 3. The operator is present for the session (receives the bootstrap credential, approves the first deploy).
 
@@ -49,4 +49,4 @@ You are building **`pvp-dashboard`**: the web application with which a small inv
 
 ## Handoff
 
-Write `docs/execution-plan/handoffs/HANDOFF_PHASE_10.md` from the template. This is the project-closing record: the production URLs, service/revision identifiers, where each secret lives, the accounts created (usernames only), the live-verification results, the drill outcomes, any open follow-ups (e.g. next-day scraper-run confirmation) — and a final note pointing future work at `SPECIFICATIONS.md` §19 (the deferred refresh trigger first among them).
+Write `docs/execution-plan/handoffs/HANDOFF_PHASE_12.md` from the template. This is the project-closing record: the production URLs, service/revision identifiers, where each secret lives, the accounts created (usernames only), the live-verification results, the drill outcomes, any open follow-ups (e.g. next-day scraper-run confirmation) — and a final note pointing future work at `SPECIFICATIONS.md` §19 (the deferred refresh trigger first among them).

@@ -27,7 +27,7 @@ The functional behaviour is fully specified in [`../FUNCTIONAL_SPECIFICATIONS_UI
 Decisions confirmed with the project owner (2026-07):
 
 - **Monorepo** containing frontend and backend, with a shared types/domain package.
-- **Frontend:** React + TypeScript + **PrimeReact** (mandated), built as a Vite single-page application.
+- **Frontend:** React + TypeScript + **Radix UI** primitives (open-source, hand-styled on design tokens), built as a Vite single-page application. (Originally PrimeReact; replaced because its styled theming requires a commercial license.)
 - **Backend:** **Fastify + Zod** TypeScript REST server; **all** Firestore access goes through it via the Firebase Admin SDK — the browser never talks to Firestore.
 - **Database:** the existing shared Cloud Firestore (Native mode, `europe-west8`, project `pvp-aste`) — the scraper's collections are read-only for this project; see the boundary contract in `DATA_MODEL.md`.
 - **Deployment:** frontend on **Firebase Hosting**, backend on **Cloud Run**, in the same Google Cloud project as the database; requires the Blaze (pay-as-you-go) plan with budget alerts.
@@ -58,7 +58,7 @@ Decisions confirmed with the project owner (2026-07):
 | React framework | **Vite SPA (no SSR)** | The app sits entirely behind a login: there is nothing to SEO and no first-paint-for-anonymous-users problem, which are the reasons to buy Next.js's complexity. A static SPA also deploys trivially to Firebase Hosting. Alternative considered: Next.js (SSR machinery, server components, and hosting constraints bought for nothing here). |
 | Routing | **TanStack Router** | Typed routes and — decisively — **typed, validated search params**: the deep-link requirement (UI §2.4 — area, cluster, tab, filters, workspace all restorable from the URL) is exactly its core feature. Alternative: React Router (more common, but search-param state is hand-rolled and untyped). |
 | Server state | **TanStack Query** | Polling ("short recurring interval", UI §5–§6) with caching, deduplication, and background refetch; pairs naturally with the router. |
-| UI components | **PrimeReact** (mandated) | Complete component suite; its `DataTable` with virtual scrolling carries the thousands-of-rows requirement (UI §11). Styled with a custom theme built from the project's design tokens (§9.4). |
+| UI components | **Radix UI** primitives (open-source) | Unstyled, accessible headless primitives (tabs, dialog) hand-styled on the project's design tokens; the thousands-of-rows requirement (UI §11) is carried by a custom virtualized table (`@tanstack/react-virtual`), not the component library. Replaced PrimeReact, whose styled theming needs a commercial license. |
 | i18n | **react-i18next** | The standard React i18n stack: namespaces per feature, lazy-loadable locales, ICU-style plurals. Default and only initial locale: `it`. |
 | Backend framework | **Fastify** | Fast, minimal, first-class TypeScript and schema-validation story; plugins for cookies, multipart, CORS. Alternative: NestJS (heavier DI/decorator framework — more ceremony than an app this size repays). |
 | Validation | **Zod** | One schema language for API bodies, env config, and the shared domain types; schemas live in `packages/shared` and serve both sides. |
@@ -103,7 +103,7 @@ Summary — the full target tree, and which build phase creates each part, is in
 pvp-dashboard/
 ├── docs/                    # this documentation set, moved in unchanged
 ├── apps/
-│   ├── web/                 # Vite SPA (React, PrimeReact, TanStack Router/Query, react-i18next)
+│   ├── web/                 # Vite SPA (React, Radix UI, TanStack Router/Query, react-i18next)
 │   └── server/              # Fastify API (modules, repositories, cache, config)
 ├── packages/
 │   └── shared/              # Zod schemas, domain rules, constants — pure TypeScript
@@ -163,8 +163,8 @@ The central performance/cost design. Numbers assume the realistic scale: ~5–15
 
 - **Routing:** a REST-like, deeply-linkable URL hierarchy — area / cluster / bucket / filters in typed search params; the listing workspace, its tabs (details, history, chat), the calendar month/day, chat list and thread, and each admin screen all addressable; browser back/forward traverses view states (UI §2.4). The full route map is `FRONTEND.md` §2.
 - **Data layer:** TanStack Query against the REST API with the §8 polling tiers; mutations (rating, message) apply optimistically and reconcile on the next poll.
-- **Tables:** PrimeReact `DataTable` with virtual scrolling; filtering/sorting run over the in-memory snapshot slice; the Valutazione cell and row actions stay reachable under horizontal scroll (UI §4.1).
-- **Design system:** design tokens (color, type, spacing) produced with the **Hallmark** design skill at bootstrap, encoded once into a custom PrimeReact theme; the PrimeReact AI CLI plugin is installed as a dev-time documentation aid. Hallmark is re-applied at each major surface and as a final audit (Execution Plan Phases 4, 6, 9).
+- **Tables:** a custom virtualized table (semantic `<table>` + `@tanstack/react-virtual`) carries the thousands-of-rows requirement; filtering/sorting run over the in-memory snapshot slice; the Valutazione cell and row actions stay reachable under horizontal scroll (UI §4.1).
+- **Design system:** design tokens (color, type, spacing, elevation) produced with the **Hallmark** design skill, encoded as CSS custom properties in `theme/tokens.css` and consumed directly by the hand-styled Radix components — a **modern-enterprise blue/white** language with **full dark mode** (`data-theme` token sets). Hallmark defines and enforces the system in a dedicated pass (Execution Plan Phase 10) and re-audits it during hardening (Phase 11), after earlier per-surface passes (Phases 4, 6, 7).
 - **i18n:** react-i18next, default `it`, one namespace per feature, no literal strings in components (lint-enforced); dates/currency via `Intl` with the `it-IT` locale. Language switching needs no architectural change later.
 - **Accessibility and responsiveness** per UI §11: keyboard operability, visible focus, ARIA roles on tabs/menus/dialogs, reduced-motion support; tables scroll inside their own container only.
 

@@ -6,7 +6,7 @@
 
 - **Offline by default.** `pnpm test` runs with no network and no emulator (pure unit suites). Integration suites require the Firestore/Storage emulators and are a separate script (`pnpm test:integration`); they refuse to run unless `FIRESTORE_EMULATOR_HOST` is set — a hard guard against ever touching production from a test.
 - **Fixtures are the shared vocabulary.** One fixture dataset (`seed/fixtures/`) drives unit tests, emulator seeds, e2e runs, and the dev environment — realistic Italian listings covering every edge the rules branch on (§2). Tests never fabricate ad-hoc listings inline when a fixture case exists.
-- **Test the contract, not the library.** No tests of PrimeReact/Fastify internals; tests assert this project's rules, shapes, and flows.
+- **Test the contract, not the library.** No tests of Radix/Fastify internals; tests assert this project's rules, shapes, and flows.
 - Honest reporting: a failing check is recorded as failing in the phase handoff, never skipped into green.
 
 ## 2. Unit — domain rules (`packages/shared`)
