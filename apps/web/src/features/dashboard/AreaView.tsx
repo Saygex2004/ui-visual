@@ -19,6 +19,7 @@ import { useState } from 'react';
 import { Outlet, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
+import { SkeletonRows } from '../../components/Skeleton.js';
 import { ConfirmDialog } from '../../components/ConfirmDialog.js';
 import { Field } from '../../components/Field.js';
 import { REAL_ESTATE_CLUSTERS, type AreaSlug } from '@pvp/shared';
@@ -139,7 +140,11 @@ export function AreaView() {
   }
 
   if (isLoading) {
-    return <StatusDisplay variant="loading" message={t('area.loading')} />;
+    return (
+      <div className="area-view">
+        <SkeletonRows rows={8} label={t('area.loading')} />
+      </div>
+    );
   }
   if (isError || !snapshot) {
     return <StatusDisplay variant="error" message={t('area.loadError')} />;

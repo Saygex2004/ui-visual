@@ -65,10 +65,11 @@ export function ArchiveSection({
       activeBlocco: search.blocco ?? null,
       currentClusterKey: null,
       clusters,
+      ratings,
       onIsolate,
       onJump,
     }),
-    [bloccoIndex, search.blocco, clusters, onIsolate, onJump],
+    [bloccoIndex, search.blocco, clusters, ratings, onIsolate, onJump],
   );
 
   function handleSort(key: SortKey) {
@@ -106,6 +107,7 @@ export function ArchiveSection({
         sortDir={search.dir}
         onSort={handleSort}
         emptyMessage={rows.length === 0 ? t('archive.empty') : t('table.empty')}
+        onEmptyReset={rows.length === 0 ? undefined : onReset}
       />
     </section>
   );

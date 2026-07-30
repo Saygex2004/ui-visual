@@ -72,6 +72,7 @@ export function DayView() {
                 activeBlocco: null,
                 currentClusterKey: null,
                 clusters: [],
+                ratings,
                 onIsolate: () => {},
                 onJump: () => {},
               }}

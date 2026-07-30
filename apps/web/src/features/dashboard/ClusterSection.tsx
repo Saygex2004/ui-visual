@@ -68,10 +68,11 @@ export function ClusterSection({
       activeBlocco: search.blocco ?? null,
       currentClusterKey: cluster.key,
       clusters,
+      ratings,
       onIsolate,
       onJump,
     }),
-    [bloccoIndex, search.blocco, cluster.key, clusters, onIsolate, onJump],
+    [bloccoIndex, search.blocco, cluster.key, clusters, ratings, onIsolate, onJump],
   );
 
   useEffect(() => {
@@ -151,6 +152,7 @@ export function ClusterSection({
           proceduraOptions={proceduraOptions}
           disponibilitaOptions={disponibilitaOptions}
           tribunaleOptions={tribunaleOptions}
+          showGeoChips
         />
         <TabsPanel value="principali">
           <DataTable
@@ -165,6 +167,7 @@ export function ClusterSection({
             sortDir={search.dir}
             onSort={handleSort}
             emptyMessage={t('table.empty')}
+            onEmptyReset={onReset}
           />
         </TabsPanel>
         <TabsPanel value="fallimenti">
@@ -180,6 +183,7 @@ export function ClusterSection({
             sortDir={search.dir}
             onSort={handleSort}
             emptyMessage={t('table.empty')}
+            onEmptyReset={onReset}
           />
         </TabsPanel>
       </TabsRoot>

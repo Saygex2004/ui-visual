@@ -452,62 +452,30 @@
   background: var(--color-surface-2);
 }
 
-/* Bucket tabs (UI §3.1) — Fallimenti set visually apart. */
+/* Bucket tabs (UI §3.1, Phase 13) — the shared underline-tab voice
+   (components/tabs.css); the count pill flips to the accent tint on the
+   active tab. The filter card below sits flush against the tab strip. */
 .bucket-tabs {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.bucket-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text-body);
-  font-size: var(--text-sm);
-  white-space: nowrap;
-  cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease-out);
-}
-
-.bucket-tab:hover {
-  border-color: var(--color-accent);
-}
-
-.bucket-tab:active {
-  background: var(--color-surface-2);
-}
-
-.bucket-tab:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
-.bucket-tab[data-state='active'] {
-  background: var(--color-surface-2);
-  border-color: var(--color-accent);
-  font-weight: 600;
-}
-
-.bucket-tab-fallimenti {
-  border-style: dashed;
+  margin-top: var(--space-2);
 }
 
 .bucket-tab-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.5rem;
-  height: 1.5rem;
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-pill);
   background: var(--color-surface-2);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--text-xs);
-  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.ui-tab[data-state='active'] .bucket-tab-count {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+}
+
+/* Flush filter card under the tab strip (reference: tabs sit on the card's
+   top edge). Only applies when the toolbar directly follows the tabs — the
+   Archivio toolbar keeps its full rounded card. */
+.bucket-tabs + .dashboard-toolbar {
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 /* Geographic drill-down chips (UI §3.2) — capital municipalities inside
@@ -599,77 +567,109 @@
   color: var(--color-text-muted);
 }
 
-/* Per-table toolbar (UI §4.2). */
+/* Per-table toolbar (UI §4.2, Phase 13): labeled filter fields, then the
+   active-chip footer with the live count. */
 .dashboard-toolbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-5);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
 }
 
-.dashboard-toolbar-field {
+.dashboard-toolbar-fields {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
 }
 
-.dashboard-toolbar-field label {
-  font-size: var(--text-xs);
-  font-weight: 600;
+.dashboard-toolbar-search-field {
+  flex: 1 1 13.75rem;
+}
+
+.dashboard-toolbar-search {
+  position: relative;
+  display: block;
+}
+
+.dashboard-toolbar-search-icon {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--color-text-muted);
+  pointer-events: none;
 }
 
-.dashboard-toolbar-field select,
-.dashboard-toolbar-field input[type='number'] {
+.dashboard-toolbar-search .ui-text-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: var(--space-8);
+}
+
+.dashboard-toolbar-select {
+  flex: 0 1 10.5rem;
+  min-width: 9rem;
+}
+
+.dashboard-toolbar-number {
+  flex: 0 1 7.5rem;
+}
+
+.dashboard-toolbar-number input {
   height: 2.5rem;
+  width: 100%;
+  box-sizing: border-box;
   padding: 0 var(--space-3);
-  border: 1px solid var(--color-border-strong);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text-body);
+  font-family: var(--font-body);
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
   transition: border-color var(--dur-fast) var(--ease-out);
 }
 
-.dashboard-toolbar-field select:hover,
-.dashboard-toolbar-field input[type='number']:hover {
+.dashboard-toolbar-number input:hover {
   border-color: var(--color-border-strong);
 }
 
-.dashboard-toolbar-field select:focus-visible,
-.dashboard-toolbar-field input[type='number']:focus-visible {
+.dashboard-toolbar-number input:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 1px;
   border-color: var(--color-accent);
 }
 
-.dashboard-toolbar-field select:disabled,
-.dashboard-toolbar-field input[type='number']:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.dashboard-toolbar-range {
-  flex-direction: row;
-  flex-wrap: wrap;
+.dashboard-toolbar-footer {
+  display: flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
 }
 
-.dashboard-toolbar-range input {
-  width: 7rem;
-  max-width: 40vw;
+.dashboard-toolbar-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-height: 1.75rem;
+}
+
+.dashboard-toolbar-nofilters {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }
 
 .dashboard-toolbar-count {
   margin-left: auto;
   font-size: var(--text-sm);
-  color: var(--color-text-muted);
+  font-weight: 700;
+  color: var(--color-text-body);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }

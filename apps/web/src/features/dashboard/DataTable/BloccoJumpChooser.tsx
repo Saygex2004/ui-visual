@@ -1,12 +1,13 @@
 // Cross-cluster blocco jump control (UI §4.4). Exactly one other cluster
 // jumps directly on click; more than one opens a small dismissible chooser
-// listing them by name — plain HTML + outside-click, same precedent as the
-// rest of this phase (PrimeReact's compound Popover/Menu API isn't worth it
-// for a 2-4-item dismissible list; Tabs is the one deliberate exception, see
-// HANDOFF_PHASE_4.md).
-import { useEffect, useRef, useState } from 'react';
+// listing them by name. Phase 13 moves the chooser onto the shared Popover
+// primitive (portalled — so the virtualized table's overflow container can
+// never clip it) while keeping the same menu/menuitem semantics the e2e
+// suite asserts.
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight } from 'lucide-react';
+import { PopoverContent, PopoverRoot, PopoverTrigger } from '../../../components/Popover.js';
 
 export interface BloccoJumpChooserProps {
   bloccoKey: string;
@@ -17,16 +18,6 @@ export interface BloccoJumpChooserProps {
 export function BloccoJumpChooser({ bloccoKey, otherClusterKeys, onJump }: BloccoJumpChooserProps) {
   const { t } = useTranslation('dashboard');
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onOutside(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener('mousedown', onOutside);
-    return () => document.removeEventListener('mousedown', onOutside);
-  }, [open]);
 
   if (otherClusterKeys.length === 1) {
     const target = otherClusterKeys[0]!;
@@ -45,20 +36,17 @@ export function BloccoJumpChooser({ bloccoKey, otherClusterKeys, onJump }: Blocc
   }
 
   return (
-    <div className="blocco-jump-chooser" ref={rootRef}>
-      <button
-        type="button"
+    <PopoverRoot open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
         className="blocco-jump-control"
         aria-haspopup="menu"
-        aria-expanded={open}
         title={t('table.bloccoJumpChooserTitle')}
         aria-label={t('table.bloccoJumpChooserTitle')}
-        onClick={() => setOpen((v) => !v)}
       >
         <ArrowRight aria-hidden="true" size={14} />
-      </button>
-      {open ? (
-        <ul className="blocco-jump-menu" role="menu">
+      </PopoverTrigger>
+      <PopoverContent align="start" className="blocco-jump-menu">
+        <ul role="menu" className="blocco-jump-menu-list">
           {otherClusterKeys.map((key) => (
             <li key={key} role="none">
               <button
@@ -75,7 +63,7 @@ export function BloccoJumpChooser({ bloccoKey, otherClusterKeys, onJump }: Blocc
             </li>
           ))}
         </ul>
-      ) : null}
-    </div>
+      </PopoverContent>
+    </PopoverRoot>
   );
 }

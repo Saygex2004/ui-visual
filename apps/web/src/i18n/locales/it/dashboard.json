@@ -62,10 +62,11 @@
   },
   "rating": {
     "groupLabel": "Valutazione",
+    "none": "Non valutato",
     "value": {
-      "ottimo_affare": "👍 Ottimo affare",
-      "da_verificare": "🤔 Da verificare",
-      "da_evitare": "⚠️ Da evitare"
+      "ottimo_affare": "Ottimo affare",
+      "da_verificare": "Da verificare",
+      "da_evitare": "Da evitare"
     }
   },
   "drilldown": {
@@ -100,15 +101,19 @@
   },
   "table": {
     "empty": "Nessun listing corrisponde ai filtri attuali.",
-    "goToListing": "🚀 Vai all'annuncio →",
+    "emptyTitle": "Nessun listing trovato",
+    "emptyResetAction": "Azzera filtri",
+    "goToListing": "Vai all'annuncio",
     "bloccoBadgeTitle": "{{count}} lotti nello stesso blocco",
     "bloccoJumpTitle": "Vai al blocco in {{name}}",
     "bloccoJumpChooserTitle": "Il blocco continua in altri cluster",
-    "openWorkspace": "📄 Scheda",
-    "quickChat": "💬 Chat",
+    "openWorkspace": "Apri scheda",
+    "openHistory": "Storico",
+    "quickChat": "Apri chat",
+    "moreActions": "Altre azioni",
     "columns": {
-      "tipoImmobile": "Tipo di immobile",
       "tipoBene": "Tipo di bene",
+      "tipoTribunale": "Tipo · Tribunale",
       "tipoProcedura": "Tipo di procedura",
       "disponibilita": "Disponibilità",
       "descrizione": "Descrizione",
@@ -135,9 +140,24 @@
     "allOption": "Tutti",
     "minLabel": "Valore da €",
     "maxLabel": "Valore a €",
-    "resetFilters": "🔄 Reset filtri",
+    "resetFilters": "Reset filtri",
+    "noActiveFilters": "Nessun filtro attivo",
     "countTotal": "{{count}} listing",
-    "countFiltered": "{{visible}} / {{total}} listing"
+    "countFiltered": "{{visible}} / {{total}} listing",
+    "chipRemove": "Rimuovi filtro {{name}}",
+    "chip": {
+      "q": "Ricerca",
+      "tipo": "Tipo",
+      "procedura": "Procedura",
+      "disponibilita": "Disponibilità",
+      "tribunale": "Tribunale",
+      "min": "Da",
+      "max": "A",
+      "regione": "Regione",
+      "capoluogo": "Capoluogo",
+      "provincia": "Provincia",
+      "blocco": "Blocco"
+    }
   },
   "occupancy": {
     "libero": "Libero",

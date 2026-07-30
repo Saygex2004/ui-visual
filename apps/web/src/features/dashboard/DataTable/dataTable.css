@@ -43,6 +43,10 @@
   width: 100%;
 }
 
+.data-table-body-row {
+  cursor: pointer;
+}
+
 .data-table-body-row:hover {
   background: var(--color-surface-2);
 }
@@ -81,10 +85,52 @@
   font-variant-numeric: tabular-nums;
 }
 
+.data-table-cell-right {
+  justify-content: flex-end;
+  text-align: right;
+}
+
 th.data-table-cell {
-  font-size: var(--text-xs);
-  font-weight: 600;
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
   color: var(--color-text-muted);
+}
+
+/* Stacked two-line cells (Phase 13: Anno/N°, Tipo/Tribunale). */
+.data-table-stack {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.data-table-stack-primary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.data-table-stack-secondary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.data-table-identity {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.data-table-valore {
+  font-weight: 700;
+  color: var(--color-brand);
+  white-space: nowrap;
 }
 
 .data-table-sort-button {
@@ -132,38 +178,41 @@ th.data-table-actions-cell {
   z-index: 1;
 }
 
-.data-table-annuncio-link {
-  color: var(--color-accent);
-  font-size: var(--text-sm);
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.data-table-annuncio-link:hover,
-.data-table-annuncio-link:focus-visible {
-  text-decoration: underline;
-}
-
-.data-table-annuncio-link:active {
-  color: var(--color-accent-strong);
-}
-
-.data-table-actions-cell {
+td.data-table-actions-cell {
   gap: var(--space-2);
+  justify-content: flex-end;
 }
 
-.data-table-action-link {
-  color: var(--color-text-body);
-  font-size: var(--text-xs);
+/* "Apri scheda" — the row's primary action, a link in button clothing. */
+.data-table-open-button {
+  display: inline-flex;
+  align-items: center;
+  height: 2.125rem;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-size: var(--text-sm);
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
-  border-bottom: 1px dotted var(--color-border-strong);
+  transition: background-color var(--dur-fast) var(--ease-out);
 }
 
-.data-table-action-link:hover,
-.data-table-action-link:focus-visible {
-  color: var(--color-accent);
-  border-bottom-color: var(--color-accent);
+.data-table-open-button:hover {
+  background: var(--color-accent-strong);
+}
+
+.data-table-open-button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* "⋯" overflow trigger — relative so the unread badge can sit on its
+   corner. */
+.data-table-more-button {
+  position: relative;
+  flex: none;
 }
 
 .data-table-chat-badge {
@@ -172,13 +221,29 @@ th.data-table-actions-cell {
   justify-content: center;
   min-width: 1.1rem;
   height: 1.1rem;
-  margin-left: var(--space-1);
   padding: 0 var(--space-1);
   border-radius: var(--radius-pill);
   background: var(--color-accent);
   color: var(--color-accent-contrast);
   font-variant-numeric: tabular-nums;
   font-size: 0.625rem;
+}
+
+.data-table-more-button .data-table-chat-badge {
+  position: absolute;
+  top: -0.375rem;
+  right: -0.375rem;
+}
+
+.data-table-chat-badge-menu {
+  margin-left: auto;
+}
+
+/* Full-panel empty state inside the table card slot. */
+.data-table-empty {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
 }
 
 /* Calendar day table's static blocco presence dot (UI §7.2) — no count, no
@@ -290,23 +355,12 @@ th.data-table-actions-cell {
   color: var(--color-accent-strong);
 }
 
-.blocco-jump-chooser {
-  position: relative;
-}
-
-.blocco-jump-menu {
-  position: absolute;
-  top: calc(100% + var(--space-1));
-  left: 0;
-  z-index: 3;
+/* The chooser panel is a shared Popover (portalled); the list inside just
+   resets ul chrome. */
+.blocco-jump-menu-list {
   margin: 0;
-  padding: var(--space-1);
+  padding: 0;
   list-style: none;
-  min-width: 12rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-paper);
-  box-shadow: var(--shadow-2);
 }
 
 .blocco-jump-menu-item {

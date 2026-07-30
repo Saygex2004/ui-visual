@@ -1,20 +1,25 @@
 // Column configs per table kind — UI §4.1's show/hide matrix in one place.
-// Real estate vs credits/shares differ in exactly two columns (Disponibilità
-// vs Descrizione); the archive variant of either kind adds the Cluster
-// column (origin, since the archive mixes clusters). The Valutazione cell and
-// the "Vai all'annuncio →" action live in DataTable's frozen actions column,
-// not here (Valutazione is a Phase 6 placeholder this phase).
+// Phase 13 (Claude Design reference) restructures the area tables: N°/Anno
+// stacked, Tipo and Tribunale merged into one stacked identity cell led by
+// the read-only rating dot, Valore right-aligned. Real estate vs
+// credits/shares still differ in exactly one data column (Disponibilità vs
+// Descrizione); the archive variant of either kind adds the Cluster column
+// (origin, since the archive mixes clusters). The "Apri scheda" + overflow
+// actions live in DataTable's frozen actions column, not here.
 import type { ReactNode } from 'react';
 import type { AreaSlug, ListingRow, BloccoIndexEntry, ClusterBlock } from '@pvp/shared';
 import type { SortKey } from '../urlState.js';
 import { OccupancyIndicator } from './OccupancyIndicator.js';
 import { BloccoBadge } from './BloccoBadge.js';
+import { RatingDot } from '../../ratings/RatingControl.js';
+import type { RatingsMap } from '../../ratings/join.js';
 import {
   formatCurrency,
   formatDate,
   formatText,
   formatComuneProvincia,
   formatNumeroAnno,
+  NOT_AVAILABLE,
 } from './formatting.js';
 
 export type AreaTableKind = 'real_estate' | 'credits' | 'calendar';
@@ -29,6 +34,8 @@ export interface ColumnContext {
   /** The whole snapshot's cluster list — resolves a jump target's number/
    *  buckets (UI §4.4's cross-cluster jump). */
   clusters: readonly ClusterBlock[];
+  /** Joined shared ratings (UI §5) — the identity cell's read-only dot. */
+  ratings: RatingsMap;
   /** Toggle isolation of one block within its own cluster/table. */
   onIsolate: (bloccoKey: string) => void;
   /** Jump to another cluster: switches cluster + Principali/Fallimenti tab,
@@ -50,6 +57,8 @@ export interface ColumnDef {
   /** Flex-basis width — a functional default; the Hallmark pass may refine
    *  these visually, not structurally. */
   width: string;
+  /** Right-aligns header + cells (numeric columns — Valore). */
+  align?: 'right';
   render: (row: TableRow, ctx: ColumnContext) => ReactNode;
 }
 
@@ -60,13 +69,6 @@ function bloccoCount(row: TableRow, ctx: ColumnContext): number | null {
 
 // UI §4.1: the asset-type column header wording adapts by table kind ("Tipo
 // di immobile" vs "Tipo di bene") even though both read the same field.
-const TIPO_IMMOBILE: ColumnDef = {
-  key: 'tipo_bene',
-  headerKey: 'table.columns.tipoImmobile',
-  width: '160px',
-  render: (row) => formatText(row.tipo_bene),
-};
-
 const TIPO_BENE_CREDITS: ColumnDef = {
   key: 'tipo_bene',
   headerKey: 'table.columns.tipoBene',
@@ -74,10 +76,26 @@ const TIPO_BENE_CREDITS: ColumnDef = {
   render: (row) => formatText(row.tipo_bene),
 };
 
+/** Phase 13 identity cell: read-only rating dot + Tipo over Tribunale. */
+const TIPO_TRIBUNALE: ColumnDef = {
+  key: 'tipo_tribunale',
+  headerKey: 'table.columns.tipoTribunale',
+  width: '230px',
+  render: (row, ctx) => (
+    <span className="data-table-identity">
+      <RatingDot value={ctx.ratings.get(row.id) ?? null} />
+      <span className="data-table-stack">
+        <span className="data-table-stack-primary">{formatText(row.tipo_bene)}</span>
+        <span className="data-table-stack-secondary">{formatText(row.tribunale)}</span>
+      </span>
+    </span>
+  ),
+};
+
 const TIPO_PROCEDURA: ColumnDef = {
   key: 'tipo_procedura',
   headerKey: 'table.columns.tipoProcedura',
-  width: '160px',
+  width: '150px',
   render: (row) => formatText(row.tipo_procedura),
 };
 
@@ -95,11 +113,17 @@ const DESCRIZIONE: ColumnDef = {
   render: (row) => formatText(row.descrizione_excerpt),
 };
 
+/** Phase 13: Anno emphasized over the procedure number (stacked). */
 const NUMERO_ANNO: ColumnDef = {
   key: 'numero_anno',
   headerKey: 'table.columns.numeroAnno',
   width: '110px',
-  render: (row) => formatNumeroAnno(row.numero, row.anno),
+  render: (row) => (
+    <span className="data-table-stack">
+      <span className="data-table-stack-primary">{row.anno ?? NOT_AVAILABLE}</span>
+      <span className="data-table-stack-secondary">{formatNumeroAnno(row.numero, row.anno)}</span>
+    </span>
+  ),
 };
 
 const BLOCCO: ColumnDef = {
@@ -136,7 +160,10 @@ const VALORE: ColumnDef = {
   headerKey: 'table.columns.valoreRichiesto',
   sortKey: 'valore',
   width: '140px',
-  render: (row) => formatCurrency(row.valore_richiesto),
+  align: 'right',
+  render: (row) => (
+    <span className="data-table-valore">{formatCurrency(row.valore_richiesto)}</span>
+  ),
 };
 
 const DATA_PUBBLICAZIONE: ColumnDef = {
@@ -201,12 +228,11 @@ const CALENDAR_COLUMNS: ColumnDef[] = [
 ];
 
 const REAL_ESTATE_COLUMNS: ColumnDef[] = [
-  TIPO_IMMOBILE,
-  TIPO_PROCEDURA,
-  DISPONIBILITA,
   NUMERO_ANNO,
   BLOCCO,
-  TRIBUNALE,
+  TIPO_TRIBUNALE,
+  TIPO_PROCEDURA,
+  DISPONIBILITA,
   COMUNE_PROVINCIA,
   VALORE,
   DATA_PUBBLICAZIONE,
@@ -214,12 +240,11 @@ const REAL_ESTATE_COLUMNS: ColumnDef[] = [
 ];
 
 const CREDITS_COLUMNS: ColumnDef[] = [
-  TIPO_BENE_CREDITS,
-  TIPO_PROCEDURA,
-  DESCRIZIONE,
   NUMERO_ANNO,
   BLOCCO,
-  TRIBUNALE,
+  TIPO_TRIBUNALE,
+  TIPO_PROCEDURA,
+  DESCRIZIONE,
   COMUNE_PROVINCIA,
   VALORE,
   DATA_PUBBLICAZIONE,

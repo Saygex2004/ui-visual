@@ -38,12 +38,12 @@ beforeEach(() => {
   vi.mocked(ratingsApi.clearRating).mockReset().mockResolvedValue(undefined);
 });
 
-// Operazione BELLEZZA prefixed every rating value's copy with an emoji
-// (dashboard:rating.value.*); the accessible name changed deliberately,
-// not a bug — these three constants are the new exact labels.
-const OTTIMO_AFFARE = '👍 Ottimo affare';
-const DA_VERIFICARE = '🤔 Da verificare';
-const DA_EVITARE = '⚠️ Da evitare';
+// Phase 13 (Claude Design reference) removed the FASE 10.5 emoji prefixes
+// from rating copy (dashboard:rating.value.*) — the accessible names
+// changed deliberately, not a bug; these are the exact labels again.
+const OTTIMO_AFFARE = 'Ottimo affare';
+const DA_VERIFICARE = 'Da verificare';
+const DA_EVITARE = 'Da evitare';
 
 describe('RatingControl', () => {
   it('marks the active option as pressed and leaves the others unpressed', () => {
