@@ -1,13 +1,18 @@
-// Participant list + add-a-colleague control (UI §6.2). Any participant may
-// add one — not just admins, unlike close/reopen — hidden entirely once the
-// thread is closed. The candidate picker is fetched lazily, only once
-// "aggiungi" is actually clicked (`enabled: adding`), since most thread
-// views never open it.
+// Participant bar (UI §6.2, redesigned in Execution Plan Phase 13): the
+// avatar stack + count, and a "+ Aggiungi" search popover replacing the old
+// select-then-confirm flow (one click to open, one to add — repeatable
+// without closing; already-added colleagues show a check). Any participant
+// may add one — not just admins, unlike close/reopen; the add control is
+// hidden once the thread is closed. The candidate fetch stays lazy (only
+// once the popover actually opens), same as before.
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Check, Plus } from 'lucide-react';
 import type { UserRef } from '@pvp/shared';
 import { useAddParticipant, useParticipantCandidates } from './hooks.js';
-import { StatusDisplay } from '../../components/StatusDisplay.js';
+import { Avatar, AvatarStack } from '../../components/Avatar.js';
+import { Button } from '../../components/Button.js';
+import { PopoverContent, PopoverRoot, PopoverTrigger } from '../../components/Popover.js';
 
 export interface ParticipantListProps {
   listingId: string;
@@ -17,69 +22,75 @@ export interface ParticipantListProps {
 
 export function ParticipantList({ listingId, participants, closed }: ParticipantListProps) {
   const { t } = useTranslation('chat');
-  const [adding, setAdding] = useState(false);
-  const [selected, setSelected] = useState('');
-  const candidatesQuery = useParticipantCandidates(listingId, adding);
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const candidatesQuery = useParticipantCandidates(listingId, open);
   const addParticipant = useAddParticipant(listingId);
   const candidates = candidatesQuery.data?.users ?? [];
 
-  function handleAdd() {
-    if (!selected) return;
-    addParticipant.mutate(selected, {
-      onSuccess: () => {
-        setAdding(false);
-        setSelected('');
-      },
-    });
-  }
+  const q = query.trim().toLowerCase();
+  const rows = [
+    ...participants.map((p) => ({ id: p.id, username: p.username, added: true })),
+    ...candidates.map((c) => ({ id: c.id, username: c.username, added: false })),
+  ].filter((row) => !q || row.username.toLowerCase().includes(q));
 
   return (
     <div className="chat-participants">
-      <h3 className="chat-participants-title">{t('participants.title')}</h3>
-      <ul className="chat-participants-list">
+      <AvatarStack className="chat-participants-stack">
         {participants.map((p) => (
-          <li key={p.id} className="chat-participants-item">
-            {p.username}
-          </li>
+          <Avatar key={p.id} name={p.username} size="md" title={p.username} />
         ))}
-      </ul>
-      {closed ? null : adding ? (
-        <div className="chat-participants-add">
-          {candidates.length === 0 && !candidatesQuery.isLoading ? (
-            <StatusDisplay variant="empty" message={t('participants.noCandidates')} />
-          ) : (
-            <>
-              <label className="chat-participants-add-label">
-                <span className="chat-participants-add-label-text">
-                  {t('participants.addPlaceholder')}
-                </span>
-                <select value={selected} onChange={(e) => setSelected(e.target.value)}>
-                  <option value="">{t('participants.addPlaceholder')}</option>
-                  {candidates.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.username}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button
-                type="button"
-                onClick={handleAdd}
-                disabled={!selected || addParticipant.isPending}
-              >
-                {t('participants.addAction')}
-              </button>
-            </>
-          )}
-        </div>
-      ) : (
-        <button
-          type="button"
-          className="chat-participants-add-toggle"
-          onClick={() => setAdding(true)}
+      </AvatarStack>
+      <span className="chat-participants-count">
+        {t('participants.count', { count: participants.length })}
+      </span>
+      {closed ? null : (
+        <PopoverRoot
+          open={open}
+          onOpenChange={(next) => {
+            setOpen(next);
+            if (!next) setQuery('');
+          }}
         >
-          {t('participants.add')}
-        </button>
+          <PopoverTrigger asChild>
+            <Button severity="tinted" size="small" className="chat-participants-add-toggle">
+              <Plus aria-hidden="true" size={14} />
+              {t('participants.add')}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="chat-participants-popover">
+            <input
+              type="text"
+              className="ui-search-select-input"
+              value={query}
+              placeholder={t('participants.searchPlaceholder')}
+              aria-label={t('participants.searchPlaceholder')}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+            <div className="chat-participants-candidates">
+              {candidates.length === 0 && !candidatesQuery.isLoading && q.length === 0 ? (
+                <span className="chat-participants-nocandidates">
+                  {t('participants.noCandidates')}
+                </span>
+              ) : null}
+              {rows.map((row) => (
+                <button
+                  key={row.id}
+                  type="button"
+                  className="chat-participants-item"
+                  disabled={row.added || addParticipant.isPending}
+                  onClick={() => addParticipant.mutate(row.id)}
+                >
+                  <Avatar name={row.username} size="md" />
+                  <span className="chat-participants-item-name">{row.username}</span>
+                  {row.added ? (
+                    <Check aria-hidden="true" size={14} className="chat-participants-item-check" />
+                  ) : null}
+                </button>
+              ))}
+            </div>
+          </PopoverContent>
+        </PopoverRoot>
       )}
     </div>
   );

@@ -8,7 +8,9 @@
 // standalone context too — cross-feature reuse of `features/workspace`'s own
 // data layer would cut against FRONTEND.md §1's "cross-feature reuse goes
 // through ratings/ and lib/, not deep imports between features".
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Lock, LockOpen } from 'lucide-react';
 import { useMe } from '../auth/hooks.js';
 import {
   formatCurrency,
@@ -20,6 +22,8 @@ import { MessageList } from './MessageList.js';
 import { Composer } from './Composer.js';
 import { ParticipantList } from './ParticipantList.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
+import { Button } from '../../components/Button.js';
+import { ConfirmDialog } from '../../components/ConfirmDialog.js';
 import './chat.css';
 
 export function ThreadView({ listingId }: { listingId: string }) {
@@ -28,17 +32,13 @@ export function ThreadView({ listingId }: { listingId: string }) {
   const { data, isLoading, isError } = useThread(listingId, true);
   const closeThread = useCloseThread(listingId);
   const reopenThread = useReopenThread(listingId);
+  const [confirmClose, setConfirmClose] = useState(false);
 
   if (isLoading) return <StatusDisplay variant="loading" message={t('loading')} />;
   if (isError || !data) return <StatusDisplay variant="error" message={t('loadError')} />;
 
   const { thread, messages } = data;
   const isAdmin = me?.user.role === 'admin';
-
-  function handleClose() {
-    if (!window.confirm(t('closed.closeConfirm'))) return;
-    closeThread.mutate();
-  }
 
   return (
     <div className="chat-thread-view">
@@ -50,23 +50,27 @@ export function ThreadView({ listingId }: { listingId: string }) {
         </h2>
         {isAdmin ? (
           thread.closed ? (
-            <button
-              type="button"
+            <Button
+              severity="secondary"
+              size="small"
               className="chat-thread-close-toggle"
               onClick={() => reopenThread.mutate()}
               disabled={reopenThread.isPending}
             >
+              <LockOpen aria-hidden="true" size={14} />
               {t('closed.reopenAction')}
-            </button>
+            </Button>
           ) : (
-            <button
-              type="button"
+            <Button
+              severity="secondary"
+              size="small"
               className="chat-thread-close-toggle"
-              onClick={handleClose}
+              onClick={() => setConfirmClose(true)}
               disabled={closeThread.isPending}
             >
+              <Lock aria-hidden="true" size={14} />
               {t('closed.closeAction')}
-            </button>
+            </Button>
           )
         ) : null}
       </div>
@@ -103,7 +107,20 @@ export function ThreadView({ listingId }: { listingId: string }) {
 
       <MessageList messages={messages} currentUserId={me?.user.id ?? ''} />
 
-      {thread.closed ? null : <Composer listingId={listingId} disabled={false} />}
+      {thread.closed ? null : (
+        <Composer listingId={listingId} disabled={false} participants={thread.participants} />
+      )}
+
+      <ConfirmDialog
+        open={confirmClose}
+        title={t('closed.closeAction')}
+        description={t('closed.closeConfirm')}
+        confirmLabel={t('common:actions.confirm')}
+        cancelLabel={t('common:actions.cancel')}
+        destructive
+        onConfirm={() => closeThread.mutate()}
+        onOpenChange={setConfirmClose}
+      />
     </div>
   );
 }

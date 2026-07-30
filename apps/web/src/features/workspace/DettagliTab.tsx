@@ -4,6 +4,7 @@
 // (features/ratings), not a one-shot `detail.rating` — falling back to it
 // only for the very first paint, before the poll has resolved even once.
 import { useTranslation } from 'react-i18next';
+import { ExternalLink } from 'lucide-react';
 import type { AreaSlug, ListingDetail } from '@pvp/shared';
 import { RatingControl } from '../ratings/RatingControl.js';
 import { useRatingsMap } from '../ratings/hooks.js';
@@ -34,7 +35,10 @@ export function DettagliTab({
 
   return (
     <div className="workspace-dettagli">
-      <RatingControl listingId={detail.id} value={rating} />
+      <div className="workspace-rating">
+        <span className="ui-micro-label">{t('dashboard:rating.groupLabel')}</span>
+        <RatingControl listingId={detail.id} value={rating} />
+      </div>
 
       <dl className="workspace-facts">
         <div>
@@ -95,6 +99,7 @@ export function DettagliTab({
         className="workspace-annuncio-link"
       >
         {t('details.goToListing')}
+        <ExternalLink aria-hidden="true" size={15} />
       </a>
 
       {detail.blocco ? <RelatedLots blocco={detail.blocco} area={area} search={search} /> : null}

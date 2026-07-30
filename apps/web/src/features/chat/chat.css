@@ -92,92 +92,150 @@
   margin: 0;
 }
 
-/* Participants */
+/* Participants (Phase 13): avatar stack + count + "+ Aggiungi" popover. */
 
 .chat-participants {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.chat-participants-title {
-  margin: 0;
-  font-size: var(--text-sm);
-  font-weight: 600;
-}
-
-.chat-participants-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.chat-participants-item {
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  font-size: var(--text-xs);
-  background: var(--color-surface);
-}
-
-.chat-participants-add {
-  display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
-.chat-participants-add-label {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.chat-participants-add-label-text {
+.chat-participants-count {
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
 
-.chat-participants-add-toggle,
-.chat-participants-add button {
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border);
+.chat-participants-add-toggle {
+  margin-left: auto;
+}
+
+.chat-participants-popover {
+  width: 17.5rem;
+}
+
+.chat-participants-candidates {
+  max-height: 15rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-participants-nocandidates {
+  padding: var(--space-3);
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.chat-participants-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2);
+  border: none;
   border-radius: var(--radius-md);
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.chat-participants-item:hover:not(:disabled) {
+  background: var(--color-surface-2);
+}
+
+.chat-participants-item:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}
+
+.chat-participants-item:disabled {
+  cursor: default;
+}
+
+.chat-participants-item-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.chat-participants-item-check {
+  color: var(--color-success);
+}
+
+/* Mention popup — anchored above the composer. */
+
+.chat-mention-popup {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + var(--space-2));
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2);
   background: var(--color-surface);
-  color: var(--color-text-body);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  animation: pvp-up 0.12s var(--ease-out);
+}
+
+.chat-mention-popup-title {
+  padding: var(--space-1) var(--space-2);
+}
+
+.chat-mention-empty {
+  padding: var(--space-3);
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.chat-mention-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
   font-size: var(--text-sm);
   cursor: pointer;
-  align-self: flex-end;
 }
 
-.chat-participants-add-toggle:hover,
-.chat-participants-add button:hover:not(:disabled) {
-  border-color: var(--color-accent);
+.chat-mention-item-active {
+  background: var(--color-surface-2);
 }
 
-.chat-participants-add-toggle:focus-visible,
-.chat-participants-add button:focus-visible,
-.chat-participants-add select:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
+.chat-mention-item-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--color-text);
 }
 
-.chat-participants-add button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Message list */
+/* Message list (Phase 13): the reference's bubble layout — mine right and
+   accent-filled, others left with an avatar. */
 
 .chat-message-list {
   flex: 1;
   overflow-y: auto;
   min-height: 8rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-1);
+}
+
+.chat-message-list-empty {
+  flex: 1;
 }
 
 .chat-message-list-inner {
@@ -189,19 +247,47 @@
   gap: var(--space-4);
 }
 
+.chat-message-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.chat-message-row-own {
+  flex-direction: row-reverse;
+}
+
 .chat-message {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  max-width: 32rem;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
+  max-width: 78%;
+  min-width: 0;
 }
 
 .chat-message-own {
-  align-self: flex-end;
-  background: var(--color-accent-soft);
+  align-items: flex-end;
+}
+
+.chat-message-bubble {
+  padding: var(--space-2) var(--space-3);
+  border-radius: 13px 13px 13px 4px;
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.chat-message-own .chat-message-bubble {
+  border-radius: 13px 13px 4px 13px;
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+.chat-message-own .chat-message-bubble .chat-richtext a {
+  color: inherit;
+  text-decoration: underline;
 }
 
 .chat-message-meta {
@@ -210,9 +296,14 @@
   align-items: baseline;
 }
 
+.chat-message-own .chat-message-meta {
+  flex-direction: row-reverse;
+}
+
 .chat-message-author {
-  font-weight: 600;
-  font-size: var(--text-sm);
+  font-weight: 700;
+  font-size: var(--text-xs);
+  color: var(--color-brand);
 }
 
 .chat-message-time {
@@ -252,18 +343,29 @@
   color: var(--color-accent);
 }
 
-/* Compose */
+/* Compose (Phase 13): the reference's pill container; the mention popup
+   anchors to the editor's top edge. */
 
 .chat-editor {
+  position: relative;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-2);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.chat-editor:focus-within {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
 }
 
 .chat-editor-toolbar {
   display: flex;
   gap: var(--space-1);
   padding: var(--space-2);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .chat-editor-toolbar-button {
@@ -347,49 +449,15 @@
 
 .chat-composer-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: var(--space-2);
 }
 
-.chat-composer-attach,
-.chat-composer-send {
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  cursor: pointer;
-}
-
-.chat-composer-attach {
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-body);
-}
-
-.chat-composer-attach:hover:not(:disabled) {
-  border-color: var(--color-accent);
-}
-
-.chat-composer-send {
-  border: 1px solid var(--color-accent);
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
-  font-weight: 600;
-}
-
-.chat-composer-send:hover:not(:disabled) {
-  filter: brightness(1.05);
-}
-
-.chat-composer-attach:focus-visible,
-.chat-composer-send:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
-.chat-composer-attach:disabled,
-.chat-composer-send:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.chat-composer-hint {
+  margin-right: auto;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }
 
 /* Le mie chat */
@@ -500,10 +568,4 @@
   font-size: var(--text-xs);
   color: var(--color-text-muted);
   margin-top: var(--space-2);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .chat-composer-send:hover:not(:disabled) {
-    filter: none;
-  }
 }

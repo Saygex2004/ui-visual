@@ -10,6 +10,7 @@ import type { ChatMessageView, AttachmentDescriptor } from '@pvp/shared';
 import { formatTimestamp } from '../dashboard/DataTable/formatting.js';
 import { RichTextRenderer } from './RichTextRenderer.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
+import { Avatar } from '../../components/Avatar.js';
 import * as chatApi from './api.js';
 
 const NEAR_BOTTOM_PX = 80;
@@ -56,22 +57,26 @@ function AttachmentItem({ attachment }: { attachment: AttachmentDescriptor }) {
 
 function MessageItem({ message, isOwn }: { message: ChatMessageView; isOwn: boolean }) {
   const { t } = useTranslation('chat');
+  const authorName = message.author_username ?? message.author_id;
   return (
-    <li className={`chat-message${isOwn ? ' chat-message-own' : ''}`}>
-      <div className="chat-message-meta">
-        <span className="chat-message-author">
-          {isOwn ? t('messages.you') : (message.author_username ?? message.author_id)}
-        </span>
-        <span className="chat-message-time">{formatTimestamp(message.sent_at)}</span>
-      </div>
-      {message.body ? <RichTextRenderer content={message.body} /> : null}
-      {message.attachments.length > 0 ? (
-        <div className="chat-message-attachments">
-          {message.attachments.map((a) => (
-            <AttachmentItem key={a.id} attachment={a} />
-          ))}
+    <li className={`chat-message-row${isOwn ? ' chat-message-row-own' : ''}`}>
+      {!isOwn ? <Avatar name={authorName} size="lg" title={authorName} /> : null}
+      <div className={`chat-message${isOwn ? ' chat-message-own' : ''}`}>
+        <div className="chat-message-meta">
+          <span className="chat-message-author">{isOwn ? t('messages.you') : authorName}</span>
+          <span className="chat-message-time">{formatTimestamp(message.sent_at)}</span>
         </div>
-      ) : null}
+        <div className="chat-message-bubble">
+          {message.body ? <RichTextRenderer content={message.body} /> : null}
+          {message.attachments.length > 0 ? (
+            <div className="chat-message-attachments">
+              {message.attachments.map((a) => (
+                <AttachmentItem key={a.id} attachment={a} />
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
     </li>
   );
 }
@@ -100,7 +105,15 @@ export function MessageList({ messages, currentUserId }: MessageListProps) {
   }
 
   if (messages.length === 0) {
-    return <StatusDisplay variant="empty" message={t('messages.empty')} />;
+    return (
+      <StatusDisplay
+        variant="empty"
+        layout="block"
+        className="chat-message-list-empty"
+        title={t('messages.emptyTitle')}
+        message={t('messages.empty')}
+      />
+    );
   }
 
   return (

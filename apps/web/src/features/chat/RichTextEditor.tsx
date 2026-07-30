@@ -5,15 +5,29 @@
 // are pared down to exactly the allowed shape (SPECIFICATIONS.md §11);
 // everything the server's sanitizer would strip is disabled here too, so
 // what the user sees while typing already matches what gets stored.
-import { forwardRef, useEffect, useImperativeHandle } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
+//
+// Phase 13 additions: the @-mention suggestion (mention/mentionExtension.ts
+// — popup state lives here, rendered above the editor) and Enter-to-send
+// (Shift+Enter keeps inserting a hard break via StarterKit's own binding;
+// Enter falls through to its default behaviour inside lists, where it
+// splits the list item, and while the mention popup is open, where the
+// suggestion plugin owns it).
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { useEditor, EditorContent, Extension } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { useTranslation } from 'react-i18next';
 import { Bold, Italic, Link as LinkIcon, List, ListOrdered } from 'lucide-react';
 import type { RichTextNode } from '@pvp/shared';
+import {
+  createMentionExtension,
+  type MentionCandidate,
+  type MentionController,
+  type MentionState,
+} from './mention/mentionExtension.js';
+import { MentionPopup } from './mention/MentionPopup.js';
 import './chat.css';
 
-const EXTENSIONS = [
+const BASE_EXTENSIONS = [
   StarterKit.configure({
     blockquote: false,
     code: false,
@@ -37,14 +51,74 @@ export interface RichTextEditorHandle {
 export interface RichTextEditorProps {
   onChange: (doc: RichTextNode, isEmpty: boolean) => void;
   disabled: boolean;
+  /** Enter-to-send. Omitted = Enter keeps its default paragraph behaviour. */
+  onSubmit?: () => void;
+  /** Enables the @-mention suggestion. */
+  mention?: {
+    getItems: (query: string) => MentionCandidate[];
+    onPick: (item: MentionCandidate) => void;
+    /** First time the popup opens — lazily enable the candidates fetch. */
+    onActive?: () => void;
+  };
 }
 
 export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorProps>(
-  function RichTextEditor({ onChange, disabled }, ref) {
+  function RichTextEditor({ onChange, disabled, onSubmit, mention }, ref) {
     const { t } = useTranslation('chat');
 
+    const [mentionState, setMentionState] = useState<MentionState | null>(null);
+    const mentionStateRef = useRef<MentionState | null>(null);
+    const mentionRef = useRef(mention);
+    mentionRef.current = mention;
+    const onSubmitRef = useRef(onSubmit);
+    onSubmitRef.current = onSubmit;
+
+    // One stable controller: the extension closes over it once; every call
+    // reads the latest props through refs.
+    const controller = useMemo<MentionController>(
+      () => ({
+        getItems: (query) => {
+          mentionRef.current?.onActive?.();
+          return mentionRef.current?.getItems(query) ?? [];
+        },
+        onPick: (item) => mentionRef.current?.onPick(item),
+        setState: (state) => {
+          mentionStateRef.current = state;
+          setMentionState(state);
+        },
+        getState: () => mentionStateRef.current,
+        pick: () => {},
+      }),
+      [],
+    );
+
+    const extensions = useMemo(() => {
+      const submitOnEnter = Extension.create({
+        name: 'submitOnEnter',
+        addKeyboardShortcuts() {
+          return {
+            Enter: () => {
+              if (mentionStateRef.current) return false; // suggestion owns it
+              if (this.editor.isActive('bulletList') || this.editor.isActive('orderedList')) {
+                return false; // default: split the list item
+              }
+              const submit = onSubmitRef.current;
+              if (!submit) return false;
+              submit();
+              return true;
+            },
+          };
+        },
+      });
+      return [
+        ...BASE_EXTENSIONS,
+        submitOnEnter,
+        ...(mentionRef.current ? [createMentionExtension(controller)] : []),
+      ];
+    }, [controller]);
+
     const editor = useEditor({
-      extensions: EXTENSIONS,
+      extensions,
       editable: !disabled,
       immediatelyRender: false,
       onUpdate: ({ editor: current }) => {
@@ -88,6 +162,9 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
 
     return (
       <div className="chat-editor">
+        {mentionState ? (
+          <MentionPopup state={mentionState} onPick={(item) => controller.pick(item)} />
+        ) : null}
         <div className="chat-editor-toolbar" role="toolbar" aria-label={t('compose.placeholder')}>
           <button
             type="button"

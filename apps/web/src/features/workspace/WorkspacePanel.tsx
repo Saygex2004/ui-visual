@@ -51,7 +51,10 @@ import { useListingDetail } from './hooks.js';
 import { DettagliTab } from './DettagliTab.js';
 import { ActivityTimeline } from './ActivityTimeline.js';
 import { ThreadView } from '../chat/ThreadView.js';
-import { formatText } from '../dashboard/DataTable/formatting.js';
+import { useMyThreadsMap } from '../chat/hooks.js';
+import { useRatingsMap } from '../ratings/hooks.js';
+import { RatingDot } from '../ratings/RatingControl.js';
+import { formatText, formatNumeroAnno } from '../dashboard/DataTable/formatting.js';
 import './workspace.css';
 
 export function WorkspacePanel() {
@@ -61,6 +64,9 @@ export function WorkspacePanel() {
   const navigate = useNavigate({ from: '/aste/$area/lotto/$id' });
 
   const { data: detail, isLoading, isError } = useListingDetail(id);
+  const ratings = useRatingsMap();
+  const unread = useMyThreadsMap().get(id)?.unread ?? 0;
+  const rating = detail ? (ratings.get(detail.id) ?? detail.rating?.value ?? null) : null;
 
   // Captured once, synchronously, during this component's first render —
   // before any effect (Radix's FocusScope included) has had a chance to
@@ -102,7 +108,19 @@ export function WorkspacePanel() {
           }}
         >
           <div className="workspace-drawer-header">
-            <DialogTitle className="workspace-drawer-title">{title}</DialogTitle>
+            <div className="workspace-drawer-heading">
+              {detail ? (
+                <span className="workspace-drawer-kicker">
+                  <RatingDot value={rating} />
+                  <span className="ui-micro-label">
+                    {formatText(detail.tipo_bene)}
+                    {' · '}
+                    {formatNumeroAnno(detail.numero, detail.anno)}
+                  </span>
+                </span>
+              ) : null}
+              <DialogTitle className="workspace-drawer-title">{title}</DialogTitle>
+            </div>
             <DialogClose className="workspace-drawer-close" aria-label={t('close')}>
               <X aria-hidden="true" size={18} />
             </DialogClose>
@@ -112,20 +130,24 @@ export function WorkspacePanel() {
             {isError ? <StatusDisplay variant="error" message={t('loadError')} /> : null}
             {detail ? (
               <TabsRoot
+                className="workspace-tabs-root"
                 value={search.pannello}
                 onValueChange={(value) =>
                   void navigate({ search: (prev) => ({ ...prev, pannello: value as PanelTab }) })
                 }
               >
-                <TabsList className="workspace-tabs">
-                  <TabsTab value="dettagli" className="workspace-tab">
+                <TabsList className="ui-tabs-list workspace-tabs">
+                  <TabsTab value="dettagli" className="ui-tab">
                     {t('tabs.dettagli')}
                   </TabsTab>
-                  <TabsTab value="storico" className="workspace-tab">
+                  <TabsTab value="storico" className="ui-tab">
                     {t('tabs.storico')}
                   </TabsTab>
-                  <TabsTab value="chat" className="workspace-tab">
+                  <TabsTab value="chat" className="ui-tab">
                     {t('tabs.chat')}
+                    {unread > 0 ? (
+                      <span className="ui-badge ui-badge-accent">{unread > 9 ? '9+' : unread}</span>
+                    ) : null}
                   </TabsTab>
                 </TabsList>
                 <TabsPanel value="dettagli">

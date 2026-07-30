@@ -1,25 +1,40 @@
-// Rich-text compose + attach + send (UI §6.2). Attachments are uploaded
-// ahead of send (API_CONTRACT.md §6) — picking a file uploads it immediately
-// and adds it to a pending list shown above the input; Send references
-// whatever pending attachment ids exist at that moment. A message must carry
-// text, attachments, or both — enforced here (before ever calling the
-// server) and again server-side.
-import { useRef, useState, type ChangeEvent } from 'react';
+// Rich-text compose + attach + send (UI §6.2, redesigned in Execution Plan
+// Phase 13). Attachments are uploaded ahead of send (API_CONTRACT.md §6) —
+// picking a file uploads it immediately and adds it to a pending list shown
+// above the input; Send references whatever pending attachment ids exist at
+// that moment. A message must carry text, attachments, or both — enforced
+// here (before ever calling the server) and again server-side.
+//
+// Phase 13: Enter sends (Shift+Enter for a new line; lists keep Enter),
+// and typing `@` opens the mention picker — choosing a colleague who isn't
+// yet a participant adds them to the thread through the same
+// add-participant API the popover uses. The candidates fetch stays lazy:
+// it's enabled the first time a mention is actually opened.
+import { useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { RichTextNode } from '@pvp/shared';
+import { Paperclip, SendHorizontal } from 'lucide-react';
+import type { RichTextNode, UserRef } from '@pvp/shared';
 import { translateApiError } from '../../lib/translateApiError.js';
 import { RichTextEditor, type RichTextEditorHandle } from './RichTextEditor.js';
-import { useSendMessage, useUploadAttachment } from './hooks.js';
+import type { MentionCandidate } from './mention/mentionExtension.js';
+import {
+  useAddParticipant,
+  useParticipantCandidates,
+  useSendMessage,
+  useUploadAttachment,
+} from './hooks.js';
 import type { UploadedAttachment } from './api.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
+import { Button } from '../../components/Button.js';
 import './chat.css';
 
 export interface ComposerProps {
   listingId: string;
   disabled: boolean;
+  participants: readonly UserRef[];
 }
 
-export function Composer({ listingId, disabled }: ComposerProps) {
+export function Composer({ listingId, disabled, participants }: ComposerProps) {
   const { t } = useTranslation('chat');
   const editorRef = useRef<RichTextEditorHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -27,10 +42,31 @@ export function Composer({ listingId, disabled }: ComposerProps) {
   const [bodyEmpty, setBodyEmpty] = useState(true);
   const [pending, setPending] = useState<UploadedAttachment[]>([]);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [mentionUsed, setMentionUsed] = useState(false);
 
   const sendMessage = useSendMessage(listingId);
   const uploadAttachment = useUploadAttachment(listingId);
+  const addParticipant = useAddParticipant(listingId);
+  const candidatesQuery = useParticipantCandidates(listingId, mentionUsed);
   const isBusy = disabled || sendMessage.isPending;
+
+  const mentionPool = useMemo<MentionCandidate[]>(() => {
+    const fromParticipants = participants.map((p) => ({
+      id: p.id,
+      username: p.username,
+      isParticipant: true,
+    }));
+    const fromCandidates = (candidatesQuery.data?.users ?? []).map((u) => ({
+      id: u.id,
+      username: u.username,
+      isParticipant: false,
+    }));
+    return [...fromParticipants, ...fromCandidates].sort((a, b) =>
+      a.username.localeCompare(b.username),
+    );
+  }, [participants, candidatesQuery.data]);
+  const mentionPoolRef = useRef(mentionPool);
+  mentionPoolRef.current = mentionPool;
 
   function handleAttachClick() {
     fileInputRef.current?.click();
@@ -68,6 +104,24 @@ export function Composer({ listingId, disabled }: ComposerProps) {
     );
   }
 
+  // Stable across renders (the editor's extension set is built once) —
+  // reads the live pool/mutations through refs and hook closures.
+  const mention = useMemo(
+    () => ({
+      getItems: (query: string) => {
+        const q = query.trim().toLowerCase();
+        const pool = mentionPoolRef.current;
+        return q ? pool.filter((c) => c.username.toLowerCase().includes(q)) : pool;
+      },
+      onPick: (item: MentionCandidate) => {
+        if (!item.isParticipant) addParticipant.mutate(item.id);
+      },
+      onActive: () => setMentionUsed(true),
+    }),
+    // addParticipant.mutate is referentially stable per React Query's contract
+    [addParticipant.mutate],
+  );
+
   return (
     <div className="chat-composer">
       <RichTextEditor
@@ -77,6 +131,8 @@ export function Composer({ listingId, disabled }: ComposerProps) {
           setBody(doc);
           setBodyEmpty(isEmpty);
         }}
+        onSubmit={handleSend}
+        mention={mention}
       />
       {pending.length > 0 ? (
         <ul className="chat-composer-pending">
@@ -105,6 +161,7 @@ export function Composer({ listingId, disabled }: ComposerProps) {
         />
       ) : null}
       <div className="chat-composer-actions">
+        <span className="chat-composer-hint">{t('compose.hint')}</span>
         <input
           ref={fileInputRef}
           type="file"
@@ -112,17 +169,26 @@ export function Composer({ listingId, disabled }: ComposerProps) {
           onChange={handleFileSelected}
           disabled={isBusy}
         />
-        <button
-          type="button"
+        <Button
+          severity="secondary"
+          size="small"
           className="chat-composer-attach"
           onClick={handleAttachClick}
           disabled={isBusy || uploadAttachment.isPending}
         >
+          <Paperclip aria-hidden="true" size={14} />
           {t('compose.attach')}
-        </button>
-        <button type="button" className="chat-composer-send" onClick={handleSend} disabled={isBusy}>
+        </Button>
+        <Button
+          severity="primary"
+          size="small"
+          className="chat-composer-send"
+          onClick={handleSend}
+          disabled={isBusy}
+        >
+          <SendHorizontal aria-hidden="true" size={14} />
           {t('compose.send')}
-        </button>
+        </Button>
       </div>
     </div>
   );
