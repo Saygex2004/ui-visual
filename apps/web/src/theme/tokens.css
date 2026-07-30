@@ -1,61 +1,76 @@
 /*
- * Hallmark · genre: modern-minimal · macrostructure: Workbench (data-dense +
- * panel/form archetypes) · design-system: design.md · designed-as-app
- *
  * Design tokens — the single source of truth for the app's visual system.
- * Foundations produced by the Hallmark foundations pass (Phase 0 task 7);
- * systematized + given a real dark set by the first Phase 10 pass; the
- * "hairline structure, code/mono voice" the theme originally shipped with
- * (uppercase-tracked mono labels everywhere) read as engineered/technical
- * rather than premium-corporate, per direct operator feedback — replaced in
- * this same phase with a single restrained sans-serif voice (one family,
- * no mono/uppercase/tracking), softer corner radii, closer to a calm
- * corporate site (Apple / Zurich Insurance were the named references) than
- * a developer dashboard. Same accent hue and paper/ink anchors throughout —
- * this is a typography/chrome correction, not a new palette.
+ * Foundations produced Phase 0, systematized + dark set Phase 10 (Cobalt),
+ * superseded in Phase 13 by the project owner's Claude Design reference
+ * ("PVP Aste Dashboard.dc.html"): the same token architecture — OKLCH,
+ * light + [data-theme="dark"], reduced-motion guard, no renames — with a
+ * new voice:
  *   genre:  modern-minimal
- *   theme:  Cobalt — cool engineered near-white, ONE electric cobalt signal.
+ *   theme:  Navy Ledger — cool near-white paper, deep-navy brand anchor
+ *           (identity: headings, logo, one filled brand button per screen)
+ *           and a steady mid-blue working accent (interaction: links,
+ *           active states, primary row actions).
  *
  * Contract: components reference ONLY these variables — no raw hex/oklch or
- * font literals elsewhere (lint/review enforced). Palette values are Cobalt's
- * OKLCH anchors, both light and the `[data-theme="dark"]` set — see
- * `design.md` for the full token table and the reasoning behind each pair.
+ * font literals elsewhere (lint/review enforced). Values are the reference
+ * palette converted to OKLCH, contrast-corrected where the mockup's raw
+ * hexes fail WCAG AA (muted greys, status text on tints) — see `design.md`
+ * for the full token table and the reasoning behind each pair.
  */
 :root {
-  /* --- Palette: grounds & ink (cool, never pure #fff/#000) --- */
-  --color-paper: oklch(98.5% 0.004 250); /* cool engineered near-white */
-  --color-surface: oklch(100% 0 0); /* raised surface (tables, panels) */
-  --color-surface-2: oklch(96.5% 0.006 250); /* subtle fill / zebra */
-  --color-border: oklch(90% 0.008 252); /* hairline rules do the work */
-  --color-border-strong: oklch(84% 0.01 254);
-  --color-text: oklch(24% 0.02 258); /* cool charcoal — headings */
-  --color-text-body: oklch(34% 0.018 257); /* body copy, a notch lighter */
-  --color-text-muted: oklch(52% 0.016 256); /* meta, captions */
+  /* --- Palette: grounds & ink (cool blue-greys, never pure #000) --- */
+  --color-paper: oklch(97.3% 0.006 265); /* page background (#f4f6fa) */
+  --color-surface: oklch(100% 0 0); /* cards, table, app bar */
+  --color-surface-2: oklch(96.1% 0.007 269); /* fills, idle inputs, chips */
+  --color-border: oklch(92.8% 0.013 267); /* standard hairline (#e3e7f0) */
+  --color-border-soft: oklch(95.2% 0.008 271); /* row/section dividers */
+  --color-border-strong: oklch(83% 0.026 266); /* hover borders */
+  --color-text: oklch(24.4% 0.035 265); /* ink (#182031) */
+  --color-text-body: oklch(47.9% 0.032 269); /* body copy (#565d70) */
+  --color-text-muted: oklch(56% 0.028 269); /* meta, micro-labels — mockup
+     grey darkened for AA (raw #8a91a3 is 3.15:1 on white; this is ~4.7:1) */
   --color-graphite: oklch(22% 0.016 260); /* code/terminal surfaces */
 
-  /* --- The one cobalt signal (used < 5% of a viewport) --- */
-  /* L nudged 58%→55% in this phase: axe's courtesy pass measured
-     accent-contrast-on-accent (primary button text) at 4.26:1 — under
-     WCAG AA's 4.5:1 for normal-size text. 55% clears it at 4.83:1, verified
-     with the same OKLCH-contrast check used for the dark-mode pairs, and a
-     2-3pt L shift is not a visible hue change. See HANDOFF_PHASE_10.md. */
-  --color-accent: oklch(55% 0.2 256); /* electric cobalt */
-  --color-accent-strong: oklch(52% 0.2 256); /* hover/active */
-  --color-accent-soft: oklch(95% 0.03 256); /* tint fills (active row) */
-  --color-accent-contrast: oklch(99% 0.004 250); /* ink on the accent button */
-  --color-focus: oklch(55% 0.2 256);
+  /* --- Brand (identity): navy — headings, logo tile, brand button --- */
+  --color-brand: oklch(26.9% 0.083 269); /* #16224e */
+  --color-brand-strong: oklch(31.5% 0.099 269); /* #1d2c63 hover */
+  --color-brand-fill: var(--color-brand); /* filled-button bg; dark differs
+     because navy becomes the *ink* band there and can't also be a fill */
+  --color-brand-fill-contrast: oklch(99% 0.004 255);
 
-  /* --- Status (kept desaturated to sit beside the cobalt signal) --- */
-  --color-success: oklch(58% 0.13 155);
-  --color-warning: oklch(70% 0.13 75);
-  --color-danger: oklch(56% 0.18 27);
+  /* --- Accent (interaction): blue — links, active states, actions --- */
+  --color-accent: oklch(50.8% 0.132 252); /* #2167ae — 5.8:1 under white */
+  --color-accent-strong: oklch(42.2% 0.107 252); /* #184f86 hover/text-on-tint */
+  --color-accent-soft: oklch(95.6% 0.015 257); /* #eaf1fb tint fills/chips */
+  --color-accent-contrast: oklch(99% 0.004 255); /* ink on the accent button */
+  --color-focus: oklch(50.8% 0.132 252);
+
+  /* --- Status: base for dots/borders (non-text), -strong for text on the
+         -soft tints (the raw mockup pairs sit at ~3:1 — under AA for the
+         11px-bold badge text they carry) --- */
+  --color-success: oklch(61.8% 0.13 161); /* #1f9d6b */
+  --color-success-strong: oklch(52% 0.11 161);
+  --color-success-soft: oklch(95.9% 0.017 163); /* #e8f5ee */
+  --color-warning: oklch(63.7% 0.14 68); /* #c27803 */
+  --color-warning-strong: oklch(50% 0.11 68);
+  --color-warning-soft: oklch(96% 0.03 86); /* #fbf1dc */
+  --color-danger: oklch(59.7% 0.182 25); /* #d64545 */
+  --color-danger-strong: oklch(50% 0.15 25);
+  --color-danger-soft: oklch(95.1% 0.019 17); /* #fbeaea */
   --color-info: var(--color-accent);
-  --color-success-soft: oklch(95% 0.03 155); /* tint fills — StatusDisplay */
-  --color-danger-soft: oklch(95% 0.03 27);
 
-  /* --- Typography: single family, calm and restrained (see fonts.css) --- */
-  --font-display: 'Inter', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  /* --- Categorical ramp: cluster dots, avatar fills (index-stable) --- */
+  --color-cat-1: oklch(59.7% 0.182 25); /* red */
+  --color-cat-2: oklch(50.8% 0.132 252); /* blue */
+  --color-cat-3: oklch(61.8% 0.13 161); /* green */
+  --color-cat-4: oklch(65.7% 0.028 269); /* grey */
+  --color-cat-5: oklch(30.6% 0.021 269); /* graphite */
+  --color-cat-6: oklch(54.9% 0.247 291); /* violet */
+  --color-cat-7: oklch(64.8% 0.13 232); /* cyan */
+
+  /* --- Typography: single family (see fonts.css) --- */
+  --font-display: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
 
   --text-xs: 0.75rem;
@@ -63,8 +78,15 @@
   --text-base: 0.9375rem; /* dense-dashboard base is a touch smaller */
   --text-md: 1rem;
   --text-lg: 1.25rem;
-  --text-xl: 1.625rem;
-  --text-2xl: 2.125rem;
+  --text-xl: 1.6875rem; /* area h1 (reference: 27px) */
+  --text-2xl: 2.5rem; /* landing h1 (reference: 40px) */
+
+  /* Micro-label voice (Phase 13): the reference's structural signature —
+     small/bold/uppercase/tracked, --color-text-muted. One shared pattern
+     (.field-label etc.), reserved for labels-of-things only. */
+  --label-size: 0.6875rem; /* 11px */
+  --label-weight: 700;
+  --label-tracking: 0.025em;
 
   --leading-tight: 1.2;
   --leading-normal: 1.5;
@@ -82,65 +104,144 @@
   --space-12: 3rem;
   --space-16: 4rem;
 
-  /* --- Radius: softer, calmer curves (was "drawn with a ruler" — 4/6/10px;
-     the tighter, technical radii were part of the same "engineered" read
-     this pass moves away from) --- */
+  /* --- Radius (reference: 8–10px controls, 14px cards, 16px hero cards) --- */
   --radius-sm: 6px;
-  --radius-md: 8px; /* buttons / inputs */
-  --radius-lg: 14px; /* cards / panels */
+  --radius-md: 9px; /* buttons / inputs */
+  --radius-lg: 14px; /* cards / panels / popovers */
+  --radius-xl: 16px; /* hero cards (landing) */
   --radius-pill: 999px;
 
-  /* --- Shadow: depth from borders, not blur (single barely-there lift) --- */
-  --shadow-1: 0 1px 2px oklch(24% 0.02 258 / 0.06);
-  --shadow-2: 0 4px 16px oklch(24% 0.02 258 / 0.08);
+  /* --- Elevation: resting surfaces stay border-forward; floating layers
+         (popovers/menus/drawer) take the reference's soft navy shadows --- */
+  --shadow-1: 0 1px 2px oklch(26.9% 0.083 269 / 0.06);
+  --shadow-2: 0 4px 16px oklch(26.9% 0.083 269 / 0.08);
+  --shadow-pop: 0 16px 40px oklch(26.9% 0.083 269 / 0.16);
+  --shadow-drawer: -18px 0 50px oklch(26.9% 0.083 269 / 0.2);
   /* Modal/dialog backdrop scrim — invariant across themes on purpose (a
      dark, semi-transparent dimmer reads correctly over both light and dark
      content), so it's declared once here, not overridden in the dark block. */
-  --color-scrim: oklch(0% 0 0 / 0.4);
+  --color-scrim: oklch(26.9% 0.083 269 / 0.34);
 
   /* --- Motion --- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-fast: 0.15s;
+  --dur-pop: 0.14s; /* popover/menu entrance */
+  --dur-slide: 0.24s; /* drawer entrance */
   --dur-base: 0.3s;
 }
 
 /*
- * Dark mode (Phase 10) — same hue channels as light (250/252/254/256/257/258/
- * 260), lightness inverted, chroma tuned so large surfaces don't read muddy
- * and the accent stays vivid rather than graying out against a dark ground.
- * Every pair re-verified against WCAG AA (4.5:1 body text, 3:1 large text/UI)
- * during this phase's verification step — see HANDOFF_PHASE_10.md.
- * "Depth from borders, not blur" carries over: shadows raise opacity rather
- * than switching to a blurry dark-mode look off this theme's own system.
+ * Dark mode — Phase 10's architecture, re-derived for the navy anchors:
+ * hue channels preserved (~252 accent / ~265-269 neutrals), lightness
+ * inverted, chroma tuned so large surfaces don't read muddy. Navy becomes
+ * *ink* in dark (headings, logo text), so filled brand buttons take the
+ * distinct --color-brand-fill pair. Every pair re-verified against WCAG AA
+ * (4.5:1 body text, 3:1 large text/UI). "Depth from borders, not blur"
+ * carries over: shadows raise opacity rather than changing geometry.
  */
 :root[data-theme='dark'] {
-  --color-paper: oklch(20% 0.01 258);
-  --color-surface: oklch(24% 0.012 258);
-  --color-surface-2: oklch(28% 0.014 258);
-  --color-border: oklch(34% 0.014 256);
-  --color-border-strong: oklch(42% 0.016 256);
-  --color-text: oklch(95% 0.006 250);
-  --color-text-body: oklch(88% 0.008 252);
-  --color-text-muted: oklch(68% 0.012 254);
+  --color-paper: oklch(20% 0.012 265);
+  --color-surface: oklch(24% 0.014 265);
+  --color-surface-2: oklch(28% 0.016 265);
+  --color-border: oklch(34% 0.016 265);
+  --color-border-soft: oklch(30% 0.014 265);
+  --color-border-strong: oklch(44% 0.018 265);
+  --color-text: oklch(95% 0.006 260);
+  --color-text-body: oklch(87% 0.01 262);
+  --color-text-muted: oklch(70% 0.02 265);
   /* --color-graphite is deliberately NOT overridden here: it's an
      always-dark "code/terminal surface" token by design (unused in the app
      today), not a paper/ink pair that should invert with the theme. */
 
-  --color-accent: oklch(68% 0.19 256);
-  --color-accent-strong: oklch(74% 0.18 256);
-  --color-accent-soft: oklch(30% 0.05 256);
-  --color-accent-contrast: oklch(14% 0.02 258);
-  --color-focus: oklch(68% 0.19 256);
+  --color-brand: oklch(88% 0.04 265);
+  --color-brand-strong: oklch(93% 0.03 265);
+  --color-brand-fill: oklch(38% 0.09 268);
+  --color-brand-fill-contrast: oklch(96% 0.01 260);
 
-  --color-success: oklch(70% 0.15 155);
-  --color-warning: oklch(78% 0.14 75);
-  --color-danger: oklch(68% 0.19 27);
+  --color-accent: oklch(70% 0.11 252);
+  --color-accent-strong: oklch(76% 0.1 252);
+  --color-accent-soft: oklch(31% 0.05 254);
+  --color-accent-contrast: oklch(16% 0.02 260);
+  --color-focus: oklch(70% 0.11 252);
+
+  --color-success: oklch(72% 0.14 161);
+  --color-success-strong: oklch(80% 0.12 161);
+  --color-success-soft: oklch(30% 0.05 161);
+  --color-warning: oklch(76% 0.14 78);
+  --color-warning-strong: oklch(84% 0.11 80);
+  --color-warning-soft: oklch(30% 0.05 80);
+  --color-danger: oklch(70% 0.17 25);
+  --color-danger-strong: oklch(80% 0.12 22);
+  --color-danger-soft: oklch(30% 0.06 22);
   --color-info: var(--color-accent);
-  --color-success-soft: oklch(30% 0.05 155);
-  --color-danger-soft: oklch(30% 0.05 27);
+
+  --color-cat-1: oklch(70% 0.17 25);
+  --color-cat-2: oklch(70% 0.11 252);
+  --color-cat-3: oklch(72% 0.14 161);
+  --color-cat-4: oklch(72% 0.024 269);
+  --color-cat-5: oklch(80% 0.02 269);
+  --color-cat-6: oklch(70% 0.18 291);
+  --color-cat-7: oklch(74% 0.11 232);
 
   --shadow-1: 0 1px 2px oklch(0% 0 0 / 0.3);
   --shadow-2: 0 4px 16px oklch(0% 0 0 / 0.45);
+  --shadow-pop: 0 16px 40px oklch(0% 0 0 / 0.5);
+  --shadow-drawer: -18px 0 50px oklch(0% 0 0 / 0.55);
+}
+
+/* Named entrances (design.md · Motion stance) — defined once, consumed by
+   feature CSS via `animation:`. The reduced-motion guard below flattens all
+   of them to imperceptible durations. */
+@keyframes pvp-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pvp-pop {
+  from {
+    transform: translateY(6px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes pvp-slide {
+  from {
+    transform: translateX(28px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes pvp-up {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes pvp-shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+@keyframes pvp-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Reduced motion: ship static, fully visible. */
@@ -177,8 +278,8 @@ h2,
 h3,
 h4 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 700;
   line-height: var(--leading-tight);
-  letter-spacing: -0.01em;
-  color: var(--color-text);
+  letter-spacing: -0.015em;
+  color: var(--color-brand);
 }
