@@ -65,6 +65,56 @@
   color: var(--color-text-muted);
 }
 
+/* Phase 13 block layout — the reference's centered full-panel state:
+   rounded icon tile, bold title, muted copy, optional action button. */
+.status-display-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-16) var(--space-6);
+  text-align: center;
+}
+
+.status-display-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.75rem;
+  height: 3.75rem;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+}
+
+.status-display-block-error .status-display-tile {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-strong);
+}
+
+.status-display-block-success .status-display-tile {
+  background: var(--color-success-soft);
+  color: var(--color-success-strong);
+}
+
+.status-display-title {
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--color-brand);
+}
+
+.status-display-text {
+  max-width: 24rem;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-text-muted);
+}
+
+.status-display-action {
+  margin-top: var(--space-3);
+}
+
 .status-display-spin {
   animation: status-display-spin 0.8s linear infinite;
 }

@@ -27,14 +27,18 @@
   --color-border-strong: oklch(83% 0.026 266); /* hover borders */
   --color-text: oklch(24.4% 0.035 265); /* ink (#182031) */
   --color-text-body: oklch(47.9% 0.032 269); /* body copy (#565d70) */
-  --color-text-muted: oklch(56% 0.028 269); /* meta, micro-labels — mockup
+  --color-text-muted: oklch(
+    56% 0.028 269
+  ); /* meta, micro-labels — mockup
      grey darkened for AA (raw #8a91a3 is 3.15:1 on white; this is ~4.7:1) */
   --color-graphite: oklch(22% 0.016 260); /* code/terminal surfaces */
 
   /* --- Brand (identity): navy — headings, logo tile, brand button --- */
   --color-brand: oklch(26.9% 0.083 269); /* #16224e */
   --color-brand-strong: oklch(31.5% 0.099 269); /* #1d2c63 hover */
-  --color-brand-fill: var(--color-brand); /* filled-button bg; dark differs
+  --color-brand-fill: var(
+    --color-brand
+  ); /* filled-button bg; dark differs
      because navy becomes the *ink* band there and can't also be a fill */
   --color-brand-fill-contrast: oklch(99% 0.004 255);
 

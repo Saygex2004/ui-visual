@@ -1,0 +1,39 @@
+/* design-system: design.md (Navy Ledger, Phase 13)
+ * Pill badge chrome. Token-only; dark mode flows through tokens.css. */
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.125rem var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.ui-badge-accent {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+}
+
+.ui-badge-success {
+  background: var(--color-success-soft);
+  color: var(--color-success-strong);
+}
+
+.ui-badge-warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning-strong);
+}
+
+.ui-badge-danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger-strong);
+}
+
+.ui-badge-neutral {
+  background: var(--color-surface-2);
+  color: var(--color-text-body);
+}

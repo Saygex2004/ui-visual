@@ -13,7 +13,10 @@
 // render `TabsPanel` directly inside `TabsRoot`. `onValueChange` takes a
 // plain string (Radix's native signature), not PrimeReact's `{value}` event
 // shape.
+// Phase 13: tabs.css defines the single shared underline-tab voice
+// (`.ui-tabs-list` / `.ui-tab`) consumed by every tab strip in the app.
 import * as RadixTabs from '@radix-ui/react-tabs';
+import './tabs.css';
 
 export const TabsRoot = RadixTabs.Root;
 export const TabsList = RadixTabs.List;

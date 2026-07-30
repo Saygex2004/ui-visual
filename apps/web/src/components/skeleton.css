@@ -1,0 +1,50 @@
+/* design-system: design.md (Navy Ledger, Phase 13)
+ * Shimmer skeleton chrome. The gradient stops are the surface-2/border
+ * tokens, so both themes shimmer correctly with no overrides. */
+.ui-skeleton {
+  display: inline-block;
+  height: 0.875rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-2) 25%,
+    var(--color-border-soft) 37%,
+    var(--color-surface-2) 63%
+  );
+  background-size: 800px 100%;
+  animation: pvp-shimmer 1.3s infinite linear;
+}
+
+.ui-skeleton-rows {
+  padding: var(--space-2) 0;
+}
+
+.ui-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border-soft);
+}
+
+.ui-skeleton-row:last-child {
+  border-bottom: none;
+}
+
+.ui-skeleton-cell-sm {
+  width: 3.75rem;
+}
+
+.ui-skeleton-cell-md {
+  width: 7.5rem;
+}
+
+.ui-skeleton-cell-fill {
+  flex: 1;
+}
+
+.ui-skeleton-cell-action {
+  width: 8.75rem;
+  height: 2.125rem;
+  border-radius: var(--radius-md);
+}

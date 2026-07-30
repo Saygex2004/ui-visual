@@ -1,0 +1,18 @@
+/* design-system: design.md (Navy Ledger, Phase 13)
+ * Micro-label voice — the one sanctioned uppercase pattern: labels of
+ * things (fields, columns, KV keys), never things themselves. */
+.ui-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.ui-field-label,
+.ui-micro-label {
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}

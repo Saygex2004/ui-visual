@@ -1,0 +1,72 @@
+/* design-system: design.md (Navy Ledger, Phase 13)
+ * Initials avatar chrome — categorical fills, three sizes, overlap stack.
+ * Token-only; dark mode flows through tokens.css automatically. */
+.ui-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: var(--radius-pill);
+  color: var(--color-surface);
+  font-weight: 700;
+  user-select: none;
+}
+
+.ui-avatar-sm {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.625rem;
+}
+
+.ui-avatar-md {
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 0.6875rem;
+}
+
+.ui-avatar-lg {
+  width: 2rem;
+  height: 2rem;
+  font-size: var(--text-xs);
+}
+
+.ui-avatar-cat-1 {
+  background: var(--color-cat-1);
+}
+.ui-avatar-cat-2 {
+  background: var(--color-cat-2);
+}
+.ui-avatar-cat-3 {
+  background: var(--color-cat-3);
+}
+.ui-avatar-cat-4 {
+  background: var(--color-cat-4);
+}
+.ui-avatar-cat-5 {
+  background: var(--color-cat-5);
+}
+.ui-avatar-cat-6 {
+  background: var(--color-cat-6);
+}
+.ui-avatar-cat-7 {
+  background: var(--color-cat-7);
+}
+
+/* Dark mode: categorical fills lighten (see tokens), so initials flip to
+   the dark ink for contrast. */
+:root[data-theme='dark'] .ui-avatar {
+  color: var(--color-accent-contrast);
+}
+
+.ui-avatar-stack {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ui-avatar-stack .ui-avatar {
+  border: 2px solid var(--color-surface);
+}
+
+.ui-avatar-stack .ui-avatar + .ui-avatar {
+  margin-left: calc(-1 * var(--space-2));
+}

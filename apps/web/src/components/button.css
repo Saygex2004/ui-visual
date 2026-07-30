@@ -69,6 +69,64 @@
   border-color: var(--color-border-strong);
 }
 
+/* Brand — the navy identity fill; at most one per screen (design.md).
+   Uses the -fill pair so dark mode gets a real fill while navy itself
+   becomes the ink band. */
+.ui-button-brand {
+  background: var(--color-brand-fill);
+  color: var(--color-brand-fill-contrast);
+  box-shadow: var(--shadow-1);
+}
+
+.ui-button-brand:hover:not(:disabled),
+.ui-button-brand:active:not(:disabled) {
+  background: var(--color-brand-strong);
+}
+
+:root[data-theme='dark'] .ui-button-brand:hover:not(:disabled),
+:root[data-theme='dark'] .ui-button-brand:active:not(:disabled) {
+  background: var(--color-brand-fill);
+  filter: brightness(1.15);
+}
+
+/* Tinted — secondary-but-branded (reference: "Vai all'annuncio", "+ Aggiungi") */
+.ui-button-tinted {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  font-weight: 700;
+}
+
+.ui-button-tinted:hover:not(:disabled),
+.ui-button-tinted:active:not(:disabled) {
+  filter: brightness(0.96);
+}
+
+:root[data-theme='dark'] .ui-button-tinted:hover:not(:disabled),
+:root[data-theme='dark'] .ui-button-tinted:active:not(:disabled) {
+  filter: brightness(1.15);
+}
+
+/* Ghost — transparent outlined pill (chip-row actions: reset filters) */
+.ui-button-ghost {
+  background: transparent;
+  border-color: var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-body);
+}
+
+.ui-button-ghost:hover:not(:disabled),
+.ui-button-ghost:active:not(:disabled) {
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+/* Icon — square control ("⋯", "×") */
+.ui-button-icon {
+  width: 2.125rem;
+  height: 2.125rem;
+  padding: 0;
+}
+
 /* Success / danger — status-coloured, same shape as primary */
 .ui-button-success {
   background: var(--color-success);

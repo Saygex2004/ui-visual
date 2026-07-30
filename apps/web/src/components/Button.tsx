@@ -1,12 +1,14 @@
 // Hand-styled button primitive, replacing `primereact/button` (Execution
-// Plan Phase 9). Covers exactly the prop surface every call site used:
-// type, disabled, severity, size, onClick, children — no icon/loading/
-// rounded/raised/outlined variants existed in the app, so none are built.
+// Plan Phase 9). Phase 13 adds the reference's CTA voices (design.md):
+// `brand` (navy fill, at most one per screen), `tinted` (accent-soft fill),
+// `ghost` (transparent pill), and the square `icon` size for "⋯"/"×"
+// controls.
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import './button.css';
 
-export type ButtonSeverity = 'primary' | 'secondary' | 'success' | 'danger';
-export type ButtonSize = 'small' | 'default';
+export type ButtonSeverity =
+  'primary' | 'secondary' | 'success' | 'danger' | 'brand' | 'tinted' | 'ghost';
+export type ButtonSize = 'small' | 'default' | 'icon';
 
 export interface ButtonProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
@@ -25,7 +27,12 @@ export function Button({
   type = 'button',
   ...rest
 }: ButtonProps) {
-  const classes = ['ui-button', `ui-button-${severity}`, size === 'small' ? 'ui-button-small' : '']
+  const classes = [
+    'ui-button',
+    `ui-button-${severity}`,
+    size === 'small' ? 'ui-button-small' : '',
+    size === 'icon' ? 'ui-button-icon' : '',
+  ]
     .filter(Boolean)
     .join(' ');
 

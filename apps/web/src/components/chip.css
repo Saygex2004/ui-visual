@@ -1,0 +1,47 @@
+/* design-system: design.md (Navy Ledger, Phase 13)
+ * Active-filter chip chrome. Token-only; dark mode flows through tokens. */
+.ui-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.ui-chip-key::after {
+  content: ':';
+}
+
+.ui-chip-key {
+  color: var(--color-accent);
+  font-weight: 500;
+}
+
+.ui-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  margin-left: var(--space-1);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-accent-strong);
+  cursor: pointer;
+}
+
+.ui-chip-remove:hover {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+.ui-chip-remove:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}

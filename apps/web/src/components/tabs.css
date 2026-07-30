@@ -1,0 +1,46 @@
+/* design-system: design.md (Navy Ledger, Phase 13)
+ * The one underline-tab voice (reference: 2.5px active border-bottom,
+ * count pill). Shared by bucket tabs, the workspace drawer tabs and the
+ * admin calendar tabs — no per-feature tab styles remain. Consumers use
+ * the Radix Tabs primitives from Tabs.tsx with these classes. */
+.ui-tabs-list {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: 1.5px solid var(--color-border);
+}
+
+.ui-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: -1.5px;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.ui-tab:hover {
+  color: var(--color-text);
+}
+
+.ui-tab:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}
+
+.ui-tab[data-state='active'] {
+  color: var(--color-brand);
+  font-weight: 700;
+  border-bottom-color: var(--color-accent);
+}
+
+.ui-tab .ui-badge {
+  font-size: var(--text-xs);
+}

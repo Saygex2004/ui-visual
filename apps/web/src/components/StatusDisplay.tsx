@@ -38,9 +38,37 @@ export interface StatusDisplayProps {
   icon?: ReactNode;
   role?: 'status' | 'alert';
   className?: string;
+  /** Phase 13 block layout: centered icon tile + title + message + action
+   * (the reference's full-panel empty/error states). Default stays the
+   * compact inline row. */
+  layout?: 'row' | 'block';
+  title?: string;
+  action?: ReactNode;
 }
 
-export function StatusDisplay({ variant, message, icon, role, className }: StatusDisplayProps) {
+export function StatusDisplay({
+  variant,
+  message,
+  icon,
+  role,
+  className,
+  layout = 'row',
+  title,
+  action,
+}: StatusDisplayProps) {
+  if (layout === 'block') {
+    const classes = ['status-display-block', `status-display-block-${variant}`, className]
+      .filter(Boolean)
+      .join(' ');
+    return (
+      <div className={classes} role={role ?? DEFAULT_ROLE[variant]}>
+        <span className="status-display-tile">{icon ?? DEFAULT_ICON[variant]}</span>
+        {title ? <span className="status-display-title">{title}</span> : null}
+        <span className="status-display-text">{message}</span>
+        {action ? <span className="status-display-action">{action}</span> : null}
+      </div>
+    );
+  }
   const classes = ['status-display', `status-display-${variant}`, className]
     .filter(Boolean)
     .join(' ');

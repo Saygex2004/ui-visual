@@ -1,0 +1,46 @@
+/* design-system: design.md (Navy Ledger, Phase 13)
+ * Styled native select — shared by every filter/form select. Token-only;
+ * dark mode flows through tokens.css automatically. */
+.ui-select-wrap {
+  position: relative;
+  display: block;
+}
+
+.ui-select {
+  width: 100%;
+  height: 2.5rem;
+  padding: 0 var(--space-8) 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  appearance: none;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.ui-select:hover:not(:disabled) {
+  border-color: var(--color-border-strong);
+}
+
+.ui-select:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-color: var(--color-accent);
+}
+
+.ui-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.ui-select-chevron {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
