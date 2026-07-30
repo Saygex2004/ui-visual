@@ -16,5 +16,9 @@
     "admin": "🛠 Amministrazione",
     "signOut": "Esci",
     "unread": "{{count}} messaggi non letti"
+  },
+  "passwordToggle": {
+    "show": "Mostra la password",
+    "hide": "Nascondi la password"
   }
 }

@@ -4,8 +4,8 @@
 // nonexistent/already-completed ids are skipped server-side and reported.
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { InputText } from 'primereact/inputtext';
-import { Button } from 'primereact/button';
+import { TextInput } from '../../components/TextInput.js';
+import { Button } from '../../components/Button.js';
 import { useAdminUsers, useListingSearch, useByIdAssign } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 
@@ -62,10 +62,10 @@ export function ByIdAssignTab() {
       <form className="admin-form-row" onSubmit={handleSearch}>
         <div className="admin-field">
           <label htmlFor="byid-search">{t('calendarAssignment.byId.searchLabel')}</label>
-          <InputText
+          <TextInput
             id="byid-search"
             value={query}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder={t('calendarAssignment.byId.searchPlaceholder')}
           />
         </div>
@@ -139,11 +139,11 @@ export function ByIdAssignTab() {
         </div>
         <div className="admin-field">
           <label htmlFor="byid-date">{t('calendarAssignment.dateLabel')}</label>
-          <InputText
+          <TextInput
             id="byid-date"
             type="date"
             value={date}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDate(e.target.value)}
+            onChange={(e) => setDate(e.target.value)}
           />
         </div>
       </div>

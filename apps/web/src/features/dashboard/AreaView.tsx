@@ -1,6 +1,8 @@
 // Area view (UI §2.3): back control + header + cluster nav + the active
-// section (a cluster, or Archivio), one at a time. Owns the outer, lazy
-// `TabsRoot` (only the active section's table(s) are ever mounted) and the
+// section (a cluster, or Archivio), one at a time. Owns the outer
+// `TabsRoot` (Radix's `Tabs.Content` only renders its children for the
+// active tab — see components/Tabs.tsx — so only the active section's
+// table(s) are ever mounted) and the
 // single `useSearch`/`useNavigate` pair every child reads/writes through —
 // `urlState.ts`'s schema is the single source of truth (FRONTEND.md §3).
 // Cluster nav entries come from `snapshot.clusters` itself (always one entry
@@ -18,7 +20,7 @@
 import { useMemo, useState } from 'react';
 import { Outlet, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { TabsRoot, TabsPanels, TabsPanel } from 'primereact/tabs';
+import { TabsRoot, TabsPanel } from '../../components/Tabs.js';
 import type { AreaSlug } from '@pvp/shared';
 import { useAreaSnapshot } from './hooks.js';
 import { resolveClusterSelector, type AreaSearch } from './urlState.js';
@@ -160,50 +162,47 @@ export function AreaView() {
       />
       <TabsRoot
         value={tabsValue}
-        onValueChange={(e: { value: string | number | undefined }) => {
-          patch({ cluster: e.value === 'archivio' ? 'archivio' : Number(e.value) });
+        onValueChange={(value) => {
+          patch({ cluster: value === 'archivio' ? 'archivio' : Number(value) });
         }}
-        lazy
       >
         <ClusterNav entries={navEntries} />
-        <TabsPanels>
-          {sessionMoves.clusters.map((cluster) => (
-            <TabsPanel key={cluster.key} value={String(cluster.number)}>
-              <ClusterSection
-                cluster={cluster}
-                clusters={snapshot.clusters}
-                areaKind={areaKind}
-                area={area as AreaSlug}
-                ratings={ratings}
-                chatsByListing={chatsByListing}
-                bloccoIndex={snapshot.blocco_index}
-                omiByComune={snapshot.omi_by_comune}
-                search={search}
-                onPatch={patch}
-                onReset={resetFilters}
-                onIsolate={handleIsolate}
-                onJump={handleJump}
-              />
-            </TabsPanel>
-          ))}
-          <TabsPanel value="archivio">
-            <ArchiveSection
-              rows={archiveRows}
+        {sessionMoves.clusters.map((cluster) => (
+          <TabsPanel key={cluster.key} value={String(cluster.number)}>
+            <ClusterSection
+              cluster={cluster}
               clusters={snapshot.clusters}
               areaKind={areaKind}
               area={area as AreaSlug}
               ratings={ratings}
               chatsByListing={chatsByListing}
               bloccoIndex={snapshot.blocco_index}
+              omiByComune={snapshot.omi_by_comune}
               search={search}
               onPatch={patch}
               onReset={resetFilters}
               onIsolate={handleIsolate}
               onJump={handleJump}
-              onSvuota={handleSvuota}
             />
           </TabsPanel>
-        </TabsPanels>
+        ))}
+        <TabsPanel value="archivio">
+          <ArchiveSection
+            rows={archiveRows}
+            clusters={snapshot.clusters}
+            areaKind={areaKind}
+            area={area as AreaSlug}
+            ratings={ratings}
+            chatsByListing={chatsByListing}
+            bloccoIndex={snapshot.blocco_index}
+            search={search}
+            onPatch={patch}
+            onReset={resetFilters}
+            onIsolate={handleIsolate}
+            onJump={handleJump}
+            onSvuota={handleSvuota}
+          />
+        </TabsPanel>
       </TabsRoot>
       {/* The listing workspace (UI §4.5) — renders only when the URL is
           /aste/:area/lotto/:id; a Drawer portal, so its position here is not

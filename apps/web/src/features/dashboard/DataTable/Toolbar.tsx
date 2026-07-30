@@ -11,8 +11,8 @@
 // UI §9.1: search, value range, reset, sort only).
 import { useEffect, useState, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { InputText } from 'primereact/inputtext';
-import { Button } from 'primereact/button';
+import { TextInput } from '../../../components/TextInput.js';
+import { Button } from '../../../components/Button.js';
 import type { AreaSearch } from '../urlState.js';
 import type { AreaTableKind } from './columns.js';
 
@@ -69,7 +69,7 @@ export function Toolbar({
     <div className="dashboard-toolbar">
       <div className="dashboard-toolbar-field">
         <label htmlFor="toolbar-search">{t('toolbar.searchLabel')}</label>
-        <InputText
+        <TextInput
           id="toolbar-search"
           value={qDraft}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setQDraft(e.target.value)}

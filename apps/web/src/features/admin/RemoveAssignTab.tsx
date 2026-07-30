@@ -3,8 +3,8 @@
 // DATA_MODEL.md §11 — a completed assignment_index entry survives removal).
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { InputText } from 'primereact/inputtext';
-import { Button } from 'primereact/button';
+import { TextInput } from '../../components/TextInput.js';
+import { Button } from '../../components/Button.js';
 import { useAdminUsers, useAssignedForRemoval, useRemoveAssignments } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 
@@ -77,11 +77,11 @@ export function RemoveAssignTab() {
         </div>
         <div className="admin-field">
           <label htmlFor="removal-date">{t('calendarAssignment.dateLabel')}</label>
-          <InputText
+          <TextInput
             id="removal-date"
             type="date"
             value={date}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onChange={(e) => {
               setDate(e.target.value);
               setSelected(new Set());
             }}

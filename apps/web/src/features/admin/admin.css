@@ -38,7 +38,7 @@
   cursor: pointer;
 }
 
-.admin-calendar-tab[data-active] {
+.admin-calendar-tab[data-state='active'] {
   border-color: var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-body);

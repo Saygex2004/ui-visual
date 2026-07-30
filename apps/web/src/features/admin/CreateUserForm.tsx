@@ -1,9 +1,9 @@
 // Create-account form (UI §8.1): username, password, role choice.
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { InputText } from 'primereact/inputtext';
-import { InputPassword } from 'primereact/inputpassword';
-import { Button } from 'primereact/button';
+import { TextInput } from '../../components/TextInput.js';
+import { PasswordInput } from '../../components/PasswordInput.js';
+import { Button } from '../../components/Button.js';
 import type { Role } from '@pvp/shared';
 import { useCreateUser } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
@@ -42,22 +42,16 @@ export function CreateUserForm() {
       <div className="admin-form-row">
         <div className="admin-field">
           <label htmlFor="create-username">{t('accounts.usernameLabel')}</label>
-          <InputText
+          <TextInput
             id="create-username"
             required
             value={username}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
           />
         </div>
         <div className="admin-field">
           <label htmlFor="create-password">{t('accounts.passwordLabel')}</label>
-          <InputPassword
-            id="create-password"
-            required
-            value={password}
-            onValueChange={(e: { value: string | null }) => setPassword(e.value ?? '')}
-            defaultMask
-          />
+          <PasswordInput id="create-password" required value={password} onChange={setPassword} />
         </div>
         <fieldset className="admin-field admin-role-fieldset">
           <legend>{t('accounts.roleLabel')}</legend>

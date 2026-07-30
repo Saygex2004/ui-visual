@@ -3,8 +3,8 @@
 // duplicates or draws ineligible listings — all enforced server-side.
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { InputText } from 'primereact/inputtext';
-import { Button } from 'primereact/button';
+import { TextInput } from '../../components/TextInput.js';
+import { Button } from '../../components/Button.js';
 import { useAdminUsers, useRandomAssign } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 
@@ -59,26 +59,24 @@ export function RandomAssignTab() {
         </div>
         <div className="admin-field">
           <label htmlFor="random-date">{t('calendarAssignment.dateLabel')}</label>
-          <InputText
+          <TextInput
             id="random-date"
             type="date"
             required
             value={date}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDate(e.target.value)}
+            onChange={(e) => setDate(e.target.value)}
           />
         </div>
         <div className="admin-field">
           <label htmlFor="random-count">{t('calendarAssignment.countLabel')}</label>
-          <InputText
+          <TextInput
             id="random-count"
             type="number"
             min={1}
             max={200}
             required
             value={String(count)}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setCount(Number(e.target.value) || 1)
-            }
+            onChange={(e) => setCount(Number(e.target.value) || 1)}
           />
         </div>
       </div>

@@ -7,7 +7,7 @@
 // CODEBASE (DATA_MODEL.md §7).
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'primereact/button';
+import { Button } from '../../components/Button.js';
 import { CATEGORY_GROUPS, type CategoryGroup } from '@pvp/shared';
 import { useAdminCategories, useSaveCategories } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';

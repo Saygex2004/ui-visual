@@ -1,5 +1,4 @@
 import { createRoot } from 'react-dom/client';
-import 'primeicons/primeicons.css';
 import './theme/fonts.css';
 import './theme/tokens.css';
 import { AppProviders } from './app/providers.js';

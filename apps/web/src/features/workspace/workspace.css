@@ -86,7 +86,7 @@
   cursor: pointer;
 }
 
-.workspace-tab[data-active] {
+.workspace-tab[data-state='active'] {
   border-color: var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-body);

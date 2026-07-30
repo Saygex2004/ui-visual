@@ -3,9 +3,9 @@
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
-import { InputText } from 'primereact/inputtext';
-import { InputPassword } from 'primereact/inputpassword';
-import { Button } from 'primereact/button';
+import { TextInput } from '../../components/TextInput.js';
+import { PasswordInput } from '../../components/PasswordInput.js';
+import { Button } from '../../components/Button.js';
 import { useLogin } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 import './auth.css';
@@ -38,25 +38,24 @@ export function LoginScreen({ redirectTo }: { redirectTo?: string }) {
         <h1 className="auth-title">{t('login.title')}</h1>
         <div className="auth-field">
           <label htmlFor="login-username">{t('login.usernameLabel')}</label>
-          <InputText
+          <TextInput
             id="login-username"
             name="username"
             autoComplete="username"
             required
             value={username}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
           />
         </div>
         <div className="auth-field">
           <label htmlFor="login-password">{t('login.passwordLabel')}</label>
-          <InputPassword
+          <PasswordInput
             id="login-password"
             name="password"
             autoComplete="current-password"
             required
             value={password}
-            onValueChange={(e: { value: string | null }) => setPassword(e.value ?? '')}
-            defaultMask
+            onChange={setPassword}
           />
         </div>
         {errorMessage ? (

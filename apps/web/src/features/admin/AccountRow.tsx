@@ -4,8 +4,8 @@
 // component; a native confirm keeps this phase's scope proportionate).
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { InputPassword } from 'primereact/inputpassword';
-import { Button } from 'primereact/button';
+import { PasswordInput } from '../../components/PasswordInput.js';
+import { Button } from '../../components/Button.js';
 import type { AdminUser } from '@pvp/shared';
 import { useSetPassword, useSetRole, useSetDisabled } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
@@ -126,22 +126,20 @@ export function AccountRow({
             <div className="admin-inline-panel">
               <div className="admin-field">
                 <label htmlFor={`new-password-${user.id}`}>{t('accounts.newPasswordLabel')}</label>
-                <InputPassword
+                <PasswordInput
                   id={`new-password-${user.id}`}
                   value={newPassword}
-                  onValueChange={(e: { value: string | null }) => setNewPassword(e.value ?? '')}
-                  defaultMask
+                  onChange={setNewPassword}
                 />
               </div>
               <div className="admin-field">
                 <label htmlFor={`confirm-password-${user.id}`}>
                   {t('accounts.confirmPasswordLabel')}
                 </label>
-                <InputPassword
+                <PasswordInput
                   id={`confirm-password-${user.id}`}
                   value={confirmPassword}
-                  onValueChange={(e: { value: string | null }) => setConfirmPassword(e.value ?? '')}
-                  defaultMask
+                  onChange={setConfirmPassword}
                 />
               </div>
               <Button size="small" onClick={handlePasswordSubmit} disabled={setPassword.isPending}>

@@ -1,14 +1,15 @@
 // Cluster section (UI §3.1): header + subtitle, the geographic drill-down +
 // OMI panel for clusters that map to regions (UI §3.2/§3.3), bucket tabs, the
-// active table. Owns the INNER `TabsRoot` (principali/fallimenti),
-// lazy-mounted so only the active bucket's table is ever in the DOM. Scrolls
+// active table. Owns the INNER `TabsRoot` (principali/fallimenti); Radix
+// only renders the active bucket's children (see components/Tabs.tsx), so
+// its table is the only one ever mounted. Scrolls
 // itself into view whenever a blocco isolation is active — covers both a
 // same-cluster isolate click (a harmless no-op nudge) and landing here via a
 // cross-cluster jump (UI §4.4: "brings it into view"), honouring reduced
 // motion since `scrollIntoView`'s `behavior` bypasses CSS `scroll-behavior`.
 import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TabsRoot, TabsPanels, TabsPanel } from 'primereact/tabs';
+import { TabsRoot, TabsPanel } from '../../components/Tabs.js';
 import {
   REAL_ESTATE_CLUSTERS,
   type AreaSlug,
@@ -152,13 +153,7 @@ export function ClusterSection({
         </>
       ) : null}
 
-      <TabsRoot
-        value={search.tab}
-        onValueChange={(e: { value: string | number | undefined }) =>
-          onPatch({ tab: e.value as BucketTab })
-        }
-        lazy
-      >
+      <TabsRoot value={search.tab} onValueChange={(value) => onPatch({ tab: value as BucketTab })}>
         <BucketTabs
           principaliCount={principali.totalCount}
           fallimentiCount={fallimenti.totalCount}
@@ -177,38 +172,36 @@ export function ClusterSection({
           disponibilitaOptions={disponibilitaOptions}
           tribunaleOptions={tribunaleOptions}
         />
-        <TabsPanels>
-          <TabsPanel value="principali">
-            <DataTable
-              rows={principali.rows}
-              columns={columns}
-              columnContext={columnContext}
-              ratings={ratings}
-              chatsByListing={chatsByListing}
-              area={area}
-              search={search}
-              sortKey={search.sort}
-              sortDir={search.dir}
-              onSort={handleSort}
-              emptyMessage={t('table.empty')}
-            />
-          </TabsPanel>
-          <TabsPanel value="fallimenti">
-            <DataTable
-              rows={fallimenti.rows}
-              columns={columns}
-              columnContext={columnContext}
-              ratings={ratings}
-              chatsByListing={chatsByListing}
-              area={area}
-              search={search}
-              sortKey={search.sort}
-              sortDir={search.dir}
-              onSort={handleSort}
-              emptyMessage={t('table.empty')}
-            />
-          </TabsPanel>
-        </TabsPanels>
+        <TabsPanel value="principali">
+          <DataTable
+            rows={principali.rows}
+            columns={columns}
+            columnContext={columnContext}
+            ratings={ratings}
+            chatsByListing={chatsByListing}
+            area={area}
+            search={search}
+            sortKey={search.sort}
+            sortDir={search.dir}
+            onSort={handleSort}
+            emptyMessage={t('table.empty')}
+          />
+        </TabsPanel>
+        <TabsPanel value="fallimenti">
+          <DataTable
+            rows={fallimenti.rows}
+            columns={columns}
+            columnContext={columnContext}
+            ratings={ratings}
+            chatsByListing={chatsByListing}
+            area={area}
+            search={search}
+            sortKey={search.sort}
+            sortDir={search.dir}
+            onSort={handleSort}
+            emptyMessage={t('table.empty')}
+          />
+        </TabsPanel>
       </TabsRoot>
     </section>
   );

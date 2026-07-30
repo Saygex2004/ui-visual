@@ -3,8 +3,8 @@
 // the server enforces the gate on every other route regardless.
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { InputPassword } from 'primereact/inputpassword';
-import { Button } from 'primereact/button';
+import { PasswordInput } from '../../components/PasswordInput.js';
+import { Button } from '../../components/Button.js';
 import { useChangePassword } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 import './auth.css';
@@ -42,38 +42,35 @@ export function ForcedPasswordChange() {
         <p className="auth-subtitle">{t('forcedChange.description')}</p>
         <div className="auth-field">
           <label htmlFor="fpc-current">{t('forcedChange.currentPasswordLabel')}</label>
-          <InputPassword
+          <PasswordInput
             id="fpc-current"
             name="current_password"
             autoComplete="current-password"
             required
             value={currentPassword}
-            onValueChange={(e: { value: string | null }) => setCurrentPassword(e.value ?? '')}
-            defaultMask
+            onChange={setCurrentPassword}
           />
         </div>
         <div className="auth-field">
           <label htmlFor="fpc-new">{t('forcedChange.newPasswordLabel')}</label>
-          <InputPassword
+          <PasswordInput
             id="fpc-new"
             name="new_password"
             autoComplete="new-password"
             required
             value={newPassword}
-            onValueChange={(e: { value: string | null }) => setNewPassword(e.value ?? '')}
-            defaultMask
+            onChange={setNewPassword}
           />
         </div>
         <div className="auth-field">
           <label htmlFor="fpc-confirm">{t('forcedChange.confirmPasswordLabel')}</label>
-          <InputPassword
+          <PasswordInput
             id="fpc-confirm"
             name="confirm_password"
             autoComplete="new-password"
             required
             value={confirmPassword}
-            onValueChange={(e: { value: string | null }) => setConfirmPassword(e.value ?? '')}
-            defaultMask
+            onChange={setConfirmPassword}
           />
         </div>
         {errorMessage ? (

@@ -1,7 +1,7 @@
 // Bucket tabs — Procedure principali / Fallimenti (UI §3.1), each with a
 // count badge; Fallimenti visually set apart (old-law bankruptcy context).
 // Presentational, same pattern as ClusterNav — the caller owns `TabsRoot`.
-import { TabsList, TabsTab } from 'primereact/tabs';
+import { TabsList, TabsTab } from '../../components/Tabs.js';
 import { useTranslation } from 'react-i18next';
 import type { BucketTab } from './urlState.js';
 

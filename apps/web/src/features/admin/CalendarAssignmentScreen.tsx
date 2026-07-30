@@ -3,7 +3,7 @@
 // TabsRoot-driven-by-URL pattern (WorkspacePanel.tsx).
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { TabsRoot, TabsList, TabsTab, TabsPanels, TabsPanel } from 'primereact/tabs';
+import { TabsRoot, TabsList, TabsTab, TabsPanel } from '../../components/Tabs.js';
 import type { AdminCalendarTab } from './adminCalendarUrlState.js';
 import { RandomAssignTab } from './RandomAssignTab.js';
 import { RemoveAssignTab } from './RemoveAssignTab.js';
@@ -20,10 +20,7 @@ export function CalendarAssignmentScreen() {
       <h1>{t('calendarAssignment.title')}</h1>
       <TabsRoot
         value={search.tab}
-        onValueChange={(e: { value: string | number | undefined }) =>
-          void navigate({ search: { tab: e.value as AdminCalendarTab } })
-        }
-        lazy
+        onValueChange={(value) => void navigate({ search: { tab: value as AdminCalendarTab } })}
       >
         <TabsList className="admin-calendar-tabs">
           <TabsTab value="casuale" className="admin-calendar-tab">
@@ -36,17 +33,15 @@ export function CalendarAssignmentScreen() {
             {t('calendarAssignment.tabs.byId')}
           </TabsTab>
         </TabsList>
-        <TabsPanels>
-          <TabsPanel value="casuale">
-            <RandomAssignTab />
-          </TabsPanel>
-          <TabsPanel value="rimozione">
-            <RemoveAssignTab />
-          </TabsPanel>
-          <TabsPanel value="per-id">
-            <ByIdAssignTab />
-          </TabsPanel>
-        </TabsPanels>
+        <TabsPanel value="casuale">
+          <RandomAssignTab />
+        </TabsPanel>
+        <TabsPanel value="rimozione">
+          <RemoveAssignTab />
+        </TabsPanel>
+        <TabsPanel value="per-id">
+          <ByIdAssignTab />
+        </TabsPanel>
       </TabsRoot>
     </div>
   );

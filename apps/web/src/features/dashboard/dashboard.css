@@ -204,13 +204,13 @@
   background: var(--color-surface-2);
 }
 
-.cluster-nav-tab[data-active] {
+.cluster-nav-tab[data-state='active'] {
   background: var(--color-accent);
   border-color: var(--color-accent);
   color: var(--color-accent-contrast);
 }
 
-.cluster-nav-tab[data-active]:hover {
+.cluster-nav-tab[data-state='active']:hover {
   border-color: var(--color-accent);
 }
 
@@ -312,7 +312,7 @@
   outline-offset: 2px;
 }
 
-.bucket-tab[data-active] {
+.bucket-tab[data-state='active'] {
   background: var(--color-surface-2);
   border-color: var(--color-accent);
   font-weight: 600;
