@@ -1,6 +1,9 @@
 {
   "app": {
     "name": "PVP Aste Dashboard",
+    "brandName": "PVP Aste",
+    "brandSub": "Dashboard",
+    "homeLinkTitle": "Torna alla home (Scegli una vista)",
     "tagline": "Revisione delle vendite giudiziarie italiane"
   },
   "bootstrap": {
@@ -11,11 +14,15 @@
   },
   "comingSoon": "Questa sezione sarà disponibile in un prossimo aggiornamento.",
   "userMenu": {
-    "calendar": "📅 Calendario",
-    "myChats": "💬 Le mie chat",
-    "admin": "🛠 Amministrazione",
+    "calendar": "Calendario",
+    "myChats": "Le mie chat",
+    "admin": "Amministrazione",
     "signOut": "Esci",
     "unread": "{{count}} messaggi non letti",
+    "role": {
+      "admin": "Amministratore",
+      "user": "Operatore"
+    },
     "theme": {
       "switchToDark": "Passa al tema scuro",
       "switchToLight": "Passa al tema chiaro"

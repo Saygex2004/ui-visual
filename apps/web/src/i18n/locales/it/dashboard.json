@@ -1,9 +1,15 @@
 {
   "landing": {
     "title": "Scegli una vista",
-    "immobiliTitle": "🏠 Cluster Immobiliari",
+    "subtitle": "Seleziona l'area di lavoro. I dati vengono aggiornati automaticamente in base alla pianificazione dello scraper.",
+    "updatedBadge": "Aggiornato {{when}}",
+    "activeBadge": "Attiva",
+    "openCta": "Apri",
+    "statCount": "{{count}} listing analizzati",
+    "statLoading": "Caricamento…",
+    "immobiliTitle": "Cluster Immobiliari",
     "immobiliDescription": "Aste immobiliari, organizzate per cluster di rischio geografico.",
-    "creditiTitle": "💰 Cluster Crediti",
+    "creditiTitle": "Cluster Crediti",
     "creditiDescription": "Aste di quote societarie e crediti ceduti da procedure giudiziarie."
   },
   "area": {

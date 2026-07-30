@@ -1,6 +1,6 @@
-/* Hallmark · genre: modern-minimal · macrostructure: Workbench (panel/form)
- * design-system: design.md · designed-as-app
- * App shell: header + user menu — tokens only. */
+/* design-system: design.md (Navy Ledger, Phase 13) · Workbench
+ * App bar: sticky 60px surface bar — logo (clickable, → home), breadcrumb,
+ * user pill. Menu chrome comes from the shared DropdownMenu primitive. */
 .shell {
   min-height: 100vh;
   display: flex;
@@ -9,37 +9,137 @@
 }
 
 .shell-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-3) var(--space-6);
+  gap: var(--space-5);
+  height: 3.75rem;
+  padding: 0 var(--space-6);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
 }
 
-.shell-brand {
-  font-family: var(--font-display);
+.shell-header-spacer {
+  flex: 1;
+}
+
+/* Logo block — CSS-drawn placeholder mark (design.md: temporary, will be
+   replaced by a real asset later). One implementation, reused by auth. */
+.shell-logo-link {
+  display: inline-flex;
+  margin-left: calc(-1 * var(--space-2));
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.shell-logo-link:hover {
+  background: var(--color-paper);
+}
+
+.shell-logo-link:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.shell-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.shell-logo-tile {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  width: 2.125rem;
+  height: 2.125rem;
+  padding: 0.55rem 0;
+  border-radius: var(--radius-md);
+  background: var(--color-brand-fill);
+  box-shadow: var(--shadow-1);
+}
+
+.shell-logo-bar {
+  width: 3px;
+  border-radius: 2px;
+}
+
+.shell-logo-bar-1 {
+  height: 0.5rem;
+  background: var(--color-accent-soft);
+}
+
+.shell-logo-bar-2 {
+  height: 1rem;
+  background: var(--color-brand-fill-contrast);
+}
+
+.shell-logo-bar-3 {
+  height: 0.7rem;
+  background: var(--color-accent);
+}
+
+.shell-logo-wordmark {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.shell-logo-name {
+  font-size: var(--text-base);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--color-brand);
+}
+
+.shell-logo-sub {
+  font-size: 0.65625rem;
+  font-weight: var(--label-weight);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Breadcrumb — current top-level section beside the logo. */
+.shell-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  font-size: var(--text-sm);
+}
+
+.shell-breadcrumb-sep {
+  color: var(--color-border-strong);
+}
+
+.shell-breadcrumb-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--color-text-body);
 }
 
-.shell-user-menu {
-  position: relative;
-}
-
+/* User pill. */
 .shell-user-menu-trigger {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  height: 2.25rem;
-  padding: 0 var(--space-3);
+  height: 2.375rem;
+  padding: 0 var(--space-3) 0 var(--space-1);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-pill);
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
-  font-weight: 500;
+  font-size: var(--text-sm);
+  font-weight: 600;
   cursor: pointer;
   transition:
     background-color var(--dur-fast) var(--ease-out),
@@ -47,13 +147,20 @@
 }
 
 .shell-user-menu-trigger:hover {
-  background: var(--color-surface-2);
+  background: var(--color-paper);
   border-color: var(--color-border-strong);
 }
 
 .shell-user-menu-trigger:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+.shell-user-name {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shell-unread-badge {
@@ -70,56 +177,44 @@
   font-size: var(--text-xs);
 }
 
-.shell-user-menu-panel {
-  position: absolute;
-  right: 0;
-  top: calc(100% + var(--space-2));
+.shell-unread-badge-menu {
+  margin-left: auto;
+}
+
+/* Identity header inside the user menu. */
+.shell-user-menu-header {
   display: flex;
   flex-direction: column;
-  min-width: 13rem;
-  padding: var(--space-1);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-2);
-  z-index: 10;
+  gap: 0.125rem;
+  margin-bottom: var(--space-2);
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
-.shell-user-menu-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--color-text-body);
-  font: inherit;
-  text-align: left;
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background-color var(--dur-fast) var(--ease-out);
+.shell-user-menu-username {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text);
 }
 
-.shell-user-menu-item svg {
-  flex-shrink: 0;
+.shell-user-menu-role {
+  font-size: var(--text-xs);
   color: var(--color-text-muted);
-}
-
-.shell-user-menu-item:hover,
-.shell-user-menu-item:focus-visible {
-  background: var(--color-surface-2);
-  outline: none;
-}
-
-.shell-user-menu-item:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: -2px;
 }
 
 .shell-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+@media (max-width: 30rem) {
+  .shell-header {
+    padding: 0 var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .shell-breadcrumb {
+    display: none;
+  }
 }
