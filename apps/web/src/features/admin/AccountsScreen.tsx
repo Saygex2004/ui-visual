@@ -7,6 +7,7 @@ import type { AdminUser } from '@pvp/shared';
 import { useAdminUsers } from './hooks.js';
 import { CreateUserForm } from './CreateUserForm.js';
 import { AccountRow } from './AccountRow.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import './admin.css';
 
 export function AccountsScreen() {
@@ -27,12 +28,8 @@ export function AccountsScreen() {
 
       <section>
         <h2 className="admin-form-title">{t('accounts.listTitle')}</h2>
-        {isLoading ? <p>{t('accounts.loading')}</p> : null}
-        {isError ? (
-          <p className="admin-message admin-message-error" role="alert">
-            {t('accounts.loadError')}
-          </p>
-        ) : null}
+        {isLoading ? <StatusDisplay variant="loading" message={t('accounts.loading')} /> : null}
+        {isError ? <StatusDisplay variant="error" message={t('accounts.loadError')} /> : null}
         {data ? (
           <div className="admin-table-wrap">
             <table className="admin-table">

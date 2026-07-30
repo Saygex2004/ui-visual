@@ -1,4 +1,8 @@
-/* Button chrome (Execution Plan Phase 9) — tokens only, no raw hex/oklch. */
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench (shared)
+ * design-system: design.md · designed-as-app
+ * Button chrome (Execution Plan Phase 9) — tokens only, no raw hex/oklch.
+ * Already dark-mode-ready: every value is a token, so tokens.css's
+ * `[data-theme="dark"]` override flows through with zero changes here. */
 .ui-button {
   display: inline-flex;
   align-items: center;

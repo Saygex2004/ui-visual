@@ -6,6 +6,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { TextInput } from '../../components/TextInput.js';
 import { PasswordInput } from '../../components/PasswordInput.js';
 import { Button } from '../../components/Button.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { useLogin } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 import './auth.css';
@@ -58,11 +59,7 @@ export function LoginScreen({ redirectTo }: { redirectTo?: string }) {
             onChange={setPassword}
           />
         </div>
-        {errorMessage ? (
-          <p className="auth-error" role="alert">
-            {errorMessage}
-          </p>
-        ) : null}
+        {errorMessage ? <StatusDisplay variant="error" message={errorMessage} /> : null}
         <Button type="submit" disabled={login.isPending}>
           {t('login.submit')}
         </Button>

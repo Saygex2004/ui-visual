@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/Button.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { CATEGORY_GROUPS, type CategoryGroup } from '@pvp/shared';
 import { useAdminCategories, useSaveCategories } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
@@ -54,12 +55,8 @@ export function CategoriesScreen() {
     <div className="admin-screen">
       <h1>{t('categories.title')}</h1>
 
-      {isLoading ? <p>{t('categories.loading')}</p> : null}
-      {isError ? (
-        <p className="admin-message admin-message-error" role="alert">
-          {t('categories.loadError')}
-        </p>
-      ) : null}
+      {isLoading ? <StatusDisplay variant="loading" message={t('categories.loading')} /> : null}
+      {isError ? <StatusDisplay variant="error" message={t('categories.loadError')} /> : null}
 
       {data && checked ? (
         <>
@@ -108,14 +105,7 @@ export function CategoriesScreen() {
             </fieldset>
           ) : null}
 
-          {message ? (
-            <p
-              className={`admin-message admin-message-${message.kind}`}
-              role={message.kind === 'error' ? 'alert' : 'status'}
-            >
-              {message.text}
-            </p>
-          ) : null}
+          {message ? <StatusDisplay variant={message.kind} message={message.text} /> : null}
 
           <Button onClick={handleSave} disabled={saveCategories.isPending}>
             {t('categories.saveButton')}

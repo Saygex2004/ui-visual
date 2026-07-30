@@ -24,11 +24,13 @@ import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import type { AreaSlug, ThreadListItem } from '@pvp/shared';
 import type { AreaSearch, SortDir, SortKey } from '../urlState.js';
 import type { ColumnContext, ColumnDef, TableRow } from './columns.js';
 import { RatingControl } from '../../ratings/RatingControl.js';
 import type { RatingsMap } from '../../ratings/join.js';
+import { StatusDisplay } from '../../../components/StatusDisplay.js';
 import './dataTable.css';
 
 const ROW_HEIGHT_PX = 48;
@@ -74,7 +76,7 @@ export function DataTable({
   });
 
   if (rows.length === 0) {
-    return <p className="data-table-empty">{emptyMessage}</p>;
+    return <StatusDisplay variant="empty" message={emptyMessage} />;
   }
 
   return (
@@ -106,7 +108,11 @@ export function DataTable({
                   >
                     {t(col.headerKey)}
                     {col.sortKey === sortKey ? (
-                      <span aria-hidden="true">{sortDir === 'asc' ? ' ▲' : ' ▼'}</span>
+                      sortDir === 'asc' ? (
+                        <ArrowUp aria-hidden="true" size={14} />
+                      ) : (
+                        <ArrowDown aria-hidden="true" size={14} />
+                      )
                     ) : null}
                   </button>
                 ) : (

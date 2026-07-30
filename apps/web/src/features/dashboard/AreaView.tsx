@@ -21,6 +21,7 @@ import { useMemo, useState } from 'react';
 import { Outlet, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { TabsRoot, TabsPanel } from '../../components/Tabs.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import type { AreaSlug } from '@pvp/shared';
 import { useAreaSnapshot } from './hooks.js';
 import { resolveClusterSelector, type AreaSearch } from './urlState.js';
@@ -139,10 +140,10 @@ export function AreaView() {
   }, [snapshot]);
 
   if (isLoading) {
-    return <p className="area-status">{t('area.loading')}</p>;
+    return <StatusDisplay variant="loading" message={t('area.loading')} />;
   }
   if (isError || !snapshot) {
-    return <p className="area-status area-status-error">{t('area.loadError')}</p>;
+    return <StatusDisplay variant="error" message={t('area.loadError')} />;
   }
 
   const resolvedCluster = resolveClusterSelector(search.cluster, snapshot.clusters.length);

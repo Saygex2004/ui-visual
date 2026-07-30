@@ -4,6 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PVP Aste Dashboard</title>
+    <script>
+      (function () {
+        // No-FOUC theme bootstrap (Phase 10): runs before any stylesheet
+        // paints, so the correct `data-theme` is on <html> from the first
+        // frame. Mirrors the persistence contract in src/lib/theme.ts —
+        // an explicit stored choice always wins; absence of the key means
+        // "follow the OS preference."
+        try {
+          var stored = localStorage.getItem('pvpdash.theme');
+          var theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          // localStorage/matchMedia unavailable (e.g. privacy mode) — fall
+          // back to light, the CSS default with no attribute present.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

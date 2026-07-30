@@ -14,6 +14,7 @@ import { toTableRow } from './adapter.js';
 import { useRatingsMap } from '../ratings/hooks.js';
 import { useMyThreadsMap } from '../chat/hooks.js';
 import { useMe } from '../auth/hooks.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import './calendar.css';
 
 // The workspace route (opened from a row's actions) needs an AreaSearch-
@@ -52,8 +53,8 @@ export function DayView() {
       </Link>
       <h1 className="calendar-day-title">{formatDayLabel(date)}</h1>
 
-      {isLoading ? <p className="calendar-status">{t('loading')}</p> : null}
-      {isError ? <p className="calendar-status">{t('loadError')}</p> : null}
+      {isLoading ? <StatusDisplay variant="loading" message={t('loading')} /> : null}
+      {isError ? <StatusDisplay variant="error" message={t('loadError')} /> : null}
 
       {data ? (
         <>
@@ -61,7 +62,7 @@ export function DayView() {
             {t('day.progress', { completed: data.progress.completed, total: data.progress.total })}
           </p>
           {rows.length === 0 ? (
-            <p className="calendar-status">{t('day.empty')}</p>
+            <StatusDisplay variant="empty" message={t('day.empty')} />
           ) : (
             <DataTable
               rows={rows}

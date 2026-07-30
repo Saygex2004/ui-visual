@@ -21,7 +21,12 @@ const AREAS: { slug: AreaSlug; titleKey: string; descriptionKey: string }[] = [
 export function LandingScreen() {
   const { t } = useTranslation('dashboard');
   return (
-    <main className="landing-screen">
+    // A <div>, not a second <main> — Shell.tsx's `.shell-content` is already
+    // the page's one <main> landmark; nesting a second one is an axe
+    // landmark-no-duplicate-main violation (found via this phase's a11y
+    // courtesy pass, predates Phase 10, fixed here since it's a one-line,
+    // zero-risk semantic correction with no visual or behavioural change).
+    <div className="landing-screen">
       <h1 className="landing-title">{t('landing.title')}</h1>
       <div className="landing-options">
         {AREAS.map((area) => (
@@ -37,6 +42,6 @@ export function LandingScreen() {
           </Link>
         ))}
       </div>
-    </main>
+    </div>
   );
 }

@@ -6,6 +6,7 @@
 // HANDOFF_PHASE_4.md).
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ArrowRight } from 'lucide-react';
 
 export interface BloccoJumpChooserProps {
   bloccoKey: string;
@@ -38,7 +39,7 @@ export function BloccoJumpChooser({ bloccoKey, otherClusterKeys, onJump }: Blocc
         aria-label={label}
         onClick={() => onJump(target, bloccoKey)}
       >
-        <span aria-hidden="true">{'→'}</span>
+        <ArrowRight aria-hidden="true" size={14} />
       </button>
     );
   }
@@ -54,7 +55,7 @@ export function BloccoJumpChooser({ bloccoKey, otherClusterKeys, onJump }: Blocc
         aria-label={t('table.bloccoJumpChooserTitle')}
         onClick={() => setOpen((v) => !v)}
       >
-        <span aria-hidden="true">{'→'}</span>
+        <ArrowRight aria-hidden="true" size={14} />
       </button>
       {open ? (
         <ul className="blocco-jump-menu" role="menu">

@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { ChatMessageView, AttachmentDescriptor } from '@pvp/shared';
 import { formatTimestamp } from '../dashboard/DataTable/formatting.js';
 import { RichTextRenderer } from './RichTextRenderer.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import * as chatApi from './api.js';
 
 const NEAR_BOTTOM_PX = 80;
@@ -99,7 +100,7 @@ export function MessageList({ messages, currentUserId }: MessageListProps) {
   }
 
   if (messages.length === 0) {
-    return <p className="chat-status">{t('messages.empty')}</p>;
+    return <StatusDisplay variant="empty" message={t('messages.empty')} />;
   }
 
   return (

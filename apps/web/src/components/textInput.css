@@ -1,4 +1,7 @@
-/* Text input chrome (Execution Plan Phase 9) — shared with PasswordInput. */
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench (shared)
+ * design-system: design.md · designed-as-app
+ * Text input chrome (Execution Plan Phase 9) — shared with PasswordInput.
+ * Token-only; dark mode flows through tokens.css automatically. */
 .ui-text-input {
   height: 2.5rem;
   padding: 0 var(--space-3);

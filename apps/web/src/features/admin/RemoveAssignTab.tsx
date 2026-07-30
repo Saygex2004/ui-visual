@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TextInput } from '../../components/TextInput.js';
 import { Button } from '../../components/Button.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { useAdminUsers, useAssignedForRemoval, useRemoveAssignments } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 
@@ -90,10 +91,10 @@ export function RemoveAssignTab() {
       </div>
 
       {ready && isLoading ? (
-        <p className="admin-message">{t('calendarAssignment.loading')}</p>
+        <StatusDisplay variant="loading" message={t('calendarAssignment.loading')} />
       ) : null}
       {ready && !isLoading && listings.length === 0 ? (
-        <p className="admin-message">{t('calendarAssignment.removal.empty')}</p>
+        <StatusDisplay variant="empty" message={t('calendarAssignment.removal.empty')} />
       ) : null}
 
       {listings.length > 0 ? (
@@ -135,15 +136,12 @@ export function RemoveAssignTab() {
               </tbody>
             </table>
           </div>
-          {errorMessage ? (
-            <p className="admin-message admin-message-error" role="alert">
-              {errorMessage}
-            </p>
-          ) : null}
+          {errorMessage ? <StatusDisplay variant="error" message={errorMessage} /> : null}
           {removedCount != null ? (
-            <p className="admin-message admin-message-success" role="status">
-              {t('calendarAssignment.removal.result', { count: removedCount })}
-            </p>
+            <StatusDisplay
+              variant="success"
+              message={t('calendarAssignment.removal.result', { count: removedCount })}
+            />
           ) : null}
           <Button
             type="button"

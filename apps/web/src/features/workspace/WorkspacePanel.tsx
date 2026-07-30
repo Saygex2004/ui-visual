@@ -15,6 +15,7 @@
 // `from:` quirk documented since Phase 4.
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import { X } from 'lucide-react';
 import { TabsRoot, TabsList, TabsTab, TabsPanel } from '../../components/Tabs.js';
 import {
   DialogRoot,
@@ -24,6 +25,7 @@ import {
   DialogTitle,
   DialogClose,
 } from '../../components/Dialog.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import type { AreaSlug } from '@pvp/shared';
 import type { PanelTab } from '../dashboard/urlState.js';
 import { useListingDetail } from './hooks.js';
@@ -69,12 +71,12 @@ export function WorkspacePanel() {
           <div className="workspace-drawer-header">
             <DialogTitle className="workspace-drawer-title">{title}</DialogTitle>
             <DialogClose className="workspace-drawer-close" aria-label={t('close')}>
-              {'✕'}
+              <X aria-hidden="true" size={18} />
             </DialogClose>
           </div>
           <div className="workspace-drawer-content">
-            {isLoading ? <p className="workspace-status">{t('loading')}</p> : null}
-            {isError ? <p className="workspace-status">{t('loadError')}</p> : null}
+            {isLoading ? <StatusDisplay variant="loading" message={t('loading')} /> : null}
+            {isError ? <StatusDisplay variant="error" message={t('loadError')} /> : null}
             {detail ? (
               <TabsRoot
                 value={search.pannello}

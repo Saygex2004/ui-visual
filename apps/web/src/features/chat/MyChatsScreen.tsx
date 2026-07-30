@@ -11,6 +11,7 @@ import {
   formatText,
 } from '../dashboard/DataTable/formatting.js';
 import { useMyChatsQuery } from './hooks.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import './chat.css';
 
 function previewText(thread: ThreadListItem, t: (key: string) => string): string {
@@ -65,8 +66,8 @@ export function MyChatsScreen() {
   const { t } = useTranslation('chat');
   const { data, isLoading, isError } = useMyChatsQuery();
 
-  if (isLoading) return <p className="chat-status">{t('loading')}</p>;
-  if (isError) return <p className="chat-status">{t('loadError')}</p>;
+  if (isLoading) return <StatusDisplay variant="loading" message={t('loading')} />;
+  if (isError) return <StatusDisplay variant="error" message={t('loadError')} />;
 
   const threads = data?.threads ?? [];
 
@@ -74,7 +75,7 @@ export function MyChatsScreen() {
     <div className="chat-my-chats">
       <h1 className="chat-my-chats-title">{t('myChats.title')}</h1>
       {threads.length === 0 ? (
-        <p className="chat-status">{t('myChats.empty')}</p>
+        <StatusDisplay variant="empty" message={t('myChats.empty')} />
       ) : (
         <ul className="chat-my-chats-list">
           {threads.map((thread) => {

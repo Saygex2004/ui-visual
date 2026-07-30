@@ -8,6 +8,7 @@ import { Link } from '@tanstack/react-router';
 import type { AreaSlug, BloccoSibling } from '@pvp/shared';
 import type { ListingSearch } from '../dashboard/urlState.js';
 import { formatCurrency, formatText } from '../dashboard/DataTable/formatting.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 
 export interface RelatedLotsProps {
   blocco: { key: string; count: number; siblings: readonly BloccoSibling[] };
@@ -22,7 +23,7 @@ export function RelatedLots({ blocco, area, search }: RelatedLotsProps) {
     <div className="workspace-related-lots">
       <h3>{t('relatedLots.title', { count: blocco.count })}</h3>
       {blocco.siblings.length === 0 ? (
-        <p className="workspace-status">{t('relatedLots.empty')}</p>
+        <StatusDisplay variant="empty" message={t('relatedLots.empty')} />
       ) : (
         <ul className="workspace-related-lots-list">
           {blocco.siblings.map((sibling) => (

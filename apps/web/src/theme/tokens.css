@@ -1,16 +1,20 @@
 /*
+ * Hallmark · genre: modern-minimal · macrostructure: Workbench (data-dense +
+ * panel/form archetypes) · design-system: design.md · designed-as-app
+ *
  * Design tokens — the single source of truth for the app's visual system.
- * Produced by the Hallmark foundations pass (Phase 0 task 7).
+ * Foundations produced by the Hallmark foundations pass (Phase 0 task 7);
+ * systematized + given a real dark set by the Phase 10 redesign pass, per
+ * `design.md` at the project root (read that file first — it's the rule).
  *   genre:  modern-minimal
  *   theme:  Cobalt — cool engineered near-white, ONE electric cobalt signal,
  *           hairline structure, code/mono voice. Suited to a dense, data-heavy,
  *           Italian-language professional dashboard.
  *
- * Contract: components and the PrimeReact preset reference ONLY these variables
- * — no raw hex/oklch or font literals elsewhere (lint/review enforced).
- * Palette values are Cobalt's OKLCH anchors (references/themes/cobalt.md).
- * Dark mode is out of scope for v1 (FRONTEND.md §5); the token layer makes it
- * an additive later step.
+ * Contract: components reference ONLY these variables — no raw hex/oklch or
+ * font literals elsewhere (lint/review enforced). Palette values are Cobalt's
+ * OKLCH anchors, both light and the new `[data-theme="dark"]` set — see
+ * `design.md` for the full token table and the reasoning behind each pair.
  */
 :root {
   /* --- Palette: grounds & ink (cool, never pure #fff/#000) --- */
@@ -25,17 +29,24 @@
   --color-graphite: oklch(22% 0.016 260); /* code/terminal surfaces */
 
   /* --- The one cobalt signal (used < 5% of a viewport) --- */
-  --color-accent: oklch(58% 0.2 256); /* electric cobalt */
+  /* L nudged 58%→55% in this phase: axe's courtesy pass measured
+     accent-contrast-on-accent (primary button text) at 4.26:1 — under
+     WCAG AA's 4.5:1 for normal-size text. 55% clears it at 4.83:1, verified
+     with the same OKLCH-contrast check used for the dark-mode pairs, and a
+     2-3pt L shift is not a visible hue change. See HANDOFF_PHASE_10.md. */
+  --color-accent: oklch(55% 0.2 256); /* electric cobalt */
   --color-accent-strong: oklch(52% 0.2 256); /* hover/active */
   --color-accent-soft: oklch(95% 0.03 256); /* tint fills (active row) */
   --color-accent-contrast: oklch(99% 0.004 250); /* ink on the accent button */
-  --color-focus: oklch(58% 0.2 256);
+  --color-focus: oklch(55% 0.2 256);
 
   /* --- Status (kept desaturated to sit beside the cobalt signal) --- */
   --color-success: oklch(58% 0.13 155);
   --color-warning: oklch(70% 0.13 75);
   --color-danger: oklch(56% 0.18 27);
   --color-info: var(--color-accent);
+  --color-success-soft: oklch(95% 0.03 155); /* tint fills — StatusDisplay */
+  --color-danger-soft: oklch(95% 0.03 27);
 
   /* --- Typography: 2 + 1 (bundled locally, see fonts.css) --- */
   --font-display: 'Space Grotesk', system-ui, sans-serif;
@@ -76,11 +87,54 @@
   /* --- Shadow: depth from borders, not blur (single barely-there lift) --- */
   --shadow-1: 0 1px 2px oklch(24% 0.02 258 / 0.06);
   --shadow-2: 0 4px 16px oklch(24% 0.02 258 / 0.08);
+  /* Modal/dialog backdrop scrim — invariant across themes on purpose (a
+     dark, semi-transparent dimmer reads correctly over both light and dark
+     content), so it's declared once here, not overridden in the dark block. */
+  --color-scrim: oklch(0% 0 0 / 0.4);
 
   /* --- Motion --- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-fast: 0.15s;
   --dur-base: 0.3s;
+}
+
+/*
+ * Dark mode (Phase 10) — same hue channels as light (250/252/254/256/257/258/
+ * 260), lightness inverted, chroma tuned so large surfaces don't read muddy
+ * and the accent stays vivid rather than graying out against a dark ground.
+ * Every pair re-verified against WCAG AA (4.5:1 body text, 3:1 large text/UI)
+ * during this phase's verification step — see HANDOFF_PHASE_10.md.
+ * "Depth from borders, not blur" carries over: shadows raise opacity rather
+ * than switching to a blurry dark-mode look off this theme's own system.
+ */
+:root[data-theme='dark'] {
+  --color-paper: oklch(20% 0.01 258);
+  --color-surface: oklch(24% 0.012 258);
+  --color-surface-2: oklch(28% 0.014 258);
+  --color-border: oklch(34% 0.014 256);
+  --color-border-strong: oklch(42% 0.016 256);
+  --color-text: oklch(95% 0.006 250);
+  --color-text-body: oklch(88% 0.008 252);
+  --color-text-muted: oklch(68% 0.012 254);
+  /* --color-graphite is deliberately NOT overridden here: it's an
+     always-dark "code/terminal surface" token by design (unused in the app
+     today), not a paper/ink pair that should invert with the theme. */
+
+  --color-accent: oklch(68% 0.19 256);
+  --color-accent-strong: oklch(74% 0.18 256);
+  --color-accent-soft: oklch(30% 0.05 256);
+  --color-accent-contrast: oklch(14% 0.02 258);
+  --color-focus: oklch(68% 0.19 256);
+
+  --color-success: oklch(70% 0.15 155);
+  --color-warning: oklch(78% 0.14 75);
+  --color-danger: oklch(68% 0.19 27);
+  --color-info: var(--color-accent);
+  --color-success-soft: oklch(30% 0.05 155);
+  --color-danger-soft: oklch(30% 0.05 27);
+
+  --shadow-1: 0 1px 2px oklch(0% 0 0 / 0.3);
+  --shadow-2: 0 4px 16px oklch(0% 0 0 / 0.45);
 }
 
 /* Reduced motion: ship static, fully visible. */

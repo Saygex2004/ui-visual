@@ -1,5 +1,8 @@
-/* Dashboard surface (landing, area view, cluster nav, bucket tabs, toolbar) —
-   tokens only. The DataTable/ subfolder has its own co-located stylesheet. */
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench (data-dense)
+ * design-system: design.md · designed-as-app
+ * Dashboard surface (landing, area view, cluster nav, bucket tabs, toolbar) —
+ * tokens only. The DataTable/ subfolder has its own co-located stylesheet.
+ * Loading/error states now go through the shared StatusDisplay primitive. */
 
 /* Landing — "Scegli una vista" (UI §2.2). */
 .landing-screen {
@@ -67,16 +70,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
-}
-
-.area-status {
-  padding: var(--space-8);
-  text-align: center;
-  color: var(--color-text-muted);
-}
-
-.area-status-error {
-  color: var(--color-danger);
 }
 
 /* Area header (UI §2.3 + §10.1). */
@@ -169,8 +162,8 @@
   background: var(--color-surface-2);
 }
 
-/* Cluster navigation bar (UI §2.3/§2.4) — a PrimeReact TabsList, sideways
-   scrollable. */
+/* Cluster navigation bar (UI §2.3/§2.4) — a Radix Tabs.List (Phase 9),
+   sideways scrollable. */
 .cluster-nav {
   display: flex;
   gap: var(--space-2);
@@ -406,10 +399,11 @@
 }
 
 .drilldown-field select {
-  padding: var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-paper);
+  height: 2.5rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
   color: var(--color-text-body);
   font-size: var(--text-sm);
 }
@@ -486,10 +480,11 @@
 
 .dashboard-toolbar-field select,
 .dashboard-toolbar-field input[type='number'] {
-  padding: var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-paper);
+  height: 2.5rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
   color: var(--color-text-body);
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
@@ -532,17 +527,6 @@
   color: var(--color-text-muted);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
-}
-
-/* Listing workspace placeholder (UI §4.5, Phase 6 builds the real panel). */
-.workspace-placeholder {
-  padding: var(--space-6);
-  border: 1px dashed var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  color: var(--color-text-muted);
-  max-width: 40rem;
-  margin: var(--space-6) auto;
-  text-align: center;
 }
 
 /* Narrow viewports (UI §11 responsiveness floor — verified at 320/375/414px):

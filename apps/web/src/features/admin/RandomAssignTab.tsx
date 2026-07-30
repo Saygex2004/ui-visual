@@ -5,6 +5,7 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TextInput } from '../../components/TextInput.js';
 import { Button } from '../../components/Button.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { useAdminUsers, useRandomAssign } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 
@@ -80,15 +81,12 @@ export function RandomAssignTab() {
           />
         </div>
       </div>
-      {errorMessage ? (
-        <p className="admin-message admin-message-error" role="alert">
-          {errorMessage}
-        </p>
-      ) : null}
+      {errorMessage ? <StatusDisplay variant="error" message={errorMessage} /> : null}
       {result ? (
-        <p className="admin-message admin-message-success" role="status">
-          {t('calendarAssignment.random.result', { count: result.length })}
-        </p>
+        <StatusDisplay
+          variant="success"
+          message={t('calendarAssignment.random.result', { count: result.length })}
+        />
       ) : null}
       <Button type="submit" disabled={randomAssign.isPending || !userId || !date}>
         {t('calendarAssignment.random.submit')}

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { TextInput } from '../../components/TextInput.js';
 import { PasswordInput } from '../../components/PasswordInput.js';
 import { Button } from '../../components/Button.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import type { Role } from '@pvp/shared';
 import { useCreateUser } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
@@ -77,16 +78,8 @@ export function CreateUserForm() {
           </label>
         </fieldset>
       </div>
-      {errorMessage ? (
-        <p className="admin-message admin-message-error" role="alert">
-          {errorMessage}
-        </p>
-      ) : null}
-      {successMessage ? (
-        <p className="admin-message admin-message-success" role="status">
-          {successMessage}
-        </p>
-      ) : null}
+      {errorMessage ? <StatusDisplay variant="error" message={errorMessage} /> : null}
+      {successMessage ? <StatusDisplay variant="success" message={successMessage} /> : null}
       <Button type="submit" disabled={createUser.isPending}>
         {t('accounts.createSubmit')}
       </Button>

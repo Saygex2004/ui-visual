@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PasswordInput } from '../../components/PasswordInput.js';
 import { Button } from '../../components/Button.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import type { AdminUser } from '@pvp/shared';
 import { useSetPassword, useSetRole, useSetDisabled } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
@@ -152,12 +153,7 @@ export function AccountRow({
       {message ? (
         <tr>
           <td colSpan={5}>
-            <p
-              className={`admin-message admin-message-${message.kind}`}
-              role={message.kind === 'error' ? 'alert' : 'status'}
-            >
-              {message.text}
-            </p>
+            <StatusDisplay variant={message.kind} message={message.text} />
           </td>
         </tr>
       ) : null}

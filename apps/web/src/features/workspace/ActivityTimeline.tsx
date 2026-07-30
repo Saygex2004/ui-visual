@@ -4,14 +4,16 @@ import { useTranslation } from 'react-i18next';
 import { useListingActivity } from './hooks.js';
 import { activityLabelFor } from './activityLabels.js';
 import { formatTimestamp } from '../dashboard/DataTable/formatting.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 
 export function ActivityTimeline({ listingId }: { listingId: string }) {
   const { t } = useTranslation('workspace');
   const { data, isLoading, isError } = useListingActivity(listingId, true);
 
-  if (isLoading) return <p className="workspace-status">{t('activity.loading')}</p>;
-  if (isError || !data) return <p className="workspace-status">{t('activity.loadError')}</p>;
-  if (data.events.length === 0) return <p className="workspace-status">{t('activity.empty')}</p>;
+  if (isLoading) return <StatusDisplay variant="loading" message={t('activity.loading')} />;
+  if (isError || !data) return <StatusDisplay variant="error" message={t('activity.loadError')} />;
+  if (data.events.length === 0)
+    return <StatusDisplay variant="empty" message={t('activity.empty')} />;
 
   return (
     <ul className="workspace-timeline">

@@ -1,10 +1,8 @@
-/* Chat (UI §6) — tokens only, shared by the workspace tab, the standalone
-   thread route, and *Le mie chat*. */
-
-.chat-status {
-  color: var(--color-text-muted);
-  padding: var(--space-4) 0;
-}
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench (panel/form)
+ * design-system: design.md · designed-as-app
+ * Chat (UI §6) — tokens only, shared by the workspace tab, the standalone
+ * thread route, and *Le mie chat*. Loading/error/empty states now go
+ * through the shared StatusDisplay primitive. */
 
 /* Standalone /chat/:listingId page chrome */
 
@@ -343,12 +341,6 @@
   color: var(--color-text-muted);
   cursor: pointer;
   font-size: var(--text-xs);
-}
-
-.chat-composer-error {
-  color: var(--color-danger);
-  font-size: var(--text-sm);
-  margin: 0;
 }
 
 .chat-composer-actions {

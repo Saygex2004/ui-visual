@@ -5,6 +5,7 @@
 import { useTranslation } from 'react-i18next';
 import type { AdminEventView, Run } from '@pvp/shared';
 import { useAdminEvents, useAdminRuns } from './hooks.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import './admin.css';
 
 function formatInstant(iso: string): string {
@@ -49,11 +50,11 @@ export function AdminActivityScreen() {
 
       <section>
         <h2 className="admin-form-title">{t('activity.eventsTitle')}</h2>
-        {events.isLoading ? <p>{t('activity.loading')}</p> : null}
+        {events.isLoading ? (
+          <StatusDisplay variant="loading" message={t('activity.loading')} />
+        ) : null}
         {events.isError ? (
-          <p className="admin-message admin-message-error" role="alert">
-            {t('activity.eventsLoadError')}
-          </p>
+          <StatusDisplay variant="error" message={t('activity.eventsLoadError')} />
         ) : null}
         {events.data ? (
           <div className="admin-table-wrap">
@@ -69,7 +70,9 @@ export function AdminActivityScreen() {
               <tbody>
                 {events.data.events.length === 0 ? (
                   <tr>
-                    <td colSpan={4}>{t('activity.eventsEmpty')}</td>
+                    <td colSpan={4}>
+                      <StatusDisplay variant="empty" message={t('activity.eventsEmpty')} />
+                    </td>
                   </tr>
                 ) : (
                   events.data.events.map((event, i) => <EventRow key={i} event={event} />)
@@ -82,11 +85,11 @@ export function AdminActivityScreen() {
 
       <section>
         <h2 className="admin-form-title">{t('activity.runsTitle')}</h2>
-        {runs.isLoading ? <p>{t('activity.loading')}</p> : null}
+        {runs.isLoading ? (
+          <StatusDisplay variant="loading" message={t('activity.loading')} />
+        ) : null}
         {runs.isError ? (
-          <p className="admin-message admin-message-error" role="alert">
-            {t('activity.runsLoadError')}
-          </p>
+          <StatusDisplay variant="error" message={t('activity.runsLoadError')} />
         ) : null}
         {runs.data ? (
           <div className="admin-table-wrap">
@@ -105,7 +108,9 @@ export function AdminActivityScreen() {
               <tbody>
                 {runs.data.runs.length === 0 ? (
                   <tr>
-                    <td colSpan={7}>{t('activity.runsEmpty')}</td>
+                    <td colSpan={7}>
+                      <StatusDisplay variant="empty" message={t('activity.runsEmpty')} />
+                    </td>
                   </tr>
                 ) : (
                   runs.data.runs.map((run, i) => <RunRow key={i} run={run} />)

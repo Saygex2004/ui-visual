@@ -5,6 +5,7 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PasswordInput } from '../../components/PasswordInput.js';
 import { Button } from '../../components/Button.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { useChangePassword } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 import './auth.css';
@@ -73,11 +74,7 @@ export function ForcedPasswordChange() {
             onChange={setConfirmPassword}
           />
         </div>
-        {errorMessage ? (
-          <p className="auth-error" role="alert">
-            {errorMessage}
-          </p>
-        ) : null}
+        {errorMessage ? <StatusDisplay variant="error" message={errorMessage} /> : null}
         <Button type="submit" disabled={changePassword.isPending}>
           {t('forcedChange.submit')}
         </Button>

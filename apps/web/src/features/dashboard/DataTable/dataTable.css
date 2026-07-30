@@ -1,8 +1,10 @@
-/* Generic virtualized table — tokens only. `display: flex` rows + explicit
-   ARIA roles (see DataTable.tsx) replace native table layout so column
-   widths and the frozen actions column are controllable; the outer
-   `.data-table-scroll` is the ONE scrolling ancestor for both axes, which is
-   what makes the sticky header and the sticky frozen column work together. */
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench (data-dense)
+ * design-system: design.md · designed-as-app
+ * Generic virtualized table — tokens only. `display: flex` rows + explicit
+ * ARIA roles (see DataTable.tsx) replace native table layout so column
+ * widths and the frozen actions column are controllable; the outer
+ * `.data-table-scroll` is the ONE scrolling ancestor for both axes, which is
+ * what makes the sticky header and the sticky frozen column work together. */
 .data-table-scroll {
   overflow: auto;
   border: 1px solid var(--color-border);
@@ -179,12 +181,6 @@ th.data-table-actions-cell {
   color: var(--color-accent-contrast);
   font-family: var(--font-mono);
   font-size: 0.625rem;
-}
-
-.data-table-empty {
-  padding: var(--space-6);
-  text-align: center;
-  color: var(--color-text-muted);
 }
 
 /* Calendar day table's static blocco presence dot (UI §7.2) — no count, no

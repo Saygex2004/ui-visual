@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UserRef } from '@pvp/shared';
 import { useAddParticipant, useParticipantCandidates } from './hooks.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 
 export interface ParticipantListProps {
   listingId: string;
@@ -45,7 +46,7 @@ export function ParticipantList({ listingId, participants, closed }: Participant
       {closed ? null : adding ? (
         <div className="chat-participants-add">
           {candidates.length === 0 && !candidatesQuery.isLoading ? (
-            <p className="chat-status">{t('participants.noCandidates')}</p>
+            <StatusDisplay variant="empty" message={t('participants.noCandidates')} />
           ) : (
             <>
               <label className="chat-participants-add-label">

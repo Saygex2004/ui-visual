@@ -1,13 +1,15 @@
 // App shell: the user-menu header (UI §2.5) — account name, Calendario /
-// Le mie chat / Amministrazione (admins only) / Esci, with the unread badge
-// (UI §6.1: "on the user-menu button ... on every screen"). Exposes menu
-// role/expanded state to assistive technology (UI §11).
+// Le mie chat / Amministrazione (admins only) / tema / Esci, with the unread
+// badge (UI §6.1: "on the user-menu button ... on every screen"). Exposes
+// menu role/expanded state to assistive technology (UI §11).
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from '@tanstack/react-router';
+import { Calendar, LogOut, MessageSquare, Moon, Settings, Sun } from 'lucide-react';
 import type { UserPublic } from '@pvp/shared';
 import { useLogout } from '../features/auth/hooks.js';
 import { useUnreadTotal } from '../features/chat/hooks.js';
+import { useTheme } from '../lib/theme.js';
 import './shell.css';
 
 export function Shell({ user, children }: { user: UserPublic; children: React.ReactNode }) {
@@ -17,6 +19,7 @@ export function Shell({ user, children }: { user: UserPublic; children: React.Re
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const unreadTotal = useUnreadTotal();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -75,6 +78,7 @@ export function Shell({ user, children }: { user: UserPublic; children: React.Re
                 className="shell-user-menu-item"
                 onClick={() => setMenuOpen(false)}
               >
+                <Calendar aria-hidden="true" size={16} />
                 {t('userMenu.calendar')}
               </Link>
               <Link
@@ -83,6 +87,7 @@ export function Shell({ user, children }: { user: UserPublic; children: React.Re
                 className="shell-user-menu-item"
                 onClick={() => setMenuOpen(false)}
               >
+                <MessageSquare aria-hidden="true" size={16} />
                 {t('userMenu.myChats')}
                 {unreadTotal > 0 ? ` (${unreadTotal > 9 ? '9+' : unreadTotal})` : ''}
               </Link>
@@ -93,6 +98,7 @@ export function Shell({ user, children }: { user: UserPublic; children: React.Re
                   className="shell-user-menu-item"
                   onClick={() => setMenuOpen(false)}
                 >
+                  <Settings aria-hidden="true" size={16} />
                   {t('userMenu.admin')}
                 </Link>
               ) : null}
@@ -100,8 +106,24 @@ export function Shell({ user, children }: { user: UserPublic; children: React.Re
                 type="button"
                 role="menuitem"
                 className="shell-user-menu-item"
+                onClick={toggleTheme}
+              >
+                {theme === 'dark' ? (
+                  <Sun aria-hidden="true" size={16} />
+                ) : (
+                  <Moon aria-hidden="true" size={16} />
+                )}
+                {theme === 'dark'
+                  ? t('userMenu.theme.switchToLight')
+                  : t('userMenu.theme.switchToDark')}
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="shell-user-menu-item"
                 onClick={handleLogout}
               >
+                <LogOut aria-hidden="true" size={16} />
                 {t('userMenu.signOut')}
               </button>
             </div>

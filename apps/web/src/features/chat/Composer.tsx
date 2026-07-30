@@ -11,6 +11,7 @@ import { translateApiError } from '../../lib/translateApiError.js';
 import { RichTextEditor, type RichTextEditorHandle } from './RichTextEditor.js';
 import { useSendMessage, useUploadAttachment } from './hooks.js';
 import type { UploadedAttachment } from './api.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import './chat.css';
 
 export interface ComposerProps {
@@ -90,20 +91,18 @@ export function Composer({ listingId, disabled }: ComposerProps) {
           ))}
         </ul>
       ) : null}
-      {validationError ? (
-        <p className="chat-composer-error" role="alert">
-          {validationError}
-        </p>
-      ) : null}
+      {validationError ? <StatusDisplay variant="error" message={validationError} /> : null}
       {sendMessage.isError ? (
-        <p className="chat-composer-error" role="alert">
-          {translateApiError(t, sendMessage.error, t('compose.sendError'))}
-        </p>
+        <StatusDisplay
+          variant="error"
+          message={translateApiError(t, sendMessage.error, t('compose.sendError'))}
+        />
       ) : null}
       {uploadAttachment.isError ? (
-        <p className="chat-composer-error" role="alert">
-          {translateApiError(t, uploadAttachment.error, t('compose.sendError'))}
-        </p>
+        <StatusDisplay
+          variant="error"
+          message={translateApiError(t, uploadAttachment.error, t('compose.sendError'))}
+        />
       ) : null}
       <div className="chat-composer-actions">
         <input

@@ -9,6 +9,7 @@ import { forwardRef, useEffect, useImperativeHandle } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { useTranslation } from 'react-i18next';
+import { Bold, Italic, Link as LinkIcon, List, ListOrdered } from 'lucide-react';
 import type { RichTextNode } from '@pvp/shared';
 import './chat.css';
 
@@ -96,7 +97,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             title={t('compose.bold')}
             onClick={() => editor?.chain().focus().toggleBold().run()}
           >
-            <strong aria-hidden="true">{'B'}</strong>
+            <Bold aria-hidden="true" size={16} />
           </button>
           <button
             type="button"
@@ -106,7 +107,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             title={t('compose.italic')}
             onClick={() => editor?.chain().focus().toggleItalic().run()}
           >
-            <em aria-hidden="true">{'I'}</em>
+            <Italic aria-hidden="true" size={16} />
           </button>
           <button
             type="button"
@@ -116,7 +117,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             title={t('compose.bulletList')}
             onClick={() => editor?.chain().focus().toggleBulletList().run()}
           >
-            <span aria-hidden="true">{'•'}</span>
+            <List aria-hidden="true" size={16} />
           </button>
           <button
             type="button"
@@ -126,7 +127,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             title={t('compose.orderedList')}
             onClick={() => editor?.chain().focus().toggleOrderedList().run()}
           >
-            <span aria-hidden="true">{'1.'}</span>
+            <ListOrdered aria-hidden="true" size={16} />
           </button>
           <button
             type="button"
@@ -136,7 +137,7 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
             title={t('compose.link')}
             onClick={addLink}
           >
-            <span aria-hidden="true">{'🔗'}</span>
+            <LinkIcon aria-hidden="true" size={16} />
           </button>
         </div>
         <EditorContent editor={editor} className="chat-editor-content" />

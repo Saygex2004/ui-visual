@@ -1,4 +1,7 @@
-/* Calendar month + day views (UI §7) — tokens only. */
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench (data-dense)
+ * design-system: design.md · designed-as-app
+ * Calendar month + day views (UI §7) — tokens only. Loading/error/empty
+ * states now go through the shared StatusDisplay primitive. */
 
 .calendar-month-view,
 .calendar-day-view {
@@ -30,11 +33,16 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
   background: var(--color-surface);
+  color: var(--color-text-muted);
   cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
 .calendar-month-nav:hover {
   border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .calendar-month-nav:focus-visible {
@@ -141,12 +149,6 @@
 
 .calendar-legend p:last-child {
   margin-bottom: 0;
-}
-
-.calendar-status {
-  padding: var(--space-4);
-  text-align: center;
-  color: var(--color-text-muted);
 }
 
 .calendar-day-back {

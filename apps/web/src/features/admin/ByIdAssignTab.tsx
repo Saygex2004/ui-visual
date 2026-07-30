@@ -6,6 +6,7 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TextInput } from '../../components/TextInput.js';
 import { Button } from '../../components/Button.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { useAdminUsers, useListingSearch, useByIdAssign } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 
@@ -72,9 +73,11 @@ export function ByIdAssignTab() {
         <Button type="submit">{t('calendarAssignment.byId.searchSubmit')}</Button>
       </form>
 
-      {isLoading ? <p className="admin-message">{t('calendarAssignment.loading')}</p> : null}
+      {isLoading ? (
+        <StatusDisplay variant="loading" message={t('calendarAssignment.loading')} />
+      ) : null}
       {submittedQuery !== '' && !isLoading && results.length === 0 ? (
-        <p className="admin-message">{t('calendarAssignment.byId.noResults')}</p>
+        <StatusDisplay variant="empty" message={t('calendarAssignment.byId.noResults')} />
       ) : null}
 
       {results.length > 0 ? (
@@ -148,16 +151,15 @@ export function ByIdAssignTab() {
         </div>
       </div>
 
-      {errorMessage ? (
-        <p className="admin-message admin-message-error" role="alert">
-          {errorMessage}
-        </p>
-      ) : null}
+      {errorMessage ? <StatusDisplay variant="error" message={errorMessage} /> : null}
       {result ? (
-        <div className="admin-message admin-message-success" role="status">
-          <p>{t('calendarAssignment.byId.assignedResult', { count: result.assigned.length })}</p>
+        <>
+          <StatusDisplay
+            variant="success"
+            message={t('calendarAssignment.byId.assignedResult', { count: result.assigned.length })}
+          />
           {result.skipped.length > 0 ? (
-            <ul>
+            <ul className="admin-skip-reasons">
               {result.skipped.map((s) => (
                 <li key={s.id}>
                   {s.id}
@@ -167,7 +169,7 @@ export function ByIdAssignTab() {
               ))}
             </ul>
           ) : null}
-        </div>
+        </>
       ) : null}
 
       <Button

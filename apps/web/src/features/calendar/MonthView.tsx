@@ -6,9 +6,11 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { MonthDay } from '@pvp/shared';
 import { useMonth } from './hooks.js';
 import { todayIso } from '../dashboard/sessionArchive.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import './calendar.css';
 
 function monthOf(dateIso: string): string {
@@ -87,7 +89,7 @@ export function MonthView() {
           onClick={() => goToMonth(shiftMonth(month, -1))}
           aria-label={t('month.previous')}
         >
-          {'←'}
+          <ChevronLeft aria-hidden="true" size={18} />
         </button>
         <h1 className="calendar-month-title">{formatMonthLabel(month)}</h1>
         <button
@@ -96,12 +98,12 @@ export function MonthView() {
           onClick={() => goToMonth(shiftMonth(month, 1))}
           aria-label={t('month.next')}
         >
-          {'→'}
+          <ChevronRight aria-hidden="true" size={18} />
         </button>
       </div>
 
-      {isLoading ? <p className="calendar-status">{t('loading')}</p> : null}
-      {isError ? <p className="calendar-status">{t('loadError')}</p> : null}
+      {isLoading ? <StatusDisplay variant="loading" message={t('loading')} /> : null}
+      {isError ? <StatusDisplay variant="error" message={t('loadError')} /> : null}
 
       {!isLoading && !isError ? (
         <>

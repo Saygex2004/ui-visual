@@ -1,0 +1,85 @@
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench (shared)
+ * design-system: design.md · designed-as-app
+ * Shared empty/loading/error/success status primitive (Execution Plan
+ * Phase 10). Every variant is a bordered, token-coloured row — never blank
+ * text — per FRONTEND.md §7's "designed states" obligation. */
+.status-display {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text-body);
+  font-size: var(--text-sm);
+}
+
+.status-display svg {
+  flex-shrink: 0;
+}
+
+.status-display-loading {
+  color: var(--color-text-muted);
+}
+
+.status-display-loading svg {
+  color: var(--color-text-muted);
+}
+
+.status-display-empty {
+  border-style: dashed;
+  color: var(--color-text-muted);
+}
+
+.status-display-empty svg {
+  color: var(--color-text-muted);
+}
+
+.status-display-error {
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.status-display-error svg {
+  color: var(--color-danger);
+}
+
+.status-display-success {
+  border-color: var(--color-success);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.status-display-success svg {
+  color: var(--color-success);
+}
+
+.status-display-info {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.status-display-info svg {
+  color: var(--color-text-muted);
+}
+
+.status-display-spin {
+  animation: status-display-spin 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-display-spin {
+    animation: none;
+  }
+}
+
+@keyframes status-display-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

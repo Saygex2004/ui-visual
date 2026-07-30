@@ -19,6 +19,7 @@ import { useThread, useCloseThread, useReopenThread } from './hooks.js';
 import { MessageList } from './MessageList.js';
 import { Composer } from './Composer.js';
 import { ParticipantList } from './ParticipantList.js';
+import { StatusDisplay } from '../../components/StatusDisplay.js';
 import './chat.css';
 
 export function ThreadView({ listingId }: { listingId: string }) {
@@ -28,8 +29,8 @@ export function ThreadView({ listingId }: { listingId: string }) {
   const closeThread = useCloseThread(listingId);
   const reopenThread = useReopenThread(listingId);
 
-  if (isLoading) return <p className="chat-status">{t('loading')}</p>;
-  if (isError || !data) return <p className="chat-status">{t('loadError')}</p>;
+  if (isLoading) return <StatusDisplay variant="loading" message={t('loading')} />;
+  if (isError || !data) return <StatusDisplay variant="error" message={t('loadError')} />;
 
   const { thread, messages } = data;
   const isAdmin = me?.user.role === 'admin';
@@ -85,7 +86,7 @@ export function ThreadView({ listingId }: { listingId: string }) {
           ) : null}
         </div>
       ) : (
-        <p className="chat-status">{t('removedListing.notice')}</p>
+        <StatusDisplay variant="info" message={t('removedListing.notice')} />
       )}
 
       <ParticipantList

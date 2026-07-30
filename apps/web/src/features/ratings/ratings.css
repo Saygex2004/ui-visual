@@ -1,7 +1,9 @@
-/* Shared Valutazione control (UI §5) — tokens only. Compact mode (table
-   actions column) renders a dot per option, no visible text; full mode (the
-   workspace) renders the label. Same success/warning/danger risk-coding as
-   the row marking (dataTable.css) and the occupancy indicator. */
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench (shared)
+ * design-system: design.md · designed-as-app
+ * Shared Valutazione control (UI §5) — tokens only. Compact mode (table
+ * actions column) renders a dot per option, no visible text; full mode (the
+ * workspace) renders the label. Same success/warning/danger risk-coding as
+ * the row marking (dataTable.css) and the occupancy indicator. */
 .rating-control {
   display: inline-flex;
   align-items: center;
