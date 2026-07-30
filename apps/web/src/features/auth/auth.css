@@ -43,9 +43,7 @@
 }
 
 .auth-field label {
-  font-family: var(--font-mono);
   font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-label);
+  font-weight: 600;
   color: var(--color-text-muted);
 }

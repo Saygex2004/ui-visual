@@ -11,9 +11,9 @@
   },
   "comingSoon": "Questa sezione sarà disponibile in un prossimo aggiornamento.",
   "userMenu": {
-    "calendar": "Calendario",
-    "myChats": "Le mie chat",
-    "admin": "Amministrazione",
+    "calendar": "📅 Calendario",
+    "myChats": "💬 Le mie chat",
+    "admin": "🛠 Amministrazione",
     "signOut": "Esci",
     "unread": "{{count}} messaggi non letti",
     "theme": {

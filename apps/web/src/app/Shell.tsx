@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { Calendar, LogOut, MessageSquare, Moon, Settings, Sun } from 'lucide-react';
+import { LogOut, Moon, Sun } from 'lucide-react';
 import type { UserPublic } from '@pvp/shared';
 import { useLogout } from '../features/auth/hooks.js';
 import { useUnreadTotal } from '../features/chat/hooks.js';
@@ -78,7 +78,6 @@ export function Shell({ user, children }: { user: UserPublic; children: React.Re
                 className="shell-user-menu-item"
                 onClick={() => setMenuOpen(false)}
               >
-                <Calendar aria-hidden="true" size={16} />
                 {t('userMenu.calendar')}
               </Link>
               <Link
@@ -87,7 +86,6 @@ export function Shell({ user, children }: { user: UserPublic; children: React.Re
                 className="shell-user-menu-item"
                 onClick={() => setMenuOpen(false)}
               >
-                <MessageSquare aria-hidden="true" size={16} />
                 {t('userMenu.myChats')}
                 {unreadTotal > 0 ? ` (${unreadTotal > 9 ? '9+' : unreadTotal})` : ''}
               </Link>
@@ -98,7 +96,6 @@ export function Shell({ user, children }: { user: UserPublic; children: React.Re
                   className="shell-user-menu-item"
                   onClick={() => setMenuOpen(false)}
                 >
-                  <Settings aria-hidden="true" size={16} />
                   {t('userMenu.admin')}
                 </Link>
               ) : null}

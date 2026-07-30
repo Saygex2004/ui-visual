@@ -4,16 +4,21 @@
  *
  * Design tokens — the single source of truth for the app's visual system.
  * Foundations produced by the Hallmark foundations pass (Phase 0 task 7);
- * systematized + given a real dark set by the Phase 10 redesign pass, per
- * `design.md` at the project root (read that file first — it's the rule).
+ * systematized + given a real dark set by the first Phase 10 pass; the
+ * "hairline structure, code/mono voice" the theme originally shipped with
+ * (uppercase-tracked mono labels everywhere) read as engineered/technical
+ * rather than premium-corporate, per direct operator feedback — replaced in
+ * this same phase with a single restrained sans-serif voice (one family,
+ * no mono/uppercase/tracking), softer corner radii, closer to a calm
+ * corporate site (Apple / Zurich Insurance were the named references) than
+ * a developer dashboard. Same accent hue and paper/ink anchors throughout —
+ * this is a typography/chrome correction, not a new palette.
  *   genre:  modern-minimal
- *   theme:  Cobalt — cool engineered near-white, ONE electric cobalt signal,
- *           hairline structure, code/mono voice. Suited to a dense, data-heavy,
- *           Italian-language professional dashboard.
+ *   theme:  Cobalt — cool engineered near-white, ONE electric cobalt signal.
  *
  * Contract: components reference ONLY these variables — no raw hex/oklch or
  * font literals elsewhere (lint/review enforced). Palette values are Cobalt's
- * OKLCH anchors, both light and the new `[data-theme="dark"]` set — see
+ * OKLCH anchors, both light and the `[data-theme="dark"]` set — see
  * `design.md` for the full token table and the reasoning behind each pair.
  */
 :root {
@@ -48,8 +53,8 @@
   --color-success-soft: oklch(95% 0.03 155); /* tint fills — StatusDisplay */
   --color-danger-soft: oklch(95% 0.03 27);
 
-  /* --- Typography: 2 + 1 (bundled locally, see fonts.css) --- */
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  /* --- Typography: single family, calm and restrained (see fonts.css) --- */
+  --font-display: 'Inter', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
 
@@ -63,7 +68,6 @@
 
   --leading-tight: 1.2;
   --leading-normal: 1.5;
-  --tracking-label: 0.06em; /* JetBrains Mono UPPERCASE labels */
 
   /* --- Spacing (4pt scale) --- */
   --space-0: 0;
@@ -78,10 +82,12 @@
   --space-12: 3rem;
   --space-16: 4rem;
 
-  /* --- Radius: tight technical radii ("drawn with a ruler") --- */
-  --radius-sm: 4px;
-  --radius-md: 6px; /* buttons / inputs */
-  --radius-lg: 10px; /* code cards / panels */
+  /* --- Radius: softer, calmer curves (was "drawn with a ruler" — 4/6/10px;
+     the tighter, technical radii were part of the same "engineered" read
+     this pass moves away from) --- */
+  --radius-sm: 6px;
+  --radius-md: 8px; /* buttons / inputs */
+  --radius-lg: 14px; /* cards / panels */
   --radius-pill: 999px;
 
   /* --- Shadow: depth from borders, not blur (single barely-there lift) --- */
@@ -173,5 +179,6 @@ h4 {
   font-family: var(--font-display);
   font-weight: 600;
   line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
   color: var(--color-text);
 }

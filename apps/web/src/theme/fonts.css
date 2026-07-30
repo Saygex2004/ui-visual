@@ -1,12 +1,15 @@
 /*
  * Local font faces (bundled via @fontsource — no CDN, builds/runs offline).
- * Cobalt type pairing: Space Grotesk (display) + Inter (body) + JetBrains Mono
- * (mono labels / code). Only the weights the system uses are imported.
+ * Single-family system (Phase 10 restyle, per direct request): Inter for
+ * both display and body — Space Grotesk's geometric display voice read as
+ * "engineered/technical" rather than the calm, single-typeface restraint of
+ * a premium corporate site (Apple, Zurich Insurance). JetBrains Mono is kept
+ * imported since `--font-mono` remains a defined token (unused in any
+ * component today, available if a genuine code/technical context appears).
  */
-@import '@fontsource/space-grotesk/500.css';
-@import '@fontsource/space-grotesk/600.css';
 @import '@fontsource/inter/400.css';
 @import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
 @import '@fontsource/jetbrains-mono/400.css';
 @import '@fontsource/jetbrains-mono/500.css';

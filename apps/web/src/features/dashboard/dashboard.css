@@ -118,10 +118,8 @@
 }
 
 .area-metadata-item dt {
-  font-family: var(--font-mono);
   font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-label);
+  font-weight: 600;
   color: var(--color-text-muted);
 }
 
@@ -213,7 +211,7 @@
 }
 
 .cluster-nav-number {
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-xs);
   opacity: 0.75;
 }
@@ -324,7 +322,7 @@
   padding: 0 var(--space-2);
   border-radius: var(--radius-pill);
   background: var(--color-surface-2);
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-xs);
   font-variant-numeric: tabular-nums;
 }
@@ -391,10 +389,8 @@
 }
 
 .drilldown-field label {
-  font-family: var(--font-mono);
   font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-label);
+  font-weight: 600;
   color: var(--color-text-muted);
 }
 
@@ -471,10 +467,8 @@
 }
 
 .dashboard-toolbar-field label {
-  font-family: var(--font-mono);
   font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-label);
+  font-weight: 600;
   color: var(--color-text-muted);
 }
 

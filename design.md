@@ -24,7 +24,8 @@ the file is the rule.
   — kept and systematized, not replaced, because it already satisfies the
   brief's "blue and white" ask.
 - **Axes** · paper-band: light (+ a genuine dark set) / display-style:
-  grotesk-sans (Space Grotesk headings) / accent-hue: cool blue (~256°).
+  single-family humanist sans (Inter, both display and body — see Notes) /
+  accent-hue: cool blue (~256°).
 
 ## Tokens (canonical · `apps/web/src/theme/tokens.css` is the source of truth)
 
@@ -50,16 +51,16 @@ separate: `paper` is the page background, `surface` is a raised card/panel).
   --color-accent-contrast: oklch(99% 0.004 250);
   --color-focus: oklch(55% 0.2 256);
 
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-display: 'Inter', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
 
   /* 4-pt spacing scale: --space-0 … --space-16. See tokens.css. */
   /* Type scale: --text-xs … --text-2xl. See tokens.css. */
 
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
   --radius-pill: 999px;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-fast: 0.15s;
@@ -123,8 +124,8 @@ dark: low-L low-C tint — same derivation the accent-soft pair already uses).
 
 - The wordmark (`PVP Aste Dashboard`, text-only — no logo asset supplied).
 - The accent colour and its ≤5%-of-viewport placement rule.
-- The type pairing (Space Grotesk display / Inter body / JetBrains Mono for
-  labels and tabular data).
+- The type pairing: **Inter, one family, for both display and body** — no
+  mono/uppercase/tracked-letter-spacing labels anywhere (see Notes).
 - The Button / TextInput / PasswordInput / Tabs / Dialog voice established in
   `apps/web/src/components/` (Phase 9).
 - The focus-ring token (`--color-focus`, 2px solid, 2px offset).
@@ -160,7 +161,7 @@ project's own token names.
   --color-accent: oklch(55% 0.2 256);
   --color-focus: oklch(55% 0.2 256);
 
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-display: 'Inter', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
@@ -173,8 +174,8 @@ project's own token names.
   --text-sm: 0.8125rem;
   --text-base: 0.9375rem;
 
-  --radius-md: 6px;
-  --radius-lg: 10px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
   --radius-pill: 999px;
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -195,7 +196,7 @@ project's own token names.
     "focus": { "$value": "oklch(55% 0.2 256)", "$type": "color" }
   },
   "font": {
-    "display": { "$value": "Space Grotesk, system-ui, sans-serif", "$type": "fontFamily" },
+    "display": { "$value": "Inter, system-ui, sans-serif", "$type": "fontFamily" },
     "body": { "$value": "Inter, system-ui, sans-serif", "$type": "fontFamily" },
     "mono": { "$value": "JetBrains Mono, ui-monospace, monospace", "$type": "fontFamily" }
   },
@@ -222,7 +223,7 @@ project's own token names.
   --border: 90% 0.008 252;
   --input: 90% 0.008 252;
   --ring: 55% 0.2 256; /* focus */
-  --radius: 6px; /* radius-md */
+  --radius: 8px; /* radius-md */
 }
 
 .dark {
@@ -258,3 +259,23 @@ project's own token names.
   as the dark-mode pairs). Dark mode's accent (68% L) already passed at
   6.83:1 and is unchanged. A 3-point L shift reads as imperceptible, not a
   hue change — `--color-accent-strong`/`--color-accent-soft` untouched.
+- **Typography and radii corrected on direct operator feedback, same
+  session**: the original Cobalt pairing (Space Grotesk display + Inter body
+  - JetBrains Mono, uppercase, tracked, for every field label/table
+    header/badge/timestamp) read as "engineered/technical" rather than the
+    calm, single-typeface restraint of a premium corporate site — the operator
+    named Apple and Zurich Insurance's own site as the reference, and a
+    DNA check against zurich.com (system/humanist sans-serif, no monospace or
+    tracked-uppercase labels anywhere, subtle 4–8px radii, generous whitespace,
+    minimal shadow) confirmed the direction. Fix: **one family (Inter) for
+    both display and body**, every mono/uppercase/letter-spacing label rule
+    removed app-wide (~20 call sites across 8 CSS files, all sharing one
+    identical 5-line pattern), numeric contexts (badges, timestamps, counts)
+    keep alignment via `font-variant-numeric: tabular-nums` instead of a
+    monospace typeface swap, and radii softened (`--radius-sm` 4→6px,
+    `--radius-md` 6→8px, `--radius-lg` 10→14px) for calmer, rounder cards.
+    Same accent hue, same paper/ink anchors, same layout/macrostructure — this
+    is a voice correction, not a new theme.
+- No pixel-copying from zurich.com — only macro-DNA (family neutrality,
+  case/tracking discipline, radius softness) informed the fix; no colours,
+  copy, or imagery were taken from the reference site.

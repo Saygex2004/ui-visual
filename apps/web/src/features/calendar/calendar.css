@@ -59,10 +59,8 @@
 .calendar-weekday-cell {
   padding: var(--space-2);
   text-align: center;
-  font-family: var(--font-mono);
   font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-label);
+  font-weight: 600;
   color: var(--color-text-muted);
 }
 
@@ -103,12 +101,12 @@
 }
 
 .calendar-day-number {
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-sm);
 }
 
 .calendar-day-badge {
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: var(--text-xs);
   padding: 0 var(--space-1);
   border-radius: var(--radius-sm);
@@ -170,6 +168,6 @@
 
 .calendar-day-progress {
   margin-bottom: var(--space-4);
-  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   color: var(--color-text-muted);
 }
