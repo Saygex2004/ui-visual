@@ -172,6 +172,7 @@ export function DataTable({
                     search={{ ...search, pannello: 'dettagli' }}
                     className="data-table-action-link"
                     title={t('table.openWorkspace')}
+                    onClick={(e) => e.currentTarget.focus()}
                   >
                     {t('table.openWorkspace')}
                   </Link>
@@ -181,6 +182,7 @@ export function DataTable({
                     search={{ ...search, pannello: 'chat' }}
                     className="data-table-action-link"
                     title={t('table.quickChat')}
+                    onClick={(e) => e.currentTarget.focus()}
                   >
                     {t('table.quickChat')}
                     {unread > 0 ? (

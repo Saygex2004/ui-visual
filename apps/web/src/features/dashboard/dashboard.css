@@ -4,8 +4,18 @@
  * tokens only. The DataTable/ subfolder has its own co-located stylesheet.
  * Loading/error states now go through the shared StatusDisplay primitive. */
 
-/* Landing — "Scegli una vista" (UI §2.2). */
+/* Landing — "Scegli una vista" (UI §2.2). Centered in the full remaining
+   viewport height (not just horizontally) — `.shell-content` is a column
+   flex container (app/shell.css), so `flex: 1` here claims all the space
+   below the header and `justify-content: center` centers vertically too. */
 .landing-screen {
+  flex: 1;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
   max-width: 48rem;
   margin: 0 auto;
   padding: var(--space-8) var(--space-6);
@@ -64,6 +74,8 @@
 
 /* Area view shell. */
 .area-view {
+  box-sizing: border-box;
+  width: 100%;
   max-width: 90rem;
   margin: 0 auto;
   padding: var(--space-6);

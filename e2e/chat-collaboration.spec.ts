@@ -151,7 +151,9 @@ test.describe('chat collaboration', () => {
     // patch); B's badge takes up to one unread poll (~20s). ---
     await page.getByRole('button', { name: 'Aggiungi un collega' }).click();
     await page.getByLabel('Scegli un collega…').selectOption({ label: USERNAME_B });
-    await page.getByRole('button', { name: 'Aggiungi', exact: true }).click();
+    // "➕ Aggiungi" — Operazione BELLEZZA prefixed every action button's copy
+    // with an emoji; the accessible name changed deliberately, not a bug.
+    await page.getByRole('button', { name: '➕ Aggiungi', exact: true }).click();
     await expect(page.locator('.chat-participants-item')).toHaveCount(2);
 
     await expect(bRow.locator('.data-table-chat-badge')).toHaveText('1', { timeout: 25_000 });
@@ -186,7 +188,9 @@ test.describe('chat collaboration', () => {
     // added". ---
     await page.getByRole('button', { name: 'Aggiungi un collega' }).click();
     await page.getByLabel('Scegli un collega…').selectOption({ label: USERNAME_C });
-    await page.getByRole('button', { name: 'Aggiungi', exact: true }).click();
+    // "➕ Aggiungi" — Operazione BELLEZZA prefixed every action button's copy
+    // with an emoji; the accessible name changed deliberately, not a bug.
+    await page.getByRole('button', { name: '➕ Aggiungi', exact: true }).click();
     await expect(page.locator('.chat-participants-item')).toHaveCount(3);
 
     await expect(cRow.locator('.data-table-chat-badge')).toHaveText('2', { timeout: 25_000 });

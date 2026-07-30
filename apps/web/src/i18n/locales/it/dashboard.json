@@ -1,9 +1,9 @@
 {
   "landing": {
     "title": "Scegli una vista",
-    "immobiliTitle": "Cluster Immobiliari",
+    "immobiliTitle": "🏠 Cluster Immobiliari",
     "immobiliDescription": "Aste immobiliari, organizzate per cluster di rischio geografico.",
-    "creditiTitle": "Cluster Crediti",
+    "creditiTitle": "💰 Cluster Crediti",
     "creditiDescription": "Aste di quote societarie e crediti ceduti da procedure giudiziarie."
   },
   "area": {
@@ -51,9 +51,9 @@
   "rating": {
     "groupLabel": "Valutazione",
     "value": {
-      "ottimo_affare": "Ottimo affare",
-      "da_verificare": "Da verificare",
-      "da_evitare": "Da evitare"
+      "ottimo_affare": "👍 Ottimo affare",
+      "da_verificare": "🤔 Da verificare",
+      "da_evitare": "⚠️ Da evitare"
     }
   },
   "drilldown": {
@@ -77,20 +77,20 @@
     "navLabel": "Archivio",
     "title": "Archivio",
     "empty": "L'archivio è vuoto.",
-    "refreshControl": "Aggiorna alla data odierna",
+    "refreshControl": "📅 Aggiorna alla data odierna",
     "refreshReport": "{{moved}} vendite spostate in archivio in questa sessione. Totale in archivio: {{total}}.",
-    "svuotaControl": "Svuota archivio",
+    "svuotaControl": "🗑️ Svuota archivio",
     "svuotaNothing": "Non c'è nulla da svuotare. I listing scomparsi dalla fonte restano comunque in archivio.",
     "svuotaConfirm": "Verranno rimosse {{count}} righe ancora attive ma con vendita ormai passata. I listing archiviati in modo permanente restano in archivio. Continuare?"
   },
   "table": {
     "empty": "Nessun listing corrisponde ai filtri attuali.",
-    "goToListing": "Vai all'annuncio →",
+    "goToListing": "🚀 Vai all'annuncio →",
     "bloccoBadgeTitle": "{{count}} lotti nello stesso blocco",
     "bloccoJumpTitle": "Vai al blocco in {{name}}",
     "bloccoJumpChooserTitle": "Il blocco continua in altri cluster",
-    "openWorkspace": "Scheda",
-    "quickChat": "Chat",
+    "openWorkspace": "📄 Scheda",
+    "quickChat": "💬 Chat",
     "columns": {
       "tipoImmobile": "Tipo di immobile",
       "tipoBene": "Tipo di bene",
@@ -120,7 +120,7 @@
     "allOption": "Tutti",
     "minLabel": "Valore da €",
     "maxLabel": "Valore a €",
-    "resetFilters": "Reset filtri",
+    "resetFilters": "🔄 Reset filtri",
     "countTotal": "{{count}} listing",
     "countFiltered": "{{visible}} / {{total}} listing"
   },

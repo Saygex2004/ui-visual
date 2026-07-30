@@ -4,6 +4,8 @@
  * through the shared StatusDisplay primitive — the old bespoke
  * .admin-message* classes are gone. */
 .admin-screen {
+  box-sizing: border-box;
+  width: 100%;
   max-width: 60rem;
   margin: 0 auto;
   padding: var(--space-8) var(--space-6);

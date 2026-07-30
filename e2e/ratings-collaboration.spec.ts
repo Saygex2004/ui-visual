@@ -82,9 +82,14 @@ test.describe('ratings collaboration', () => {
     const timelineItems = page.locator('.workspace-timeline-item');
     await expect(timelineItems).toHaveCount(2);
     await expect(timelineItems.nth(0)).toContainText(NEW_USERNAME);
-    await expect(timelineItems.nth(0)).toContainText('ha rimosso la valutazione (Ottimo affare)');
+    // "👍 Ottimo affare" — Operazione BELLEZZA prefixed every rating value's
+    // copy with an emoji; the interpolated timeline text changed deliberately,
+    // not a bug.
+    await expect(timelineItems.nth(0)).toContainText(
+      'ha rimosso la valutazione (👍 Ottimo affare)',
+    );
     await expect(timelineItems.nth(1)).toContainText('admin');
-    await expect(timelineItems.nth(1)).toContainText('ha valutato: Ottimo affare');
+    await expect(timelineItems.nth(1)).toContainText('ha valutato: 👍 Ottimo affare');
 
     await bContext.close();
   });

@@ -10,9 +10,28 @@
 // explicit override; see HANDOFF_PHASE_6.md for that precedent). Focus
 // trap, Esc-close, outside-click-close, and scroll-lock are all native to
 // Radix Dialog's default `modal` mode.
+//
+// Focus-return-on-close, found broken and fixed (Operazione BELLEZZA):
+// Radix's `DialogContentModal` *always* overrides `onCloseAutoFocus` to
+// call `event.preventDefault()` then `context.triggerRef.current?.focus()`
+// — and `triggerRef` is only ever populated by a `<Dialog.Trigger>`, which
+// this app never renders (the dialog opens via router navigation from a
+// table row's "Scheda"/"Chat" link, not a same-tree trigger click). With no
+// trigger ref, that default handler is a silent no-op, and — because it
+// already called `preventDefault()` — FocusScope's own generic "restore to
+// whatever was focused before" fallback never runs either. Net effect:
+// focus silently dropped to `document.body` on every close, confirmed via
+// a live focusin/focusout listener before this fix (see
+// HANDOFF_PHASE_10.md's Operazione BELLEZZA addendum). Fixed by capturing
+// the pre-mount `document.activeElement` in a lazy `useState` initializer
+// (evaluated during the first render, before any effect — including
+// FocusScope's own mount effect — can move focus into the dialog) and
+// restoring it explicitly via our own `onCloseAutoFocus`, which
+// `preventDefault()`s before Radix's default handler runs.
 // `useNavigate({from: '/aste/$area/lotto/$id'})` is deliberately UNPREFIXED
 // while `useParams`/`useSearch` are prefixed — the same TanStack Router
 // `from:` quirk documented since Phase 4.
+import { useState } from 'react';
 import { useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
@@ -43,6 +62,14 @@ export function WorkspacePanel() {
 
   const { data: detail, isLoading, isError } = useListingDetail(id);
 
+  // Captured once, synchronously, during this component's first render —
+  // before any effect (Radix's FocusScope included) has had a chance to
+  // move focus into the dialog. This is whatever the table row's own
+  // onClick handler explicitly focused just before navigating here.
+  const [opener] = useState<HTMLElement | null>(() =>
+    document.activeElement instanceof HTMLElement ? document.activeElement : null,
+  );
+
   function handleClose() {
     void navigate({
       to: '/aste/$area',
@@ -67,7 +94,13 @@ export function WorkspacePanel() {
     >
       <DialogPortal>
         <DialogOverlay className="workspace-drawer-backdrop" />
-        <DialogContent className="workspace-drawer-popup">
+        <DialogContent
+          className="workspace-drawer-popup"
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            opener?.focus({ preventScroll: true });
+          }}
+        >
           <div className="workspace-drawer-header">
             <DialogTitle className="workspace-drawer-title">{title}</DialogTitle>
             <DialogClose className="workspace-drawer-close" aria-label={t('close')}>

@@ -83,7 +83,9 @@ test.describe('calendar assignment', () => {
     await page.getByRole('tab', { name: 'Assegnazione per ID' }).click();
 
     await page.getByLabel('Cerca').fill('2001');
-    await page.getByRole('button', { name: 'Cerca', exact: true }).click();
+    // "🔍 Cerca" — Operazione BELLEZZA prefixed every action button's copy
+    // with an emoji; the accessible name changed deliberately, not a bug.
+    await page.getByRole('button', { name: '🔍 Cerca', exact: true }).click();
 
     const resultRow = page.locator('tbody tr', { hasText: '2001' });
     await expect(resultRow).toHaveCount(1);

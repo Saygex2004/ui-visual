@@ -8,20 +8,20 @@
   },
   "listing": {
     "valueLabel": "Valore richiesto",
-    "goToListing": "Vai all'annuncio →"
+    "goToListing": "🚀 Vai all'annuncio →"
   },
   "closed": {
     "badge": "Chiusa",
     "notice": "Questa chat è chiusa: resta consultabile ma non accetta nuovi messaggi o partecipanti.",
-    "closeAction": "Chiudi chat",
-    "reopenAction": "Riapri chat",
+    "closeAction": "🔒 Chiudi chat",
+    "reopenAction": "🔓 Riapri chat",
     "closeConfirm": "Chiudere questa chat? Resterà consultabile ma non accetterà più messaggi o nuovi partecipanti."
   },
   "participants": {
     "title": "Partecipanti",
-    "add": "Aggiungi un collega",
+    "add": "➕ Aggiungi un collega",
     "addPlaceholder": "Scegli un collega…",
-    "addAction": "Aggiungi",
+    "addAction": "➕ Aggiungi",
     "noCandidates": "Tutti i colleghi fanno già parte di questa chat."
   },
   "messages": {
@@ -30,8 +30,8 @@
   },
   "compose": {
     "placeholder": "Scrivi un messaggio…",
-    "send": "Invia",
-    "attach": "Allega file",
+    "send": "📤 Invia",
+    "attach": "📎 Allega file",
     "bold": "Grassetto",
     "italic": "Corsivo",
     "bulletList": "Elenco puntato",
@@ -43,8 +43,8 @@
   },
   "attachments": {
     "pending": "Allegati da inviare",
-    "download": "Scarica",
-    "remove": "Rimuovi"
+    "download": "⬇️ Scarica",
+    "remove": "❌ Rimuovi"
   },
   "myChats": {
     "title": "Le mie chat",

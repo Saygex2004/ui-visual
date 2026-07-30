@@ -38,23 +38,30 @@ beforeEach(() => {
   vi.mocked(ratingsApi.clearRating).mockReset().mockResolvedValue(undefined);
 });
 
+// Operazione BELLEZZA prefixed every rating value's copy with an emoji
+// (dashboard:rating.value.*); the accessible name changed deliberately,
+// not a bug — these three constants are the new exact labels.
+const OTTIMO_AFFARE = '👍 Ottimo affare';
+const DA_VERIFICARE = '🤔 Da verificare';
+const DA_EVITARE = '⚠️ Da evitare';
+
 describe('RatingControl', () => {
   it('marks the active option as pressed and leaves the others unpressed', () => {
     renderControl('da_verificare');
-    expect(screen.getByRole('button', { name: 'Ottimo affare' }).getAttribute('aria-pressed')).toBe(
+    expect(screen.getByRole('button', { name: OTTIMO_AFFARE }).getAttribute('aria-pressed')).toBe(
       'false',
     );
-    expect(screen.getByRole('button', { name: 'Da verificare' }).getAttribute('aria-pressed')).toBe(
+    expect(screen.getByRole('button', { name: DA_VERIFICARE }).getAttribute('aria-pressed')).toBe(
       'true',
     );
-    expect(screen.getByRole('button', { name: 'Da evitare' }).getAttribute('aria-pressed')).toBe(
+    expect(screen.getByRole('button', { name: DA_EVITARE }).getAttribute('aria-pressed')).toBe(
       'false',
     );
   });
 
   it('clicking an inactive option sets that rating', async () => {
     renderControl(null);
-    fireEvent.click(screen.getByRole('button', { name: 'Ottimo affare' }));
+    fireEvent.click(screen.getByRole('button', { name: OTTIMO_AFFARE }));
     await waitFor(() => {
       expect(ratingsApi.setRating).toHaveBeenCalledWith('1001', 'ottimo_affare');
     });
@@ -63,7 +70,7 @@ describe('RatingControl', () => {
 
   it('clicking the active option clears the rating', async () => {
     renderControl('ottimo_affare');
-    fireEvent.click(screen.getByRole('button', { name: 'Ottimo affare' }));
+    fireEvent.click(screen.getByRole('button', { name: OTTIMO_AFFARE }));
     await waitFor(() => {
       expect(ratingsApi.clearRating).toHaveBeenCalledWith('1001');
     });
@@ -73,8 +80,8 @@ describe('RatingControl', () => {
   it('disables every option while a mutation is pending', async () => {
     vi.mocked(ratingsApi.setRating).mockReturnValue(new Promise(() => {}));
     renderControl(null);
-    fireEvent.click(screen.getByRole('button', { name: 'Ottimo affare' }));
-    for (const name of ['Ottimo affare', 'Da verificare', 'Da evitare']) {
+    fireEvent.click(screen.getByRole('button', { name: OTTIMO_AFFARE }));
+    for (const name of [OTTIMO_AFFARE, DA_VERIFICARE, DA_EVITARE]) {
       await waitFor(() => {
         expect(screen.getByRole('button', { name }).hasAttribute('disabled')).toBe(true);
       });
