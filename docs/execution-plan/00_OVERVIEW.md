@@ -54,8 +54,11 @@ The **Specifications are authoritative**. If a task appears to conflict with the
 | 8 | [`PHASE_8_CALENDAR.md`](PHASE_8_CALENDAR.md) | Month/day views, transactional auto-assignment, admin assignment | Concurrency test: simultaneous first-opens never double-assign; admin flows e2e |
 | 9 | [`PHASE_9_UI_MIGRATION.md`](PHASE_9_UI_MIGRATION.md) | Replace PrimeReact (commercial license) with open-source Radix UI primitives, behaviour-preserving | All gates green; e2e unchanged; no PrimeReact remains; before/after visual parity |
 | 10 | [`PHASE_10_DESIGN_SYSTEM.md`](PHASE_10_DESIGN_SYSTEM.md) | Modern-enterprise design system (blue/white) + full dark mode, driven by Hallmark | Hallmark gates pass; light+dark visual pass; gates green |
+| 13 | [`PHASE_13_UX_REDESIGN.md`](PHASE_13_UX_REDESIGN.md) | Full UX/UI redesign to the owner's Claude Design reference: navy/Hanken system, combobox selectors, tab/filter/table/chat pattern changes | Gates green; e2e updated + green; URL contract unchanged; light+dark visual pass |
 | 11 | [`PHASE_11_HARDENING.md`](PHASE_11_HARDENING.md) | A11y, responsiveness, i18n completeness, performance/payload budgets, easter eggs, Hallmark audit | Axe clean (both themes); budgets met; full Playwright regression green |
 | 12 | [`PHASE_12_DEPLOYMENT.md`](PHASE_12_DEPLOYMENT.md) | Production on Hosting + Cloud Run, deny-all rules, runbook, drill | Live round-trip of every write path; rules verified; runbook drill passed |
+
+> **Ordering note (Phase 13).** Phase 13 was added after Phase 10 had completed but before Phases 11–12 had run, and it executes **in that position**: 0 → 10, then 13, then 11 → 12. It keeps the number 13 (rather than renumbering 11/12) so existing handoff cross-references stay valid; hardening (11) must verify the redesigned interface, not the pre-redesign one.
 
 The target file layout, and which phase creates each part, is in [`REPOSITORY_STRUCTURE.md`](REPOSITORY_STRUCTURE.md).
 
