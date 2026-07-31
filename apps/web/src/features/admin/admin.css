@@ -12,6 +12,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
+  animation: pvp-fade var(--dur-base) var(--ease-out);
+}
+
+.admin-screen > h1 {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 800;
+  letter-spacing: -0.015em;
 }
 
 .admin-form {
@@ -24,36 +32,10 @@
   background: var(--color-surface);
 }
 
-/* Admin calendar assignment tabs (UI §8.3) — mirrors workspace.css's
-   .workspace-tabs/.workspace-tab pattern. */
+/* Admin calendar assignment tabs (UI §8.3, Phase 13) — the shared
+   underline-tab voice (components/tabs.css); only spacing lives here. */
 .admin-calendar-tabs {
-  display: flex;
-  gap: var(--space-2);
-  border-bottom: 1px solid var(--color-border);
   margin-bottom: var(--space-4);
-}
-
-.admin-calendar-tab {
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid transparent;
-  border-bottom: none;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  background: none;
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  cursor: pointer;
-}
-
-.admin-calendar-tab[data-state='active'] {
-  border-color: var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-body);
-  font-weight: 600;
-}
-
-.admin-calendar-tab:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
 }
 
 .admin-form-title {
@@ -75,8 +57,10 @@
 }
 
 .admin-field label {
-  font-size: var(--text-xs);
-  font-weight: 600;
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
   color: var(--color-text-muted);
 }
 
@@ -148,10 +132,16 @@
 }
 
 .admin-table th {
-  font-size: var(--text-xs);
-  font-weight: 600;
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
   color: var(--color-text-muted);
   background: var(--color-surface-2);
+}
+
+.admin-table td {
+  border-bottom-color: var(--color-border-soft);
 }
 
 .admin-row-actions {

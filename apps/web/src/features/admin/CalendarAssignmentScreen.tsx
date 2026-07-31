@@ -22,14 +22,14 @@ export function CalendarAssignmentScreen() {
         value={search.tab}
         onValueChange={(value) => void navigate({ search: { tab: value as AdminCalendarTab } })}
       >
-        <TabsList className="admin-calendar-tabs">
-          <TabsTab value="casuale" className="admin-calendar-tab">
+        <TabsList className="ui-tabs-list admin-calendar-tabs">
+          <TabsTab value="casuale" className="ui-tab">
             {t('calendarAssignment.tabs.random')}
           </TabsTab>
-          <TabsTab value="rimozione" className="admin-calendar-tab">
+          <TabsTab value="rimozione" className="ui-tab">
             {t('calendarAssignment.tabs.removal')}
           </TabsTab>
-          <TabsTab value="per-id" className="admin-calendar-tab">
+          <TabsTab value="per-id" className="ui-tab">
             {t('calendarAssignment.tabs.byId')}
           </TabsTab>
         </TabsList>

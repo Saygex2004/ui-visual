@@ -7,6 +7,7 @@ import { TextInput } from '../../components/TextInput.js';
 import { PasswordInput } from '../../components/PasswordInput.js';
 import { Button } from '../../components/Button.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
+import { BrandLogo } from '../../app/Shell.js';
 import { useLogin } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 import './auth.css';
@@ -36,6 +37,9 @@ export function LoginScreen({ redirectTo }: { redirectTo?: string }) {
   return (
     <main className="auth-screen">
       <form className="auth-card" onSubmit={handleSubmit}>
+        <div className="auth-brand">
+          <BrandLogo />
+        </div>
         <h1 className="auth-title">{t('login.title')}</h1>
         <div className="auth-field">
           <label htmlFor="login-username">{t('login.usernameLabel')}</label>
@@ -60,7 +64,7 @@ export function LoginScreen({ redirectTo }: { redirectTo?: string }) {
           />
         </div>
         {errorMessage ? <StatusDisplay variant="error" message={errorMessage} /> : null}
-        <Button type="submit" disabled={login.isPending}>
+        <Button type="submit" severity="brand" disabled={login.isPending}>
           {t('login.submit')}
         </Button>
       </form>

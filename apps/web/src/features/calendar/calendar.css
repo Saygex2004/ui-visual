@@ -1,15 +1,16 @@
-/* Hallmark · genre: modern-minimal · macrostructure: Workbench (data-dense)
- * design-system: design.md · designed-as-app
+/* design-system: design.md (Navy Ledger, Phase 13) · Workbench (data-dense)
  * Calendar month + day views (UI §7) — tokens only. Loading/error/empty
- * states now go through the shared StatusDisplay primitive. */
+ * states go through the shared StatusDisplay primitive; the month grid
+ * sits on the same card-on-paper surface as every other data view. */
 
 .calendar-month-view,
 .calendar-day-view {
   box-sizing: border-box;
   width: 100%;
-  max-width: 960px;
+  max-width: 60rem;
   margin: 0 auto;
-  padding: var(--space-4);
+  padding: var(--space-8) var(--space-6);
+  animation: pvp-fade var(--dur-base) var(--ease-out);
 }
 
 .calendar-month-header {
@@ -17,13 +18,15 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-5);
 }
 
 .calendar-month-title {
   min-width: 14rem;
   text-align: center;
   font-size: var(--text-lg);
+  font-weight: 800;
+  letter-spacing: -0.015em;
 }
 
 .calendar-month-nav {
@@ -55,14 +58,20 @@
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: var(--space-1);
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
 }
 
 .calendar-weekday-cell {
   padding: var(--space-2);
   text-align: center;
-  font-size: var(--text-xs);
-  font-weight: 600;
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
   color: var(--color-text-muted);
 }
 
@@ -85,6 +94,7 @@
 
 .calendar-day-cell:hover {
   border-color: var(--color-accent);
+  background: var(--color-accent-soft);
 }
 
 .calendar-day-cell:focus-visible {
@@ -105,25 +115,28 @@
 .calendar-day-number {
   font-variant-numeric: tabular-nums;
   font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 .calendar-day-badge {
   font-variant-numeric: tabular-nums;
   font-size: var(--text-xs);
-  padding: 0 var(--space-1);
-  border-radius: var(--radius-sm);
+  font-weight: 700;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
   background: var(--color-surface-2);
   color: var(--color-text-muted);
 }
 
 .calendar-day-cell[data-progress='some'] .calendar-day-badge {
-  background: color-mix(in srgb, var(--color-warning) 15%, transparent);
-  color: var(--color-warning);
+  background: var(--color-warning-soft);
+  color: var(--color-warning-strong);
 }
 
 .calendar-day-cell[data-progress='all'] .calendar-day-badge {
-  background: color-mix(in srgb, var(--color-success) 15%, transparent);
-  color: var(--color-success);
+  background: var(--color-success-soft);
+  color: var(--color-success-strong);
 }
 
 .calendar-day-actionable {
@@ -135,9 +148,9 @@
 
 .calendar-legend {
   margin-top: var(--space-4);
-  padding: var(--space-3);
+  padding: var(--space-4) var(--space-5);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   background: var(--color-surface-2);
   font-size: var(--text-sm);
   color: var(--color-text-muted);
@@ -157,6 +170,7 @@
   color: var(--color-accent);
   text-decoration: none;
   font-size: var(--text-sm);
+  font-weight: 600;
 }
 
 .calendar-day-back:hover {
@@ -166,10 +180,13 @@
 .calendar-day-title {
   margin-bottom: var(--space-2);
   font-size: var(--text-lg);
+  font-weight: 800;
+  letter-spacing: -0.015em;
 }
 
 .calendar-day-progress {
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-5);
   font-variant-numeric: tabular-nums;
-  color: var(--color-text-muted);
+  font-weight: 600;
+  color: var(--color-text-body);
 }
