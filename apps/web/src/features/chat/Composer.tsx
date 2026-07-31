@@ -65,9 +65,6 @@ export function Composer({ listingId, disabled, participants }: ComposerProps) {
       a.username.localeCompare(b.username),
     );
   }, [participants, candidatesQuery.data]);
-  const mentionPoolRef = useRef(mentionPool);
-  mentionPoolRef.current = mentionPool;
-
   function handleAttachClick() {
     fileInputRef.current?.click();
   }
@@ -104,22 +101,16 @@ export function Composer({ listingId, disabled, participants }: ComposerProps) {
     );
   }
 
-  // Stable across renders (the editor's extension set is built once) —
-  // reads the live pool/mutations through refs and hook closures.
   const mention = useMemo(
     () => ({
-      getItems: (query: string) => {
-        const q = query.trim().toLowerCase();
-        const pool = mentionPoolRef.current;
-        return q ? pool.filter((c) => c.username.toLowerCase().includes(q)) : pool;
-      },
+      candidates: mentionPool,
       onPick: (item: MentionCandidate) => {
         if (!item.isParticipant) addParticipant.mutate(item.id);
       },
       onActive: () => setMentionUsed(true),
     }),
     // addParticipant.mutate is referentially stable per React Query's contract
-    [addParticipant.mutate],
+    [mentionPool, addParticipant.mutate],
   );
 
   return (

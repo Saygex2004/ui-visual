@@ -26,7 +26,15 @@ import { Button } from '../../components/Button.js';
 import { ConfirmDialog } from '../../components/ConfirmDialog.js';
 import './chat.css';
 
-export function ThreadView({ listingId }: { listingId: string }) {
+export interface ThreadViewProps {
+  listingId: string;
+  /** Rendered inside the workspace drawer, whose header already names the
+   *  listing — so the thread's own title would just repeat it. The
+   *  standalone /chat/:listingId route has no such frame and keeps it. */
+  embedded?: boolean;
+}
+
+export function ThreadView({ listingId, embedded = false }: ThreadViewProps) {
   const { t } = useTranslation('chat');
   const { data: me } = useMe();
   const { data, isLoading, isError } = useThread(listingId, true);
@@ -43,11 +51,13 @@ export function ThreadView({ listingId }: { listingId: string }) {
   return (
     <div className="chat-thread-view">
       <div className="chat-thread-header">
-        <h2 className="chat-thread-title">
-          {formatText(thread.listing.tipo_bene)}
-          {' — '}
-          {formatText(thread.listing.tribunale)}
-        </h2>
+        {embedded ? null : (
+          <h2 className="chat-thread-title">
+            {formatText(thread.listing.tipo_bene)}
+            {' — '}
+            {formatText(thread.listing.tribunale)}
+          </h2>
+        )}
         {isAdmin ? (
           thread.closed ? (
             <Button

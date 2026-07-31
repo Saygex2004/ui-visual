@@ -1,10 +1,19 @@
 // The shared Valutazione control (UI §5, redesigned in Execution Plan
 // Phase 13): a segmented row of three options — colored dot + label — used
 // in the workspace drawer. Selecting the already-active option clears it —
-// exactly one (or none) active at a time. Table rows no longer embed the
-// editable control: they show the read-only `RatingDot` (the row-level
-// `data-rating` marking in DataTable.tsx is driven by the same joined
-// value), and editing happens here in the drawer (owner decision, Phase 13).
+// exactly one (or none) active at a time. Dashboard and archive rows no
+// longer embed the editable control: they show the read-only `RatingDot`
+// (the row-level `data-rating` marking in DataTable.tsx is driven by the
+// same joined value), and editing happens in the drawer (owner decision,
+// Phase 13).
+//
+// The calendar day table is the deliberate exception and keeps the `compact`
+// in-row control: that screen IS a rate-through worklist (UI §7.2/§7.3 — a
+// listing counts as done once rated), and its rows' workspace link leaves
+// the calendar for the area view, so routing every verdict through the
+// drawer would mean navigating away and back for each of the day's
+// listings. Rating in the row is the point of that screen, unlike the
+// dashboard where it is an occasional judgement made with the facts open.
 import { useTranslation } from 'react-i18next';
 import { RATING_VALUES, type RatingValue } from '@pvp/shared';
 import { useSetRating, useClearRating } from './hooks.js';
@@ -13,9 +22,12 @@ import './ratings.css';
 export interface RatingControlProps {
   listingId: string;
   value: RatingValue | null;
+  /** Dots-only variant with no visible text, for the calendar day table —
+   *  the one place rating is still done in the row (see below). */
+  compact?: boolean;
 }
 
-export function RatingControl({ listingId, value }: RatingControlProps) {
+export function RatingControl({ listingId, value, compact }: RatingControlProps) {
   const { t } = useTranslation('dashboard');
   const setRating = useSetRating();
   const clearRating = useClearRating();
@@ -27,7 +39,11 @@ export function RatingControl({ listingId, value }: RatingControlProps) {
   }
 
   return (
-    <div className="rating-control" role="group" aria-label={t('rating.groupLabel')}>
+    <div
+      className={`rating-control${compact ? ' rating-control-compact' : ''}`}
+      role="group"
+      aria-label={t('rating.groupLabel')}
+    >
       {RATING_VALUES.map((option) => {
         const label = t(`rating.value.${option}`);
         return (
@@ -42,7 +58,7 @@ export function RatingControl({ listingId, value }: RatingControlProps) {
             onClick={() => handleClick(option)}
           >
             <span className="rating-dot" aria-hidden="true" />
-            {label}
+            {compact ? null : label}
           </button>
         );
       })}

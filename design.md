@@ -44,49 +44,49 @@ to OKLCH, then contrast-corrected where the mockup's raw hexes fail WCAG AA
 ```css
 :root {
   /* Light — reference anchors */
-  --color-paper: oklch(97.3% 0.006 265);        /* #f4f6fa */
-  --color-surface: oklch(100% 0 0);             /* cards, table, app bar */
-  --color-surface-2: oklch(96.1% 0.007 269);    /* fills, idle inputs */
-  --color-border: oklch(92.8% 0.013 267);       /* #e3e7f0 */
-  --color-border-soft: oklch(95.2% 0.008 271);  /* row/section dividers */
-  --color-border-strong: oklch(83% 0.026 266);  /* hover borders */
-  --color-text: oklch(24.4% 0.035 265);         /* #182031 ink */
-  --color-text-body: oklch(47.9% 0.032 269);    /* #565d70 */
-  --color-text-muted: oklch(56% 0.028 269);     /* mockup grey darkened for AA */
+  --color-paper: oklch(97.3% 0.006 265); /* #f4f6fa */
+  --color-surface: oklch(100% 0 0); /* cards, table, app bar */
+  --color-surface-2: oklch(96.1% 0.007 269); /* fills, idle inputs */
+  --color-border: oklch(92.8% 0.013 267); /* #e3e7f0 */
+  --color-border-soft: oklch(95.2% 0.008 271); /* row/section dividers */
+  --color-border-strong: oklch(83% 0.026 266); /* hover borders */
+  --color-text: oklch(24.4% 0.035 265); /* #182031 ink */
+  --color-text-body: oklch(47.9% 0.032 269); /* #565d70 */
+  --color-text-muted: oklch(56% 0.028 269); /* mockup grey darkened for AA */
 
   /* Brand (identity): navy — headings, logo tile, the brand button */
-  --color-brand: oklch(26.9% 0.083 269);        /* #16224e */
+  --color-brand: oklch(26.9% 0.083 269); /* #16224e */
   --color-brand-strong: oklch(31.5% 0.099 269); /* #1d2c63 hover */
-  --color-brand-fill: var(--color-brand);       /* button fill (dark differs) */
+  --color-brand-fill: var(--color-brand); /* button fill (dark differs) */
   --color-brand-fill-contrast: oklch(99% 0.004 255);
 
   /* Accent (interaction): blue — links, active, primary actions */
-  --color-accent: oklch(50.8% 0.132 252);       /* #2167ae */
-  --color-accent-strong: oklch(42.2% 0.107 252);/* #184f86 */
-  --color-accent-soft: oklch(95.6% 0.015 257);  /* #eaf1fb tint fills/chips */
+  --color-accent: oklch(50.8% 0.132 252); /* #2167ae */
+  --color-accent-strong: oklch(42.2% 0.107 252); /* #184f86 */
+  --color-accent-soft: oklch(95.6% 0.015 257); /* #eaf1fb tint fills/chips */
   --color-accent-contrast: oklch(99% 0.004 255);
   --color-focus: oklch(50.8% 0.132 252);
 
   /* Status — base for dots/borders, -strong for text on -soft tints */
-  --color-success: oklch(61.8% 0.13 161);         /* #1f9d6b */
+  --color-success: oklch(61.8% 0.13 161); /* #1f9d6b */
   --color-success-strong: oklch(52% 0.11 161);
-  --color-success-soft: oklch(95.9% 0.017 163);   /* #e8f5ee */
-  --color-warning: oklch(63.7% 0.14 68);          /* #c27803 */
+  --color-success-soft: oklch(95.9% 0.017 163); /* #e8f5ee */
+  --color-warning: oklch(63.7% 0.14 68); /* #c27803 */
   --color-warning-strong: oklch(50% 0.11 68);
-  --color-warning-soft: oklch(96% 0.03 86);       /* #fbf1dc */
-  --color-danger: oklch(59.7% 0.182 25);          /* #d64545 */
+  --color-warning-soft: oklch(96% 0.03 86); /* #fbf1dc */
+  --color-danger: oklch(59.7% 0.182 25); /* #d64545 */
   --color-danger-strong: oklch(50% 0.15 25);
-  --color-danger-soft: oklch(95.1% 0.019 17);     /* #fbeaea */
+  --color-danger-soft: oklch(95.1% 0.019 17); /* #fbeaea */
   --color-info: var(--color-accent);
 
   /* Categorical ramp — cluster dots, avatar fills (index-stable) */
-  --color-cat-1: oklch(59.7% 0.182 25);   /* red */
-  --color-cat-2: oklch(50.8% 0.132 252);  /* blue */
-  --color-cat-3: oklch(61.8% 0.13 161);   /* green */
-  --color-cat-4: oklch(65.7% 0.028 269);  /* grey */
-  --color-cat-5: oklch(30.6% 0.021 269);  /* graphite */
-  --color-cat-6: oklch(54.9% 0.247 291);  /* violet */
-  --color-cat-7: oklch(64.8% 0.13 232);   /* cyan */
+  --color-cat-1: oklch(59.7% 0.182 25); /* red */
+  --color-cat-2: oklch(50.8% 0.132 252); /* blue */
+  --color-cat-3: oklch(61.8% 0.13 161); /* green */
+  --color-cat-4: oklch(65.7% 0.028 269); /* grey */
+  --color-cat-5: oklch(30.6% 0.021 269); /* graphite */
+  --color-cat-6: oklch(54.9% 0.247 291); /* violet */
+  --color-cat-7: oklch(64.8% 0.13 232); /* cyan */
 
   --font-display: 'Hanken Grotesk', system-ui, sans-serif;
   --font-body: 'Hanken Grotesk', system-ui, sans-serif;
@@ -96,19 +96,27 @@ to OKLCH, then contrast-corrected where the mockup's raw hexes fail WCAG AA
   /* Type scale: --text-xs … --text-2xl. See tokens.css. */
 
   --radius-sm: 6px;
-  --radius-md: 9px;   /* buttons / inputs (reference: 8–10px) */
-  --radius-lg: 14px;  /* cards / panels */
-  --radius-xl: 16px;  /* hero cards (landing) */
+  --radius-md: 9px; /* buttons / inputs (reference: 8–10px) */
+  --radius-lg: 14px; /* cards / panels */
+  --radius-xl: 16px; /* hero cards (landing) */
   --radius-pill: 999px;
 
   --shadow-1: 0 1px 2px oklch(26.9% 0.083 269 / 0.06);
   --shadow-2: 0 4px 16px oklch(26.9% 0.083 269 / 0.08);
-  --shadow-pop: 0 16px 40px oklch(26.9% 0.083 269 / 0.16);   /* popovers/menus */
+  --shadow-pop: 0 16px 40px oklch(26.9% 0.083 269 / 0.16); /* popovers/menus */
   --shadow-drawer: -18px 0 50px oklch(26.9% 0.083 269 / 0.2);
+
+  /* One stacking scale — floating layers must not fight. Popovers and menus
+     are portalled to <body>, so they need to clear the drawer or a picker
+     opened inside it renders behind its own trigger. */
+  --z-header: 40;
+  --z-drawer: 1000;
+  --z-popover: 1100;
+  --z-modal: 1200;
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-fast: 0.15s;
-  --dur-pop: 0.14s;   /* popover/menu entrance */
+  --dur-pop: 0.14s; /* popover/menu entrance */
   --dur-slide: 0.24s; /* drawer entrance */
   --dur-base: 0.3s;
 }
@@ -171,7 +179,7 @@ tracking / `--color-text-muted`** labels for form-field labels, table column
 headers, KV-metadata keys, and popover section headers — one shared CSS
 pattern (`.field-label` and equivalents), never ad-hoc. Body copy, buttons,
 menu items, and data values stay sentence-case; the uppercase voice is
-reserved for *labels of things*, not things themselves. (This intentionally
+reserved for _labels of things_, not things themselves. (This intentionally
 reverses the Phase 10 no-uppercase correction — see Notes.)
 
 ## CTA voice
@@ -227,7 +235,11 @@ reverses the Phase 10 no-uppercase correction — see Notes.)
 - The focus-ring token (`--color-focus`, 2px solid, 2px offset).
 - One elevation scale: `--shadow-1`/`--shadow-2` for resting surfaces,
   `--shadow-pop` for floating layers, `--shadow-drawer` for the workspace
-  panel (dark mode raises opacity, same geometry).
+  panel (dark mode raises opacity, same geometry) — and one **stacking**
+  scale (`--z-header` < `--z-drawer` < `--z-popover` < `--z-modal`); no
+  surface invents its own `z-index` for a floating layer.
+- No browser-native `alert`/`confirm`/`prompt`: confirmations use
+  `ConfirmDialog`, single-value asks use `PromptDialog`.
 - The shared `StatusDisplay`/`Skeleton` primitives for every
   loading/empty/error/success state (no bespoke per-feature status text).
 
@@ -348,7 +360,7 @@ project's own token names.
   Its palette (navy `#16224e`, blue `#2167ae`, blue-grey neutrals),
   typography (Hanken Grotesk), and structural voice (uppercase micro-labels,
   pill badges, popover elevation) replace Cobalt's single-cobalt-signal
-  system. The token *architecture* — OKLCH, light + `data-theme='dark'`,
+  system. The token _architecture_ — OKLCH, light + `data-theme='dark'`,
   names, reduced-motion guard — is unchanged from Phase 10.
 - **The uppercase micro-label reversal is intentional and user-confirmed**
   (Phase 13 planning session, 2026-07-31). Phase 10 removed all
@@ -366,12 +378,12 @@ project's own token names.
   White-on-accent (5.81:1) and white-on-navy (15.3:1) pass as-is.
 - Dark mode has no mockup — the dark set above derives from the light
   anchors under Phase 10's rules (hue preserved, lightness inverted, chroma
-  tuned, pairs verified). Navy cannot be a fill in dark (it *is* the ink
+  tuned, pairs verified). Navy cannot be a fill in dark (it _is_ the ink
   band), hence the `--color-brand` (ink) vs `--color-brand-fill` (button)
   split.
 - The logo is a **temporary placeholder** (owner: "it will be replaced
   later") — drawn in CSS, no binary asset, one implementation.
-- *Historical (Phase 10, superseded where it conflicts with the above):*
+- _Historical (Phase 10, superseded where it conflicts with the above):_
   Cobalt anchors, Inter single-family, the no-uppercase rule and its
   Apple/Zurich rationale, `--color-accent` 58%→55% L axe fix. See git
   history of this file and `HANDOFF_PHASE_10.md`.

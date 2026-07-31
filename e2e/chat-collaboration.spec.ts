@@ -19,7 +19,7 @@
 // (dashboard/menu badges), openThread ~7.5s (an already-open thread picking
 // up a peer's message or a close/reopen).
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin } from './helpers.js';
+import { clickExpectingConfirm, loginAsAdmin, openRowChat, openUserMenuItem } from './helpers.js';
 
 const RUN_ID = Date.now();
 const USERNAME_B = `collega-b-${RUN_ID}`;
@@ -76,8 +76,7 @@ test.describe('chat collaboration', () => {
 
     // --- Setup: admin creates two colleagues up front. ---
     await loginAsAdmin(page);
-    await page.getByRole('button', { name: 'admin' }).click();
-    await page.getByRole('menuitem', { name: 'Amministrazione' }).click();
+    await openUserMenuItem(page, 'admin', 'Amministrazione');
     await createAccount(page, USERNAME_B);
     await createAccount(page, USERNAME_C);
 
@@ -100,13 +99,11 @@ test.describe('chat collaboration', () => {
     await page.goto(LISTING_URL);
     await expect(page.getByRole('heading', { name: /Cluster 2: Blue Chip Zone/ })).toBeVisible();
     const aRow = page.locator('tr.data-table-body-row', { hasText: ROW_MATCH });
-    await aRow.getByRole('link', { name: 'Chat' }).click();
+    // Phase 13: the row's chat quick action moved into the "⋯" overflow menu.
+    await openRowChat(page, aRow);
     await expect(page.locator('.chat-composer')).toBeVisible();
-    await expect(page.locator('.chat-participants-item')).toHaveCount(1);
-    await expect(page.locator('.chat-participants-item').first()).toHaveText('admin');
-    await expect(
-      page.getByText('Nessun messaggio: scrivi il primo per avviare la conversazione.'),
-    ).toBeVisible();
+    await expect(page.getByText('1 partecipante', { exact: true })).toBeVisible();
+    await expect(page.getByText('Nessun messaggio', { exact: true })).toBeVisible();
 
     // --- Compose: plain text + bold + a plain-typed URL (server-side
     // linkified, never through the link button) + a bullet list, plus an
@@ -118,7 +115,8 @@ test.describe('chat collaboration', () => {
     await page.keyboard.type('urgente');
     await page.getByRole('button', { name: 'Grassetto' }).click();
     await page.keyboard.type(' Dettagli: https://example.com/lotto-1031');
-    await page.keyboard.press('Enter');
+    // Phase 13: Enter sends the message; Shift+Enter starts a new paragraph.
+    await page.keyboard.press('Shift+Enter');
     await page.getByRole('button', { name: 'Elenco puntato' }).click();
     await page.keyboard.type('Prima cosa da fare');
     await page.keyboard.press('Enter');
@@ -149,18 +147,18 @@ test.describe('chat collaboration', () => {
     // --- Admin adds B — the whole prior history becomes B's unread (Fase 7
     // plan's "Scoperta chiave 3"). Own view updates instantly (mutation cache
     // patch); B's badge takes up to one unread poll (~20s). ---
-    await page.getByRole('button', { name: 'Aggiungi un collega' }).click();
-    await page.getByLabel('Scegli un collega…').selectOption({ label: USERNAME_B });
-    // "➕ Aggiungi" — Operazione BELLEZZA prefixed every action button's copy
-    // with an emoji; the accessible name changed deliberately, not a bug.
-    await page.getByRole('button', { name: '➕ Aggiungi', exact: true }).click();
-    await expect(page.locator('.chat-participants-item')).toHaveCount(2);
+    // Phase 13: the select-then-confirm flow became a search popover — open
+    // it once, click the colleague, done.
+    await page.getByRole('button', { name: 'Aggiungi', exact: true }).click();
+    await page.getByRole('button', { name: USERNAME_B, exact: true }).click();
+    await page.keyboard.press('Escape');
+    await expect(page.getByText('2 partecipanti', { exact: true })).toBeVisible();
 
     await expect(bRow.locator('.data-table-chat-badge')).toHaveText('1', { timeout: 25_000 });
 
     // B opens via the row's own quick action, sees the rendered message +
     // attachment preview, and replies.
-    await bRow.getByRole('link', { name: 'Chat' }).click();
+    await openRowChat(bPage, bRow);
     const bFirstMessage = bPage.locator('.chat-message').first();
     await expect(bFirstMessage.locator('strong', { hasText: 'urgente' })).toBeVisible();
     await expect(bFirstMessage.locator('img.chat-attachment-preview')).toBeVisible();
@@ -180,30 +178,28 @@ test.describe('chat collaboration', () => {
 
     // Back into the thread — needed for the close/reopen propagation checks
     // further down (leaving the dashboard above unmounts the workspace).
-    await bRow.getByRole('link', { name: 'Chat' }).click();
+    await openRowChat(bPage, bRow);
     await expect(bPage.locator('.chat-composer')).toBeVisible();
 
     // --- Admin adds C — now TWO prior messages (admin's + B's reply) must
     // both land as C's unread, proving "full history", not just "since
     // added". ---
-    await page.getByRole('button', { name: 'Aggiungi un collega' }).click();
-    await page.getByLabel('Scegli un collega…').selectOption({ label: USERNAME_C });
-    // "➕ Aggiungi" — Operazione BELLEZZA prefixed every action button's copy
-    // with an emoji; the accessible name changed deliberately, not a bug.
-    await page.getByRole('button', { name: '➕ Aggiungi', exact: true }).click();
-    await expect(page.locator('.chat-participants-item')).toHaveCount(3);
+    await page.getByRole('button', { name: 'Aggiungi', exact: true }).click();
+    await page.getByRole('button', { name: USERNAME_C, exact: true }).click();
+    await page.keyboard.press('Escape');
+    await expect(page.getByText('3 partecipanti', { exact: true })).toBeVisible();
 
     await expect(cRow.locator('.data-table-chat-badge')).toHaveText('2', { timeout: 25_000 });
 
-    await cRow.getByRole('link', { name: 'Chat' }).click();
+    await openRowChat(cPage, cRow);
     await expect(cPage.locator('.chat-message')).toHaveCount(2);
-    await expect(cPage.locator('.chat-participants-item')).toHaveCount(3);
+    await expect(cPage.getByText('3 partecipanti', { exact: true })).toBeVisible();
 
-    // --- Admin closes the thread (client-side confirm dialog, UI §6.2). ---
-    page.once('dialog', (dialog) => void dialog.accept());
-    await page.getByRole('button', { name: 'Chiudi chat' }).click();
+    // --- Admin closes the thread (Phase 13: a ConfirmDialog, not the native
+    // window.confirm — UI §6.2). ---
+    await clickExpectingConfirm(page, 'Chiudi chat', 'Conferma');
     await expect(page.locator('.chat-composer')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Aggiungi un collega' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Aggiungi', exact: true })).toHaveCount(0);
     await expect(page.locator('.chat-closed-notice')).toBeVisible();
 
     // B's already-open thread picks up the close within one openThread poll
@@ -219,6 +215,51 @@ test.describe('chat collaboration', () => {
 
     await bContext.close();
     await cContext.close();
+  });
+
+  test('typing @ in the composer both inserts the mention and adds the colleague to the thread', async ({
+    page,
+  }) => {
+    // Phase 13 (UX redesign): the mention picker is the low-friction path to
+    // participant management — picking a non-participant inserts a bold
+    // "@username" into the message AND fires the same add-participant API the
+    // "+ Aggiungi" popover uses. Listing 1060 (Milano, cluster 2/principali)
+    // is untouched by every other spec in this file.
+    test.setTimeout(120_000);
+    const mentionUser = `menzionato-${RUN_ID}`;
+
+    await loginAsAdmin(page);
+    await openUserMenuItem(page, 'admin', 'Amministrazione');
+    await createAccount(page, mentionUser);
+
+    await page.goto('/chat/1060');
+    await expect(page.locator('.chat-composer')).toBeVisible();
+    await expect(page.getByText('1 partecipante', { exact: true })).toBeVisible();
+
+    const editor = page.locator('.chat-editor-content [contenteditable="true"]');
+    await editor.click();
+    await page.keyboard.type('Ciao @');
+    // The picker opens with the colleague listed as an addable candidate.
+    const picker = page.getByRole('listbox', { name: 'Menziona un collega' });
+    await expect(picker).toBeVisible();
+    await picker.getByRole('option', { name: new RegExp(mentionUser) }).click();
+
+    // The mention lands as bold text (the rich-text allowlist has no mention
+    // node — SPECIFICATIONS.md §11 — so this needs no schema change)…
+    await expect(editor.locator('strong', { hasText: `@${mentionUser}` })).toBeVisible();
+    // …and the colleague is now a participant.
+    await expect(page.getByText('2 partecipanti', { exact: true })).toBeVisible();
+
+    // Enter sends (Phase 13), and the sent message keeps the mention.
+    await page.keyboard.type('dai un occhiata');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.chat-message')).toHaveCount(1);
+    await expect(
+      page
+        .locator('.chat-message')
+        .first()
+        .locator('strong', { hasText: `@${mentionUser}` }),
+    ).toBeVisible();
   });
 
   test('a malicious message body is stored sanitized, and disallowed/oversized uploads are rejected', async ({

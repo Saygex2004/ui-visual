@@ -64,6 +64,10 @@ test.describe('calendar assignment', () => {
     const progressBefore = await page.locator('.calendar-day-progress').textContent();
     expect(progressBefore).toMatch(/^0 di/);
 
+    // Phase 13 moved rating into the scheda drawer for dashboard/archive
+    // rows, but the calendar day table deliberately keeps its in-row control
+    // (it is a rate-through worklist, and its scheda link leaves the
+    // calendar) — so this stays a single click on the row.
     await rows.first().getByRole('button', { name: RATING_LABEL }).click();
     await expect(rows.first()).toHaveAttribute('data-rating', 'ottimo_affare');
 
@@ -83,9 +87,7 @@ test.describe('calendar assignment', () => {
     await page.getByRole('tab', { name: 'Assegnazione per ID' }).click();
 
     await page.getByLabel('Cerca').fill('2001');
-    // "🔍 Cerca" — Operazione BELLEZZA prefixed every action button's copy
-    // with an emoji; the accessible name changed deliberately, not a bug.
-    await page.getByRole('button', { name: '🔍 Cerca', exact: true }).click();
+    await page.getByRole('button', { name: 'Cerca', exact: true }).click();
 
     const resultRow = page.locator('tbody tr', { hasText: '2001' });
     await expect(resultRow).toHaveCount(1);
@@ -95,7 +97,9 @@ test.describe('calendar assignment', () => {
     await page.getByLabel('Utente').selectOption({ label: 'admin' });
     await page.getByLabel('Giorno').fill(assignDate);
     await page.getByRole('button', { name: 'Assegna selezionati' }).click();
-    await expect(page.getByText('1 annunci assegnati.')).toBeVisible();
+    // Phase 13 gave the count-interpolated admin copy proper Italian plural
+    // forms, so a single assignment now reads "1 annuncio assegnato."
+    await expect(page.getByText('1 annuncio assegnato.')).toBeVisible();
 
     await page.goto(`/calendario/${assignDate}`);
     const row = page.locator('tr.data-table-body-row', { hasText: '2001' });

@@ -126,6 +126,16 @@
      content), so it's declared once here, not overridden in the dark block. */
   --color-scrim: oklch(26.9% 0.083 269 / 0.34);
 
+  /* --- Stacking order (one scale, so floating layers can't fight).
+         Popovers and menus must clear the workspace drawer: they are
+         portalled to <body>, so without this a picker opened *inside* the
+         drawer renders behind it and its own trigger. Confirmations sit
+         above everything, since one can be raised from the drawer. --- */
+  --z-header: 40;
+  --z-drawer: 1000;
+  --z-popover: 1100;
+  --z-modal: 1200;
+
   /* --- Motion --- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-fast: 0.15s;
@@ -258,6 +268,17 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Border-box everywhere (Phase 13). Without it, a declared width is the
+   content box and padding is added on top — which is how the data table's
+   column budget silently overflowed its container and pushed the value and
+   date columns under the frozen actions column. Surfaces that already
+   declared it individually keep working unchanged. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 html,

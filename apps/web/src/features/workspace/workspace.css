@@ -7,7 +7,7 @@
   position: fixed;
   inset: 0;
   background: var(--color-scrim);
-  z-index: 1000;
+  z-index: var(--z-drawer);
   animation: pvp-fade var(--dur-fast) var(--ease-out);
 }
 
@@ -21,7 +21,7 @@
   flex-direction: column;
   background: var(--color-surface);
   box-shadow: var(--shadow-drawer);
-  z-index: 1001;
+  z-index: calc(var(--z-drawer) + 1);
   animation: pvp-slide var(--dur-slide) var(--ease-out);
 }
 

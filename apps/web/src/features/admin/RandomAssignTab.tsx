@@ -5,6 +5,7 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TextInput } from '../../components/TextInput.js';
 import { Button } from '../../components/Button.js';
+import { ConfirmDialog } from '../../components/ConfirmDialog.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { useAdminUsers, useRandomAssign } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
@@ -20,6 +21,7 @@ export function RandomAssignTab() {
   const [count, setCount] = useState(DEFAULT_COUNT);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [result, setResult] = useState<string[] | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const users = usersData?.users.filter((u) => !u.disabled) ?? [];
 
@@ -28,7 +30,12 @@ export function RandomAssignTab() {
     setErrorMessage(null);
     setResult(null);
     if (!userId || !date) return;
-    if (!window.confirm(t('calendarAssignment.random.confirm', { count, date }))) return;
+    setConfirmOpen(true);
+  }
+
+  // Phase 13: the confirmation step is the shared ConfirmDialog, not the
+  // browser's native confirm.
+  function runAssign() {
     randomAssign.mutate(
       { user_id: userId, date, count },
       {
@@ -91,6 +98,15 @@ export function RandomAssignTab() {
       <Button type="submit" disabled={randomAssign.isPending || !userId || !date}>
         {t('calendarAssignment.random.submit')}
       </Button>
+      <ConfirmDialog
+        open={confirmOpen}
+        title={t('calendarAssignment.random.submit')}
+        description={t('calendarAssignment.random.confirm', { count, date })}
+        confirmLabel={t('common:actions.confirm')}
+        cancelLabel={t('common:actions.cancel')}
+        onConfirm={runAssign}
+        onOpenChange={setConfirmOpen}
+      />
     </form>
   );
 }

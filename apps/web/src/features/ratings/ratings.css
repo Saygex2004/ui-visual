@@ -77,6 +77,25 @@
   color: var(--color-danger-strong);
 }
 
+/* Compact variant — the calendar day table's in-row control: dots only,
+   the full verdict carried by title/aria-label. */
+.rating-control-compact {
+  gap: var(--space-1);
+}
+
+.rating-control-compact .rating-option {
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border-radius: var(--radius-pill);
+}
+
+.rating-control-compact .rating-dot {
+  width: 0.625rem;
+  height: 0.625rem;
+}
+
 /* Read-only row indicator (Phase 13): colored dot with soft halo; grey
    ring when unrated. */
 .rating-indicator {

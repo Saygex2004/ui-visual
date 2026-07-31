@@ -5,6 +5,61 @@
 import { expect, type Page } from '@playwright/test';
 import { E2E_BOOTSTRAP_PASSWORD, ADMIN_ROTATED_PASSWORD } from '../playwright.config.js';
 
+// --- Phase 13 (UX redesign) interaction helpers -----------------------------
+// The cluster pill-row and the region chip-row became comboboxes, and the
+// native alert()/confirm() flows became modal ConfirmDialogs. These wrap the
+// two-step "open the listbox, pick the option" and "click, then confirm in
+// the dialog" idioms so every spec drives them the same way.
+
+/** Opens the user menu and clicks one of its items (Radix renders menu items
+ *  only while the menu is open). */
+export async function openUserMenuItem(
+  page: Page,
+  username: string,
+  itemName: string,
+): Promise<void> {
+  await page.getByRole('button', { name: username }).click();
+  await page.getByRole('menuitem', { name: itemName }).click();
+}
+
+/** Picks a cluster (or "Archivio") from the selector toolbar's combobox. */
+export async function selectCluster(page: Page, optionName: RegExp | string): Promise<void> {
+  await page.getByRole('combobox', { name: 'Cluster' }).click();
+  await page.getByRole('option', { name: optionName }).click();
+}
+
+/** Picks a region (including "Tutte le regioni") from the region combobox. */
+export async function selectRegion(page: Page, optionName: string): Promise<void> {
+  await page.getByRole('combobox', { name: 'Regione' }).click();
+  await page.getByRole('option', { name: optionName, exact: true }).click();
+}
+
+/** Opens a table row's chat from the row's "⋯" overflow menu (Phase 13
+ *  moved the per-row quick actions there). */
+export async function openRowChat(page: Page, row: ReturnType<Page['locator']>): Promise<void> {
+  await row.getByRole('button', { name: 'Altre azioni' }).click();
+  await page.getByRole('menuitem', { name: 'Apri chat' }).click();
+}
+
+/** Clicks a control that opens a ConfirmDialog, asserts the dialog's copy,
+ *  then resolves it. Returns the dialog's description text. */
+export async function clickExpectingConfirm(
+  page: Page,
+  buttonName: string,
+  action: 'Conferma' | 'OK' | 'Annulla',
+): Promise<string> {
+  await page.getByRole('button', { name: buttonName }).click();
+  // Scoped by class, not by role: the workspace drawer and every popover are
+  // `role="dialog"` too, so a bare role lookup is ambiguous whenever a
+  // confirmation is raised from inside one of them.
+  const dialog = page.locator('.ui-confirm');
+  await expect(dialog).toBeVisible();
+  const message = (await dialog.textContent()) ?? '';
+  await dialog.getByRole('button', { name: action, exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  return message;
+}
+
 /** Attaches a no-op catch to suppress the "unhandled rejection" warning from
  *  a losing `Promise.race` branch, without affecting what the race itself
  *  observes (a promise may carry multiple independent handlers). */

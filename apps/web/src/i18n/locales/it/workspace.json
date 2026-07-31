@@ -23,7 +23,8 @@
     "goToListing": "Vai all'annuncio"
   },
   "relatedLots": {
-    "title": "Lotti correlati ({{count}})",
+    "title_one": "Lotto correlato (1)",
+    "title_other": "Lotti correlati ({{count}})",
     "empty": "Nessun altro lotto attivo in questo blocco."
   },
   "activity": {

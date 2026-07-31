@@ -8,6 +8,8 @@
 // same as any other table).
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Archive, Trash2 } from 'lucide-react';
+import { Button } from '../../components/Button.js';
 import type {
   AreaSlug,
   ArchiveRow,
@@ -80,12 +82,21 @@ export function ArchiveSection({
   return (
     <section className="cluster-section" aria-labelledby="archive-title">
       <div className="archive-section-header">
-        <h2 id="archive-title" className="cluster-section-title">
-          {t('archive.title')}
-        </h2>
-        <button type="button" className="archive-svuota-control" onClick={onSvuota}>
+        <div className="cluster-section-heading">
+          <Archive aria-hidden="true" size={16} className="archive-section-icon" />
+          <h2 id="archive-title" className="cluster-section-title">
+            {t('archive.title')}
+          </h2>
+        </div>
+        <Button
+          severity="secondary"
+          size="small"
+          className="archive-svuota-control"
+          onClick={onSvuota}
+        >
+          <Trash2 aria-hidden="true" size={14} />
           {t('archive.svuotaControl')}
-        </button>
+        </Button>
       </div>
       <Toolbar
         areaKind={areaKind}

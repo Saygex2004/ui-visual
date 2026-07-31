@@ -59,15 +59,19 @@
     },
     "random": {
       "submit": "Assegna",
-      "confirm": "Assegnare {{count}} annunci a {{date}}?",
-      "result": "{{count}} annunci assegnati."
+      "confirm_one": "Assegnare 1 annuncio a {{date}}?",
+      "confirm_other": "Assegnare {{count}} annunci a {{date}}?",
+      "result_one": "1 annuncio assegnato.",
+      "result_other": "{{count}} annunci assegnati."
     },
     "removal": {
       "empty": "Nessun annuncio assegnato per questo utente e giorno.",
       "selectAll": "Seleziona tutti",
       "submit": "Rimuovi selezionati",
-      "confirm": "Rimuovere {{count}} annunci dal calendario? L'annuncio e le eventuali valutazioni restano intatti.",
-      "result": "{{count}} annunci rimossi dal calendario."
+      "confirm_one": "Rimuovere 1 annuncio dal calendario? L'annuncio e le eventuali valutazioni restano intatti.",
+      "confirm_other": "Rimuovere {{count}} annunci dal calendario? Gli annunci e le eventuali valutazioni restano intatti.",
+      "result_one": "1 annuncio rimosso dal calendario.",
+      "result_other": "{{count}} annunci rimossi dal calendario."
     },
     "byId": {
       "searchLabel": "Cerca",
@@ -86,7 +90,8 @@
       "completedYes": "Sì",
       "completedNo": "No",
       "assignSubmit": "Assegna selezionati",
-      "assignedResult": "{{count}} annunci assegnati.",
+      "assignedResult_one": "1 annuncio assegnato.",
+      "assignedResult_other": "{{count}} annunci assegnati.",
       "skipReason": {
         "not_found": "id inesistente",
         "completed": "già completato"

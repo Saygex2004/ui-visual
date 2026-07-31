@@ -1,11 +1,13 @@
 // One row of the accounts table (UI §8.1): lifecycle actions with
-// confirmation and outcome messages. Uses window.confirm for the confirmation
-// step (see Phase 3 handoff — PrimeReact 11's Dialog is a compound/headless
-// component; a native confirm keeps this phase's scope proportionate).
+// confirmation and outcome messages. Phase 13 moved the confirmation step
+// from the browser's native `window.confirm` onto the shared ConfirmDialog,
+// so it carries the application's own copy, layout and focus behaviour like
+// every other confirmation.
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PasswordInput } from '../../components/PasswordInput.js';
 import { Button } from '../../components/Button.js';
+import { ConfirmDialog } from '../../components/ConfirmDialog.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
 import type { AdminUser } from '@pvp/shared';
 import { useSetPassword, useSetRole, useSetDisabled } from './hooks.js';
@@ -27,19 +29,16 @@ export function AccountRow({
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState<{ kind: 'error' | 'success'; text: string } | null>(null);
+  const [pending, setPending] = useState<'role' | 'disabled' | null>(null);
+
+  const nextRole = user.role === 'admin' ? 'user' : 'admin';
+  const nextDisabled = !user.disabled;
 
   function report(err: unknown, fallbackKey: string) {
     setMessage({ kind: 'error', text: translateApiError(t, err, t(fallbackKey)) });
   }
 
-  function handleRoleToggle() {
-    const nextRole = user.role === 'admin' ? 'user' : 'admin';
-    const confirmed = window.confirm(
-      nextRole === 'admin'
-        ? t('accounts.confirmPromote', { username: user.username })
-        : t('accounts.confirmDemote', { username: user.username }),
-    );
-    if (!confirmed) return;
+  function confirmRoleToggle() {
     setMessage(null);
     setRole.mutate(
       { userId: user.id, role: nextRole },
@@ -50,14 +49,7 @@ export function AccountRow({
     );
   }
 
-  function handleDisabledToggle() {
-    const nextDisabled = !user.disabled;
-    const confirmed = window.confirm(
-      nextDisabled
-        ? t('accounts.confirmDisable', { username: user.username })
-        : t('accounts.confirmEnable', { username: user.username }),
-    );
-    if (!confirmed) return;
+  function confirmDisabledToggle() {
     setMessage(null);
     setDisabled.mutate(
       { userId: user.id, disabled: nextDisabled },
@@ -106,7 +98,7 @@ export function AccountRow({
           <Button
             size="small"
             severity="secondary"
-            onClick={handleRoleToggle}
+            onClick={() => setPending('role')}
             disabled={isLastAdminGuess}
           >
             {user.role === 'admin' ? t('accounts.actionDemote') : t('accounts.actionPromote')}
@@ -114,7 +106,7 @@ export function AccountRow({
           <Button
             size="small"
             severity={user.disabled ? 'success' : 'danger'}
-            onClick={handleDisabledToggle}
+            onClick={() => setPending('disabled')}
             disabled={isLastAdminGuess}
           >
             {user.disabled ? t('accounts.actionEnable') : t('accounts.actionDisable')}
@@ -157,6 +149,37 @@ export function AccountRow({
           </td>
         </tr>
       ) : null}
+      <ConfirmDialog
+        open={pending != null}
+        title={
+          pending === 'role'
+            ? nextRole === 'admin'
+              ? t('accounts.actionPromote')
+              : t('accounts.actionDemote')
+            : nextDisabled
+              ? t('accounts.actionDisable')
+              : t('accounts.actionEnable')
+        }
+        description={
+          pending === 'role'
+            ? nextRole === 'admin'
+              ? t('accounts.confirmPromote', { username: user.username })
+              : t('accounts.confirmDemote', { username: user.username })
+            : nextDisabled
+              ? t('accounts.confirmDisable', { username: user.username })
+              : t('accounts.confirmEnable', { username: user.username })
+        }
+        confirmLabel={t('common:actions.confirm')}
+        cancelLabel={t('common:actions.cancel')}
+        destructive={pending === 'disabled' && nextDisabled}
+        onConfirm={() => {
+          if (pending === 'role') confirmRoleToggle();
+          else confirmDisabledToggle();
+        }}
+        onOpenChange={(open) => {
+          if (!open) setPending(null);
+        }}
+      />
     </>
   );
 }

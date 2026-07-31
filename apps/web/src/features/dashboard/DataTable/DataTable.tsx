@@ -43,7 +43,7 @@ import './dataTable.css';
 
 const ROW_HEIGHT_PX = 56;
 const VIEWPORT_HEIGHT_PX = 560;
-const ACTIONS_COLUMN_WIDTH = '180px';
+const ACTIONS_COLUMN_WIDTH = '166px';
 
 export interface DataTableProps {
   rows: readonly TableRow[];

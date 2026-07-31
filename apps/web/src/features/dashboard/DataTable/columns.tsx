@@ -11,7 +11,7 @@ import type { AreaSlug, ListingRow, BloccoIndexEntry, ClusterBlock } from '@pvp/
 import type { SortKey } from '../urlState.js';
 import { OccupancyIndicator } from './OccupancyIndicator.js';
 import { BloccoBadge } from './BloccoBadge.js';
-import { RatingDot } from '../../ratings/RatingControl.js';
+import { RatingControl, RatingDot } from '../../ratings/RatingControl.js';
 import type { RatingsMap } from '../../ratings/join.js';
 import {
   formatCurrency,
@@ -72,7 +72,7 @@ function bloccoCount(row: TableRow, ctx: ColumnContext): number | null {
 const TIPO_BENE_CREDITS: ColumnDef = {
   key: 'tipo_bene',
   headerKey: 'table.columns.tipoBene',
-  width: '160px',
+  width: '150px',
   render: (row) => formatText(row.tipo_bene),
 };
 
@@ -80,7 +80,7 @@ const TIPO_BENE_CREDITS: ColumnDef = {
 const TIPO_TRIBUNALE: ColumnDef = {
   key: 'tipo_tribunale',
   headerKey: 'table.columns.tipoTribunale',
-  width: '230px',
+  width: '210px',
   render: (row, ctx) => (
     <span className="data-table-identity">
       <RatingDot value={ctx.ratings.get(row.id) ?? null} />
@@ -102,14 +102,14 @@ const TIPO_PROCEDURA: ColumnDef = {
 const DISPONIBILITA: ColumnDef = {
   key: 'disponibilita',
   headerKey: 'table.columns.disponibilita',
-  width: '180px',
+  width: '175px',
   render: (row) => <OccupancyIndicator value={row.disponibilita} />,
 };
 
 const DESCRIZIONE: ColumnDef = {
   key: 'descrizione',
   headerKey: 'table.columns.descrizione',
-  width: '280px',
+  width: '220px',
   render: (row) => formatText(row.descrizione_excerpt),
 };
 
@@ -117,7 +117,7 @@ const DESCRIZIONE: ColumnDef = {
 const NUMERO_ANNO: ColumnDef = {
   key: 'numero_anno',
   headerKey: 'table.columns.numeroAnno',
-  width: '110px',
+  width: '92px',
   render: (row) => (
     <span className="data-table-stack">
       <span className="data-table-stack-primary">{row.anno ?? NOT_AVAILABLE}</span>
@@ -130,7 +130,7 @@ const BLOCCO: ColumnDef = {
   key: 'blocco',
   headerKey: 'table.columns.blocco',
   sortKey: 'blocco',
-  width: '90px',
+  width: '78px',
   render: (row, ctx) => (
     <BloccoBadge
       bloccoKey={row.blocco_key}
@@ -151,7 +151,7 @@ const TRIBUNALE: ColumnDef = {
 const COMUNE_PROVINCIA: ColumnDef = {
   key: 'comune_provincia',
   headerKey: 'table.columns.comuneProvincia',
-  width: '190px',
+  width: '165px',
   render: (row) => formatComuneProvincia(row.comune, row.provincia),
 };
 
@@ -159,7 +159,7 @@ const VALORE: ColumnDef = {
   key: 'valore_richiesto',
   headerKey: 'table.columns.valoreRichiesto',
   sortKey: 'valore',
-  width: '140px',
+  width: '124px',
   align: 'right',
   render: (row) => (
     <span className="data-table-valore">{formatCurrency(row.valore_richiesto)}</span>
@@ -170,7 +170,7 @@ const DATA_PUBBLICAZIONE: ColumnDef = {
   key: 'data_pubblicazione',
   headerKey: 'table.columns.dataPubblicazione',
   sortKey: 'pubblicazione',
-  width: '130px',
+  width: '112px',
   render: (row) => formatDate(row.data_pubblicazione),
 };
 
@@ -178,7 +178,7 @@ const DATA_VENDITA: ColumnDef = {
   key: 'data_vendita',
   headerKey: 'table.columns.dataVendita',
   sortKey: 'vendita',
-  width: '130px',
+  width: '100px',
   render: (row) => formatDate(row.data_vendita),
 };
 
@@ -215,7 +215,20 @@ const CALENDAR_BLOCCO: ColumnDef = {
     row.blocco_key ? <span className="calendar-blocco-indicator" title={row.blocco_key} /> : null,
 };
 
+/** The calendar day table keeps an in-row Valutazione control — that screen
+ *  is a rate-through worklist and its scheda link leaves the calendar (see
+ *  RatingControl.tsx). Dashboard/archive rows show the read-only dot only. */
+const CALENDAR_RATING: ColumnDef = {
+  key: 'valutazione',
+  headerKey: 'table.columns.valutazione',
+  width: '120px',
+  render: (row, ctx) => (
+    <RatingControl listingId={row.id} value={ctx.ratings.get(row.id) ?? null} compact />
+  ),
+};
+
 const CALENDAR_COLUMNS: ColumnDef[] = [
+  CALENDAR_RATING,
   TIPO_BENE_CREDITS,
   TIPO_PROCEDURA,
   CALENDAR_BLOCCO,

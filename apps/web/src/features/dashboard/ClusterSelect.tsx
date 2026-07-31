@@ -37,9 +37,7 @@ export function ClusterSelect({ clusters, value, archiveCount, onChange }: Clust
       label: (
         <>
           <span className={clusterDotClass(cluster.number)} aria-hidden="true" />
-          <span className="cluster-select-number" aria-hidden="true">
-            {cluster.number}
-          </span>
+          <span className="cluster-select-number">{cluster.number}</span>
           <span className="cluster-select-option-text">
             <span className="cluster-select-option-name">{name}</span>
             <span className="cluster-select-option-count">
@@ -78,9 +76,7 @@ export function ClusterSelect({ clusters, value, archiveCount, onChange }: Clust
         active ? (
           <>
             <span className={clusterDotClass(active.number)} aria-hidden="true" />
-            <span className="cluster-select-number" aria-hidden="true">
-              {active.number}
-            </span>
+            <span className="cluster-select-number">{active.number}</span>
             <span className="cluster-select-trigger-name">{t(`cluster.name.${active.key}`)}</span>
           </>
         ) : (

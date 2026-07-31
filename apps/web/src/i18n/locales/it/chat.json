@@ -46,6 +46,8 @@
     "orderedList": "Elenco numerato",
     "link": "Link",
     "linkPrompt": "Indirizzo del link",
+    "linkPlaceholder": "https://esempio.it/pagina",
+    "linkConfirm": "Inserisci link",
     "mustContainSomething": "Scrivi un messaggio o allega un file prima di inviare.",
     "sendError": "Non è stato possibile inviare il messaggio."
   },

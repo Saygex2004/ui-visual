@@ -97,14 +97,16 @@
     "svuotaTitle": "Svuota archivio",
     "svuotaNothingTitle": "Nulla da svuotare",
     "svuotaNothing": "Non c'è nulla da svuotare. I listing scomparsi dalla fonte restano comunque in archivio.",
-    "svuotaConfirm": "Verranno rimosse {{count}} righe ancora attive ma con vendita ormai passata. I listing archiviati in modo permanente restano in archivio. Continuare?"
+    "svuotaConfirm_one": "Verrà rimossa 1 riga ancora attiva ma con vendita ormai passata. I listing archiviati in modo permanente restano in archivio. Continuare?",
+    "svuotaConfirm_other": "Verranno rimosse {{count}} righe ancora attive ma con vendita ormai passata. I listing archiviati in modo permanente restano in archivio. Continuare?"
   },
   "table": {
     "empty": "Nessun listing corrisponde ai filtri attuali.",
     "emptyTitle": "Nessun listing trovato",
     "emptyResetAction": "Azzera filtri",
     "goToListing": "Vai all'annuncio",
-    "bloccoBadgeTitle": "{{count}} lotti nello stesso blocco",
+    "bloccoBadgeTitle_one": "1 lotto in questo blocco",
+    "bloccoBadgeTitle_other": "{{count}} lotti nello stesso blocco",
     "bloccoJumpTitle": "Vai al blocco in {{name}}",
     "bloccoJumpChooserTitle": "Il blocco continua in altri cluster",
     "openWorkspace": "Apri scheda",
@@ -122,11 +124,12 @@
       "tribunale": "Tribunale",
       "comuneProvincia": "Comune / Provincia",
       "valoreRichiesto": "Valore richiesto",
-      "dataPubblicazione": "Data pubblicazione",
-      "dataVendita": "Data vendita",
+      "dataPubblicazione": "Pubblicazione",
+      "dataVendita": "Vendita",
       "cluster": "Cluster",
       "regione": "Regione",
       "id": "ID",
+      "valutazione": "Valutazione",
       "actions": "Azioni"
     }
   },

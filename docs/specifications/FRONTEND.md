@@ -6,8 +6,10 @@
 
 ```
 apps/web/src/
-├── app/                # bootstrap: router, providers (Query, i18n, theme), auth guard, shell (user menu, badges)
-├── components/         # shared hand-styled UI primitives (Button, TextInput, Tabs, Dialog) over Radix UI
+├── app/                # bootstrap: router, providers (Query, i18n, theme), auth guard, shell (logo, breadcrumb, user menu, badges)
+├── components/         # shared hand-styled UI primitives over Radix UI (Button, TextInput, Field/SelectField,
+│                       #   Tabs, Dialog/ConfirmDialog, Popover, DropdownMenu, SearchSelect, Badge, Chip,
+│                       #   Avatar, Skeleton, StatusDisplay)
 ├── features/
 │   ├── auth/           # login screen, forced password change, session boot
 │   ├── dashboard/      # landing, area view, cluster sections, tables, toolbar, drill-down, OMI panel
@@ -60,16 +62,21 @@ Notes binding on the implementation:
 ## 4. Tables at scale
 
 - A **custom virtualized table** — semantic `<table>` markup with `@tanstack/react-virtual`'s `useVirtualizer` for row windowing — carries the thousands-of-rows requirement (UI §11), not pagination (the UI spec has no pages). (The table was custom from the start: PrimeReact 11 shipped no working virtualized table.)
-- Row identity by listing id; memoized row rendering; the Valutazione cell and row actions (workspace, quick chat) rendered in a **frozen column** so they stay reachable under horizontal scroll (UI §4.1).
+- Row identity by listing id; memoized row rendering; the row actions (*Apri scheda* plus the overflow menu, UI §4.5) rendered in a **frozen column** so they stay reachable under horizontal scroll (UI §4.1). The overflow menu is **portalled**, so the table's own scroll container can never clip it.
+- The row itself is a click target for opening the workspace; the actions cell stops propagation so its controls keep their own behaviour (UI §4.5).
 - Column sets per table kind (real estate / credits / archive / calendar day) are declarative configs over one table component — the UI §4.1 show/hide matrix in one file.
 - Sorting implements the UI §4.2 rules exactly (nulls-lowest for value, chronological for dates, block identity for Blocco) via comparators from `packages/shared`.
 
-## 5. Design system: tokens, hand-styled Radix, Hallmark
+## 5. Design system: tokens, hand-styled Radix, `design.md`
 
-- **Tokens first.** The **Hallmark** design skill (installed by the developer with `npx skills add nutlope/hallmark`, landing in `.agents/skills/hallmark/` — never installed by copying the folder) produces the project's design foundations — palette, type pairing, spacing scale, radius/shadow/elevation stance — emitted as CSS custom properties in `apps/web/src/theme/tokens.css`. Tokens are the single source: no raw hex/font literals in components (lint-enforced).
-- **Hand-styled Radix primitives.** UI primitives are **Radix UI** headless components (tabs, dialog) plus plain `<button>`/`<input>`, styled by hand with plain CSS that consumes the tokens directly — no component-library theme layer, no CSS-in-JS. The shared primitives live in `apps/web/src/components/`; per-feature `.css` files hold surface-specific styling, all against the same tokens. (This replaced PrimeReact, whose styled preset system required a commercial license — Execution Plan Phase 9.)
-- **Modern-enterprise language + dark mode.** The visual language is modern enterprise — a clean **blue/white** palette — with **full dark mode**: a `:root[data-theme="dark"]` token set overrides the light custom properties, driven by a theme toggle (default: OS `prefers-color-scheme`; the explicit choice persisted). Both themes live entirely in the token layer.
-- **Hallmark cadence:** the design system is defined and applied in a dedicated `redesign` pass (Execution Plan Phase 10) and re-audited (`audit`) during hardening (Phase 11), after earlier per-surface passes (Phases 4, 6, 7). Its anti-slop gates (structural variety, no italic headers, token discipline, 8-state interactive components, mobile floors) are part of the quality bar, not decoration.
+**`design.md` (repository root) is the locked design system** — theme, token table, CTA voice, motion stance, and what every surface must share. It is the first thing any design pass reads and the rule any surface defers to; amendments to it are deliberate and recorded there.
+
+- **Tokens first.** The design foundations — palette, type pairing, spacing scale, radius/shadow/elevation stance, motion — are emitted as CSS custom properties in `apps/web/src/theme/tokens.css`. Tokens are the single source: no raw hex/font literals in components (lint-enforced). Colours are OKLCH; every text/background pair is contrast-verified rather than assumed.
+- **Hand-styled Radix primitives.** UI primitives are **Radix UI** headless components (tabs, dialog, popover, dropdown menu) plus plain `<button>`/`<input>`/`<select>`, styled by hand with plain CSS that consumes the tokens directly — no component-library theme layer, no CSS-in-JS. The shared primitives live in `apps/web/src/components/` and are the **only** implementation of each pattern: a feature that needs a menu, a popover, a combobox, a badge, a chip, an avatar, a skeleton, a confirmation, or a tab strip uses the shared one rather than hand-rolling a variant. Per-feature `.css` files hold surface-specific layout, all against the same tokens. (This replaced PrimeReact, whose styled preset system required a commercial license — Execution Plan Phase 9.)
+- **Visual language + dark mode** (Phase 13, from the project owner's Claude Design reference): a **navy brand anchor** for identity (headings, logo, at most one filled brand button per screen) and a **blue accent** for interaction (links, active states, primary actions), on cool near-white paper; one type family; a single **micro-label voice** (small spaced capitals) for field labels, column headers, and KV keys. **Full dark mode**: a `:root[data-theme="dark"]` token set overrides the light custom properties, driven by a theme toggle (default: OS `prefers-color-scheme`; the explicit choice persisted). Both themes live entirely in the token layer — including the navy split (`--color-brand` is ink in dark, so filled brand buttons take their own `--color-brand-fill`).
+- **Motion** is named once in the token layer (`pvp-fade`, `pvp-pop`, `pvp-slide`, `pvp-up`, `pvp-shimmer`, `pvp-spin`) and consumed by feature CSS, so entrances stay consistent and the `prefers-reduced-motion` guard covers all of them in one place.
+- **Icons:** one locked open-source set (Lucide). **No emoji as icons** anywhere in the interface.
+- **Design cadence:** foundations in Phase 0, systematized with dark mode in Phase 10 (Hallmark `redesign`), superseded by the reference-driven redesign in Phase 13, re-audited during hardening (Phase 11). Anti-slop gates (structural variety, token discipline, full interactive-state coverage, mobile floors) are part of the quality bar, not decoration.
 
 ## 6. Internationalization
 
@@ -83,7 +90,9 @@ Notes binding on the implementation:
 
 Implementation stances for UI §11, fixed here so they are built in, not retrofitted:
 
-- **Keyboard & ARIA:** cluster nav and bucket tabs are a `tablist`; the user menu a `menu` with expanded state; the workspace panel and confirmation dialogs are modal `dialog`s (Radix `Dialog` — focus trap, `aria-modal`, and `Esc` close are native); every interactive element focusable with visible focus ring (token-defined).
+- **Keyboard & ARIA:** bucket, workspace and admin tabs are a `tablist` (one shared implementation); the cluster and region choosers are `combobox`es over a `listbox` of `option`s, with arrow-key navigation, `Enter` to choose, `Esc` to dismiss, and `aria-activedescendant` tracking; the user menu and row overflow menus are `menu`s with expanded state (Radix `DropdownMenu`); the workspace panel and confirmation dialogs are modal `dialog`s (Radix `Dialog` — focus trap, `aria-modal`, and `Esc` close are native); every interactive element focusable with visible focus ring (token-defined).
+- **No browser-native `alert`/`confirm`/`prompt` for user flows** — confirmations go through the shared `ConfirmDialog` so they carry the application's copy, layout, and focus behaviour.
+- **Colour is never the only channel:** the rating indicator, occupancy states, and cluster marks all carry a text label or accessible name alongside their colour.
 - **Reduced motion:** all transitions behind a `prefers-reduced-motion` guard in the token layer.
 - **Responsive:** tables scroll inside their own container (`overflow-x: auto`); the page body never scrolls horizontally; calendar and admin are width-capped and centred; toolbars wrap.
 - **Empty/loading/error states** are designed states with copy in the catalog — never blank panels or raw error text.

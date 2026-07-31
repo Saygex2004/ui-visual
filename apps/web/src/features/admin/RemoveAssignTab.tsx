@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TextInput } from '../../components/TextInput.js';
 import { Button } from '../../components/Button.js';
+import { ConfirmDialog } from '../../components/ConfirmDialog.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { useAdminUsers, useAssignedForRemoval, useRemoveAssignments } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
@@ -17,6 +18,7 @@ export function RemoveAssignTab() {
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [removedCount, setRemovedCount] = useState<number | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const ready = userId !== '' && date !== '';
   const { data, isLoading } = useAssignedForRemoval(userId, date, ready);
@@ -41,7 +43,12 @@ export function RemoveAssignTab() {
     setErrorMessage(null);
     setRemovedCount(null);
     if (selected.size === 0) return;
-    if (!window.confirm(t('calendarAssignment.removal.confirm', { count: selected.size }))) return;
+    setConfirmOpen(true);
+  }
+
+  // Phase 13: the confirmation step is the shared ConfirmDialog, not the
+  // browser's native confirm.
+  function runRemove() {
     removeAssignments.mutate(
       { userId, date, listingIds: [...selected] },
       {
@@ -152,6 +159,16 @@ export function RemoveAssignTab() {
           </Button>
         </>
       ) : null}
+      <ConfirmDialog
+        open={confirmOpen}
+        title={t('calendarAssignment.removal.submit')}
+        description={t('calendarAssignment.removal.confirm', { count: selected.size })}
+        confirmLabel={t('common:actions.confirm')}
+        cancelLabel={t('common:actions.cancel')}
+        destructive
+        onConfirm={runRemove}
+        onOpenChange={setConfirmOpen}
+      />
     </div>
   );
 }

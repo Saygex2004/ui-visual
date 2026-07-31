@@ -1,19 +1,141 @@
-As you can see, Step 8 of the execution plan has been completed, and the next logical action would be to proceed with the following steps.
+I want you to perform a comprehensive UX/UI redesign of the entire application. The current Radix UI theme feels inconsistent, and many components appear to be positioned without a clear visual hierarchy or UX rationale. Your goal is not to make small adjustments, but to rethink the interface following modern UX/UI best practices while preserving the application’s functionality.
 
-However, before continuing, the current execution plan needs to be reviewed and updated to introduce several important improvements.
+Design Reference
 
-The highest priority is replacing the PrimeUI library, along with all of its related dependencies, with a fully open-source component library, such as Radix UI (or another equivalent open-source solution if you identify a better alternative). This change is required because PrimeUI requires a commercial license, and we do not want to rely on any library that is not completely open source.
+Below you will find a design reference created with Claude Design. It is essential that you analyze it carefully to fully understand the desired visual direction and user experience.
 
-Another critical area that requires attention is the application’s UX/UI. At the moment, the application does not present a consistent visual language across the entire interface. Some components follow different styling conventions, while others appear visually under-designed. The result is an inconsistent user experience.
+The final UI should closely match the overall style, quality, layout principles, and interaction patterns demonstrated in the reference.
 
-Update the execution plan by introducing a dedicated phase focused on UX/UI standardization and modernization, making extensive use of the Hallmark skill throughout this phase. Ensure that the skill is fully configured and ready to use before this work begins, and that it is leveraged to define and enforce the application’s design system.
+However, pay close attention to the following:
 
-The desired visual style should be modern enterprise, with a clean and professional appearance based primarily on blue and white color palettes, while providing full Dark Mode support. Every component should follow the same design language so that the application feels cohesive and unified. Pay particular attention to button sizing, spacing, alignment, typography, borders, corner radii, icons, colors, elevations, and overall visual consistency.
+- The provided design is only a visual mockup intended as a design reference.
+- It does not represent the complete application.
+- Some existing features may be missing from the mockup.
+- Some interactions or specifications in the mockup may intentionally differ from the actual implementation.
+- When discrepancies exist, preserve the application’s functional requirements while adopting the visual language and UX principles of the reference.
 
-Feel free to ask me any questions if additional clarification is needed regarding the desired visual style before updating the plan.
+Use the Claude Design MCP to import and analyze the following project:
 
-Please review and update both the execution plan and all related documentation contained in the docs directory. The documentation must always remain up to date while preserving its existing structure, organization, and documentation patterns.
+Use the claude_design MCP (https://api.anthropic.com/v1/design/mcp, auth via /design-login) to import this project:
+https://claude.ai/design/p/9a6a3659-ac8c-4d46-9b8f-06abe620f442?file=PVP+Aste+Dashboard.dc.html
 
-I expect the revision to begin from the next planned phase, introducing any additional phases that are necessary to achieve these objectives in a clean, maintainable, and well-structured manner.
+Focus primarily on:
 
-Do not execute the next implementation step. The objective of this task is only to review and update the execution plan and the documentation so that everything is properly prepared for a future session, where we will continue with the next implementation step.
+- PVP Aste Dashboard.dc.html
+
+Also review:
+
+- support.js
+
+Implement the interface based on:
+
+- PVP Aste Dashboard.dc.html
+
+Treat this design as the primary UX/UI inspiration while ensuring that the production implementation remains complete, functional, and consistent with the existing application.
+
+1. Overall Design System
+
+- Review the entire UI for visual consistency.
+- Establish a clear design hierarchy (spacing, typography, colors, borders, elevation, and component sizing).
+- Ensure all buttons, inputs, cards, badges, and interactive elements follow a consistent design language.
+- Remove arbitrary sizing or styling differences unless they communicate semantic meaning.
+
+2. Layout Optimization
+
+Several sections consume excessive space or are poorly organized.
+
+In particular:
+
+- Clusters and Regions currently occupy too much screen space. Design a more compact and scalable solution that allows users to select them quickly without sacrificing usability. Consider modern patterns such as searchable comboboxes, popovers, multi-select dropdowns, token selectors, or other space-efficient approaches.
+- Reorganize the page layout to maximize the usable area for the main content while keeping filters and controls easily accessible.
+
+3. Main Procedures & Failures
+
+The Main Procedures and Failures sections currently look like ordinary buttons instead of navigation tabs.
+
+Redesign these components so they are immediately recognizable as tabs by:
+
+- following common UI conventions,
+- providing clear active/inactive states,
+- improving visual hierarchy,
+- making navigation more intuitive.
+
+4. Filters
+
+The filters displayed above the table appear misplaced.
+
+Review their placement and organization by:
+
+- grouping related filters,
+- improving spacing and alignment,
+- making filtering faster and more intuitive,
+- following common dashboard UX patterns.
+
+5. Data Table
+
+The table requires several UX improvements.
+
+Specifically:
+
+- Standardize action buttons.
+- Improve the visibility and readability of row actions.
+- Prevent labels from being truncated (for example, “Go to Listing” is currently cut off).
+- Consider more appropriate action layouts (icon + label, overflow menus, contextual actions, etc.) where beneficial.
+- Improve column spacing, alignment, and responsiveness.
+
+6. Navigation & Branding
+
+The application currently lacks a proper branding area.
+
+Please:
+
+- Add a temporary placeholder logo (it will be replaced later).
+- Make the logo clickable.
+- Clicking the logo must always navigate back to “Choose a View”, which should be treated as the application’s homepage.
+
+7. Participants UX
+
+The participant management flow requires a complete UX redesign.
+
+The current experience involves too many clicks and feels outdated.
+
+Follow modern UX patterns to simplify the workflow.
+
+For example:
+
+- Consider using mentions/autocomplete to add chat participants instead of requiring multiple dialogs or excessive navigation.
+- Reduce friction throughout the entire participant management process.
+
+8. Global UX Review
+
+Don’t limit yourself to the issues listed above.
+
+Review the entire application and proactively identify additional UX/UI problems, including but not limited to:
+
+- inconsistent spacing,
+- poor alignment,
+- unclear interaction patterns,
+- unnecessary clicks,
+- weak information hierarchy,
+- accessibility issues,
+- responsive behavior,
+- discoverability,
+- visual consistency,
+- interaction feedback,
+- empty states,
+- loading states,
+- error states.
+
+Whenever possible, do not simply fix isolated issues. Instead, redesign the experience holistically so that every screen feels like part of a unified product.
+
+Your objective is to deliver a polished, modern, professional dashboard experience that aligns with current UX/UI trends and best practices.
+
+9. Execution Plan
+
+Update the execution plan by adding any phases you consider necessary to support this redesign.
+
+If the redesign requires updates to the documentation inside the plan folder, update it accordingly.
+
+Any modifications to the execution plan or documentation must strictly preserve the existing structure, conventions, formatting, and overall pattern used throughout the project.
+
+Do not force changes if they are unnecessary, but if you identify improvements that should be documented, include them as part of the redesign process.

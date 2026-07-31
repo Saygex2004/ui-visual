@@ -12,7 +12,7 @@
 // past `data_vendita`), of which exactly 3 principali rows carry tribunale
 // "Tribunale di Roma".
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin } from './helpers.js';
+import { loginAsAdmin, selectCluster } from './helpers.js';
 
 test.describe('auth flow 2: browse, filter, deep-link', () => {
   test('landing → area → cluster → filter → deep-link reproduces the exact view', async ({
@@ -32,15 +32,17 @@ test.describe('auth flow 2: browse, filter, deep-link', () => {
     await expect(page.getByRole('tab', { name: 'Procedure principali 1' })).toBeVisible();
     await expect(page.getByRole('tab', { name: 'Fallimenti 3' })).toBeVisible();
 
-    // Cluster 2 (Blue Chip Zone).
-    await page.getByRole('tab', { name: /2\s+Blue Chip Zone/ }).click();
+    // Cluster 2 (Blue Chip Zone) — Phase 13: the cluster pill row became a
+    // searchable combobox; the option's accessible name still carries the
+    // area-local number plus the cluster name.
+    await selectCluster(page, /2\s+Blue Chip Zone/);
     await expect(page.getByRole('heading', { name: /Cluster 2: Blue Chip Zone/ })).toBeVisible();
     await expect(page.getByRole('tab', { name: 'Procedure principali 6' })).toBeVisible();
     await expect(page.getByRole('tab', { name: 'Fallimenti 1' })).toBeVisible();
     await expect(page.getByText('6 listing', { exact: true })).toBeVisible();
 
     // Filter: tribunale = Tribunale di Roma narrows 6 → 3.
-    await page.getByLabel('Tribunale').selectOption('Tribunale di Roma');
+    await page.getByLabel('Tribunale', { exact: true }).selectOption('Tribunale di Roma');
     await expect(page.getByText('3 / 6 listing', { exact: true })).toBeVisible();
     await expect(page.getByRole('row')).toHaveCount(4); // 3 data rows + header
 
@@ -68,7 +70,7 @@ test.describe('auth flow 2: browse, filter, deep-link', () => {
     );
 
     // Re-apply the filter to build a concrete deep link, then capture it.
-    await page.getByLabel('Tribunale').selectOption('Tribunale di Roma');
+    await page.getByLabel('Tribunale', { exact: true }).selectOption('Tribunale di Roma');
     await expect(page.getByText('3 / 6 listing', { exact: true })).toBeVisible();
     const deepLink = page.url();
     expect(deepLink).toContain('cluster=2');
@@ -86,7 +88,9 @@ test.describe('auth flow 2: browse, filter, deep-link', () => {
       freshPage.getByRole('heading', { name: /Cluster 2: Blue Chip Zone/ }),
     ).toBeVisible();
     await expect(freshPage.getByText('3 / 6 listing', { exact: true })).toBeVisible();
-    await expect(freshPage.getByLabel('Tribunale')).toHaveValue('Tribunale di Roma');
+    await expect(freshPage.getByLabel('Tribunale', { exact: true })).toHaveValue(
+      'Tribunale di Roma',
+    );
     await expect(freshPage.getByRole('columnheader', { name: /Valore richiesto/ })).toHaveAttribute(
       'aria-sort',
       'descending',

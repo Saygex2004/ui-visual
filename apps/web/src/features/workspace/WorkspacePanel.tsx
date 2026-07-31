@@ -157,7 +157,7 @@ export function WorkspacePanel() {
                   <ActivityTimeline listingId={id} />
                 </TabsPanel>
                 <TabsPanel value="chat">
-                  <ThreadView listingId={id} />
+                  <ThreadView listingId={id} embedded />
                 </TabsPanel>
               </TabsRoot>
             ) : null}

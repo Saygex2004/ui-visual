@@ -89,8 +89,8 @@ Entering an area reveals, in order:
 
 - A **back control** (*← Torna alla scelta*) that returns to the landing screen and clears the current view state.
 - An **area header**: the area's name, an **update-metadata row** (§10.1), and a **refresh region** (§10.2).
-- A **cluster navigation bar**: one entry per cluster (each showing the cluster's **area-local number** and its name), followed by a separated **Archivio** entry. The active entry is highlighted; the bar scrolls sideways if it is too narrow to fit.
-- The cluster **sections** and the **archive** section — only one of these is shown at a time, matching the active navigation entry.
+- A **selector toolbar**: a **cluster chooser** and, for clusters that map to regions, the **geographic controls** (§3.2), grouped in one compact band so they cost a fixed amount of vertical space no matter how many clusters or regions exist. The cluster chooser is a **searchable single-select**: its closed state names the active cluster (its **area-local number**, its name, and a colour mark); opening it reveals a filter field and one option per cluster with that cluster's **listing count**, plus a separated **Archivio** option at the end.
+- The cluster **section** or the **archive** section — only one is shown at a time, matching the chooser's selection.
 
 ### 2.4 Navigation model: local numbering, linkable state, no reloads
 
@@ -100,12 +100,12 @@ Entering an area reveals, in order:
 
 ### 2.5 User menu
 
-A menu at the top of every screen shows the signed-in **account name** and links to:
+The top of every screen carries the application's **logo**, which is always a link back to the landing screen (*Scegli una vista*, §2.2) — the application's home — followed by a **breadcrumb** naming the current top-level section. At the opposite end, a menu shows the signed-in **account name** (with its avatar) and links to:
 
-- **📅 Calendario** — the user's calendar (§7).
-- **💬 Le mie chat** — the user's chat list (§6.3).
-- **🛠 Amministrazione** — the administration panel (§8), shown to **admins only**.
-- Sign-out (*Esci*).
+- **Calendario** — the user's calendar (§7).
+- **Le mie chat** — the user's chat list (§6.3).
+- **Amministrazione** — the administration panel (§8), shown to **admins only**.
+- A **theme** toggle (light / dark) and sign-out (*Esci*).
 
 The menu button carries a **total unread-chat count** across all of the user's threads, visible even while the menu is closed and present on **every** screen (so the signal is reliable even where no listings are shown). The same total appears next to the *Le mie chat* item. The menu closes when the user interacts outside it.
 
@@ -117,21 +117,23 @@ The menu button carries a **total unread-chat count** across all of the user's t
 
 Each cluster section shows a header (*Cluster N: «Name»*) and a subtitle describing the cluster's character. Real-estate clusters that map to regions then show a set of **region controls** (§3.2); region-less clusters (the non-geolocated real-estate catch-all, and both credits clusters) show an explanatory focus subtitle instead.
 
-Below the header are two **bucket tabs**, each with a **count badge**; exactly one table is shown at a time:
+Below the header are two **bucket tabs**, each with a **count badge**; exactly one table is shown at a time. They read unmistakably as tabs — a single row of labels with the active one underlined and emphasized — and sit **flush on top of the filter panel** they govern, so the relationship between tab, filters, and table is visible without reading a word:
 
 - **Procedure principali** — ordinary proceedings. A subtitle states which proceeding types are excluded (ordinary real-estate enforcement in either its pre- or post-reform naming, civil litigation, and tax-collection enforcement) and notes that old-law bankruptcy lives on the *Fallimenti* tab.
-- **Fallimenti** — old-law bankruptcy proceedings, kept distinct from the successor judicial-liquidation regime. This tab and its table are **set apart** so the old-law context is recognizable at a glance. A subtitle explains the distinction.
+- **Fallimenti** — old-law bankruptcy proceedings, kept distinct from the successor judicial-liquidation regime. A subtitle explains the distinction.
 
 Selecting a bucket tab switches which table is visible within that cluster; the other cluster sections are unaffected.
 
 ### 3.2 Geographic drill-down (real-estate clusters)
 
-- **Region selection.** A *Tutte le regioni* option plus one option per region present in the cluster. Selecting a region **filters every table in the cluster** to that region and opens the drill-down panel below.
-- **Drill-down panel** (built from the region's actual listings):
+The geographic controls live in the **selector toolbar** (§2.3), beside the cluster chooser, and reveal themselves progressively so an unused drill-down costs almost no space:
+
+- **Region selection.** A compact chooser offering *Tutte le regioni* plus one option per region present in the cluster. Selecting a region **filters every table in the cluster** to that region and reveals the finer controls beside it.
+- **Finer controls** (built from the region's actual listings, shown only once a region is active):
   - **Capital municipality** — one option per regional capital present, each marked as a capital. Selecting one filters the cluster to that municipality.
   - **Provinces** — a *Tutte le provincie* option plus one option per province present. Selecting a province filters the cluster to that province **and** shows the price panel (§3.3).
   - Capital and province selections are **mutually exclusive**: choosing one clears the other.
-- Geographic selection is a **cluster-wide filter**, combined by logical **AND** with each table's own filters (§4.2). Choosing *Tutte le regioni* clears the geographic filter and hides the drill-down.
+- Geographic selection is a **cluster-wide filter**, combined by logical **AND** with each table's own filters (§4.2). Choosing *Tutte le regioni* clears the geographic filter and hides the finer controls. Whatever is active is also listed among the table's **active-filter chips** (§4.2), so it can be cleared from there too and can never silently narrow a table.
 
 ### 3.3 Price panel (OMI)
 
@@ -150,30 +152,34 @@ A listing keeps the **same row shape** wherever it appears; some columns are sho
 
 | Column | Behaviour / when shown |
 |---|---|
-| **Tipo di immobile** / **Tipo di bene** | Asset-type label; the wording adapts by kind (real estate vs credits/shares). |
+| **N° / Anno** | Proceeding year, with its number beneath. |
+| **Blocco** | A lot-count badge for grouped lots (§4.4). Sortable. |
+| **Tipo · Tribunale** | The identity cell: the listing's **rating indicator** (§5, read-only here), the asset-type label, and the court beneath it. The asset-type wording adapts by kind (real estate vs credits/shares). |
 | **Tipo di procedura** | Procedure type. |
 | **Disponibilità** | Real-estate tables only — occupancy status shown as a distinct at-a-glance indicator per state (see §4.3) plus its label. |
 | **Descrizione** | Credits/shares tables only — an excerpt of the lot description (truncated for display), because for these assets the real value is often stated only there. |
-| **N° / Anno** | Proceeding number and year. |
-| **Blocco** | A lot-count badge for grouped lots (§4.4). Sortable. |
-| **Tribunale** | Court. |
 | **Comune / Provincia** | Shown as *N/D* when absent. |
-| **Valore richiesto** | Base auction price, formatted as currency; *N/D* when absent. Sortable. |
+| **Valore richiesto** | Base auction price, formatted as currency and **right-aligned** so amounts compare down the column; *N/D* when absent. Sortable. |
 | **Data pubblicazione / Data vendita** | Publication and sale dates. Sortable (chronological). |
-| **Annuncio** | A *Vai all'annuncio →* link opening the public listing in a new tab (see also Appendix B). |
 | **Cluster** | Archive table only — each row's cluster of origin (the archive mixes clusters). |
-| **Valutazione** | Rating controls plus the chat entry point (§5, §6), always reachable regardless of horizontal scrolling. |
+| **Azioni** | The row's actions (§4.5), always reachable regardless of horizontal scrolling. |
+
+Column headers are set in the application's **label style** (small, spaced capitals) so the header band reads as structure rather than as data.
 
 Each table can be scrolled **horizontally within its own container** when it is wider than the viewport; the page body itself never scrolls horizontally. Header cells remain visible while the table body is scrolled vertically.
 
 ### 4.2 Toolbar: searching, filtering, sorting
 
-**Per-table toolbar:**
+**Per-table toolbar.** One panel directly under the bucket tabs, in two bands. The upper band holds the filter **fields**, each under its own label:
 
 - **Free-text search** (*Ricerca libera…*) — matches anywhere in the row.
 - **Column filters** — separate choosers for asset type, procedure type, occupancy (real estate only), and court; each is populated with the distinct values actually present in that table and defaults to an "all" choice.
 - **Value range** — two numeric bounds, *Valore da €* and *Valore a €*.
-- **Reset filtri** — clears that table's search, column filters, value range, and any block isolation (§4.4).
+
+The lower band summarizes what is actually filtering the table right now:
+
+- **Active-filter chips** — one removable chip per active filter, each naming the filter and its value; removing a chip clears exactly that filter. The chips cover the geographic selection (§3.2) and any block isolation (§4.4) too, so nothing can narrow a table invisibly. When nothing is active the band says so plainly (*Nessun filtro attivo*).
+- **Reset filtri** — offered **only when at least one filter is active**; clears that table's search, column filters, value range, and any block isolation (§4.4).
 - **Live count** — shows the number of listings, updating to a *visible / total* form as filters narrow the table.
 
 **Sorting.** The **Blocco**, **Valore richiesto**, **Data pubblicazione**, and **Data vendita** headers are clickable; each toggles ascending/descending and shows the current direction. Value sorts numerically with missing values treated as lowest; dates sort chronologically; **Blocco** sorts by block identity so the lots of one proceeding become adjacent.
@@ -195,12 +201,19 @@ A **blocco** is the set of listings that are lots of one and the same proceeding
 
 Tables stay lean on purpose: a row shows only the columns of §4.1, and everything else about a listing lives in the **listing workspace** — a detail panel that opens beside the table (without leaving the current view) and is the central place for interacting with one listing.
 
-**Opening and closing.** Every row exposes two actions, always reachable regardless of horizontal scrolling: one opens the **workspace**, and a **quick chat action** opens the workspace directly on its chat (§6). The open workspace is part of the application's address state, so a specific listing — and a specific part of its workspace — can be linked to and is restored on load. Dismissing the workspace returns to the unchanged table.
+**Opening and closing.** The **whole row** is a click target that opens the workspace on its details — the fastest path, and the one that needs no aiming. The row's **Azioni** cell, always reachable regardless of horizontal scrolling, additionally offers:
+
+- **Apri scheda** — the same thing as a real link (so it is keyboard-reachable, opens in a new tab on a modified click, and can be copied);
+- an **overflow menu** ("⋯") holding the less-frequent per-row actions: **Apri chat** (opens the workspace directly on its chat, §6, carrying that thread's unread count), **Storico** (opens it on the activity history), and **Vai all'annuncio** (the public listing, in a new tab — Appendix B applies).
+
+Action labels are never truncated: infrequent actions move into the menu rather than being squeezed into the row. Clicks that land on a control inside the row (a link, a button, the block badge) do **that** control's job and never also open the workspace.
+
+The open workspace is part of the application's address state, so a specific listing — and a specific part of its workspace — can be linked to and is restored on load. Dismissing the workspace returns to the unchanged table, with focus back where it started.
 
 **Contents.** The workspace presents, for the selected listing:
 
-- **Details** — every stored fact, including the **full, untruncated description** (tables show at most an excerpt), the key facts of §4.1, geography, dates, and the *Vai all'annuncio →* link (Appendix B applies).
-- **Rating** — the same shared Valutazione controls as the row (§5); changes made here and in the row are the same rating.
+- **Details** — every stored fact, including the **full, untruncated description** (tables show at most an excerpt), the key facts of §4.1, geography, dates, and the *Vai all'annuncio* link (Appendix B applies).
+- **Rating** — the shared Valutazione control (§5). This is **where a rating is set**: rows show the verdict, the workspace changes it.
 - **Related lots** — when the listing belongs to a blocco (§4.4), the other lots of the same proceeding, each openable in the workspace in turn.
 - **Price context** — for a real-estate listing whose province has OMI data, the same €/m² reference as §3.3, with the same residential-reference caption.
 - **Activity history** — see below.
@@ -214,7 +227,12 @@ The workspace is available wherever listing rows appear — cluster tables, the 
 
 ## 5. Collaborative ratings
 
-For every listing — in every cluster, in the archive, and in the calendar day view — the team shares a single **rating**, set from the row's **Valutazione** cell or from the listing workspace (§4.5); both operate on the same shared verdict.
+For every listing — in every cluster, in the archive, and in the calendar day view — the team shares a single **rating**.
+
+- In **cluster and archive tables**, the rating is set from the **listing workspace** (§4.5). The row **shows** the current verdict as a colour indicator in its identity cell (with the verdict's name available to assistive technology and on hover) and is tinted to match, but is not where the verdict is changed: rating there is a considered judgement made with the listing's facts in front of you, and keeping it out of the row also keeps the row's click target unambiguous.
+- The **calendar day view** (§7.2) is the deliberate exception and keeps the rating control **in the row**: that screen is a work-through list whose whole purpose is rating the day's assignments (a rated listing is a completed one, §7.3), and its workspace link leaves the calendar — so routing every verdict through the workspace would mean navigating away and back once per listing.
+
+Both places operate on the same shared verdict.
 
 - Three rating options, each of which also **marks the whole row** to match the verdict:
   - **Ottimo affare** — a good deal.
@@ -227,7 +245,7 @@ For every listing — in every cluster, in the archive, and in the calendar day 
 - Each change is **saved immediately** to shared storage; clearing removes the stored verdict entirely (an unrated listing stores nothing).
 - **Ratings are collective** — any team member's rating is everyone's. The view reconciles with the shared state on a **short recurring interval**, so others' ratings appear **without reloading**.
 - A rated listing counts as **completed** for the calendar (§7) — regardless of who rated it — and is never assigned to anyone again.
-- There is **no free-text comment** on a rating; written discussion lives in the listing's chat (§6). The Valutazione cell therefore also holds the **chat entry point** (§6.1), which stays reachable no matter how far the table is scrolled.
+- There is **no free-text comment** on a rating; written discussion lives in the listing's chat (§6), reachable from the row's actions (§6.1) no matter how far the table is scrolled.
 
 ---
 
@@ -237,18 +255,20 @@ Every listing can have exactly **one discussion thread**, shared by the team —
 
 ### 6.1 Entry point and unread indicators
 
-- A **chat control** sits in the Valutazione cell of every row (cluster tables, archive, calendar day view), carrying that thread's **unread count** (a large count is shown capped, e.g. *9+*). Activating it opens the thread.
+- **Apri chat** sits in every row's overflow menu (cluster tables, archive, calendar day view — §4.5), and the menu's own control carries that thread's **unread count** (a large count is shown capped, e.g. *9+*) so an unread thread is visible without opening the menu. Activating the item opens the thread.
 - Unread counts refresh on a short recurring interval. The **total** across all of the user's threads appears on the user-menu button and on the *Le mie chat* item, on **every** screen.
 
 ### 6.2 Chat thread screen
 
 Reached by opening a listing's chat. **Opening a thread makes the opener a participant** and marks the thread read for them.
 
-- **Header:** the thread title (asset type and court); for admins, a **close/reopen** control. Below it, the listing's key facts (procedure type, place, value, and a *Vai all'annuncio →* link) — or a placeholder noting the listing is no longer in the database but the thread remains readable, if the listing was later removed. Then the **participant list** and — unless the thread is closed — a control to **add a colleague** to the thread. Adding a colleague hands them the entire existing conversation as unread.
-- **Messages:** a scrollable list of messages, each showing its **author** and **timestamp** above the message body; the current user's own messages are distinguished from others'. A message body is **rich text** limited to a small, fixed set of formats — bold, italic, bulleted and numbered lists, and links; nothing else survives (pasted content is reduced to that set by one rule applied identically at first display and on every sync). Web links pasted as plain text are made **clickable** by that same rule. New messages arrive **without reloading** on a short recurring interval; the view auto-scrolls only when the user is already near the bottom. An empty thread invites the user to write the first message.
+- **Header:** the thread title (asset type and court); for admins, a **close/reopen** control. Below it, the listing's key facts (procedure type, place, value, and a *Vai all'annuncio* link) — or a placeholder noting the listing is no longer in the database but the thread remains readable, if the listing was later removed.
+- **Participants:** a compact bar showing each participant's **avatar** (overlapped into a stack) and the participant **count**. Unless the thread is closed, an **Aggiungi** control opens a **searchable colleague picker**: typing narrows the list, clicking a colleague adds them immediately, and the picker stays open so several colleagues can be added in a row; those already in the thread are shown as such rather than offered again. Adding a colleague hands them the entire existing conversation as unread.
+- **Messages:** a scrollable list of messages as **bubbles**, each showing its **author** and **timestamp**; the current user's own messages sit on the opposite side and are filled with the accent colour, others carry the author's avatar. A message body is **rich text** limited to a small, fixed set of formats — bold, italic, bulleted and numbered lists, and links; nothing else survives (pasted content is reduced to that set by one rule applied identically at first display and on every sync). Web links pasted as plain text are made **clickable** by that same rule. New messages arrive **without reloading** on a short recurring interval; the view auto-scrolls only when the user is already near the bottom. An empty thread invites the user to write the first message and points at the mention shortcut.
 - **Attachments:** a message may carry one or more **file attachments** (images and documents), subject to declared per-file size and type limits; an oversized or disallowed file is refused with a clear message before sending. Image attachments show an inline **preview**; every attachment offers a **download** action showing its name and size. Attachments in a closed thread remain downloadable. Attachment activity is recorded in the listing's activity history (§4.5).
-- **Compose:** a rich-text input (length-limited, offering exactly the formats above), an attach action, and a send action. A message must contain text, at least one attachment, or both.
-- **Closed state (admins).** Closing a thread shows a notice that it is closed and stays readable but accepts no new messages or participants; it also stops counting toward unread indicators. The compose and add-colleague controls are hidden. An admin can **reopen** it. Closing asks for confirmation first.
+- **Compose:** a rich-text input (length-limited, offering exactly the formats above), an attach action, and a send action, with a hint line stating the keyboard model. **Invio** sends; **Maiusc+Invio** starts a new line; inside a list *Invio* keeps its ordinary meaning (next item, and leaving the list from an empty one), so multi-block messages stay writable.
+- **Mentions:** typing **@** in the composer opens a colleague picker. Choosing someone inserts their name as a mention into the message **and**, if they are not yet in the thread, **adds them as a participant** — the fast path for "get this person's eyes on this listing", with the same effect (and the same handing-over of the full history) as adding them from the participants bar. Colleagues who are not yet participants are marked in the picker so the consequence of choosing them is visible before it happens.
+- **Closed state (admins).** Closing a thread shows a notice that it is closed and stays readable but accepts no new messages or participants; it also stops counting toward unread indicators. The compose and add-colleague controls are hidden. An admin can **reopen** it. Closing asks for confirmation first, in an in-application dialog.
 
 ### 6.3 *Le mie chat* list screen
 
@@ -328,7 +348,7 @@ The archive table has its own free-text search, value-range filter, reset, and s
 
 ### 9.2 *Aggiorna alla data odierna*
 
-A header control (also run automatically on load) scans all non-archive tables and **moves any row whose sale date is before today** (by the viewer's own clock) into the Archivio of its area, then re-evaluates the archive tables' counts and empty states. It reports how many sales were moved and the new archive total. This is a **cosmetic, same-session** reorganization, distinct from the permanent archive.
+A header control (also run automatically on load) scans all non-archive tables and **moves any row whose sale date is before today** (by the viewer's own clock) into the Archivio of its area, then re-evaluates the archive tables' counts and empty states. It reports how many sales were moved and the new archive total, in an in-application dialog the user acknowledges. This is a **cosmetic, same-session** reorganization, distinct from the permanent archive.
 
 ### 9.3 *Svuota archivio*
 
@@ -336,6 +356,7 @@ One guarded control per area:
 
 - It removes only the **same-session, still-active-but-past** rows currently in that area's archive; it **never** touches genuinely-withdrawn rows (a protection enforced by the shared backend regardless of what the client requests).
 - If nothing is eligible, it says there is nothing to clear (and notes that listings that vanished from the source always remain). Otherwise it asks for confirmation, stating how many still-active-but-past rows would be removed and that permanently-withdrawn listings stay, then performs the removal.
+- Both messages, and every other confirmation in the application, are shown as **in-application dialogs** — never browser-native alert/confirm boxes — so they carry the application's own language, layout, and focus behaviour.
 
 ---
 
@@ -359,7 +380,7 @@ Each area header shows an update-metadata row: **when** the area's data was last
 ## 11. Cross-cutting UX behaviour
 
 - **Responsiveness.** The interface is usable across window sizes; headers, chip rows, and toolbars wrap as needed. Wide tables scroll **inside their own container**; the page body never scrolls horizontally. The calendar and administration screens are width-capped and centred.
-- **Accessibility.** Every interactive element is **keyboard-operable** and shows a clear **focus indication**. Filters and inputs are labelled. The cluster navigation and bucket tabs, the user menu, and modal dialogs expose their roles and state to assistive technology (which control is a tab list, which tab is selected, that a menu can be expanded, that a dialog is modal). The interface honours a user's **reduced-motion** preference.
+- **Accessibility.** Every interactive element is **keyboard-operable** and shows a clear **focus indication**. Filters and inputs are labelled. The cluster and region choosers, the bucket tabs, the user and row menus, the mention picker, and modal dialogs expose their roles and state to assistive technology (which control is a combobox and what it currently holds, which option is selected, which tab is selected, that a menu can be expanded, that a dialog is modal). Anything communicated by **colour alone** — the rating indicator, occupancy, cluster marks — also carries a text label or accessible name. The interface honours a user's **reduced-motion** preference.
 - **Performance at scale.** The dashboard routinely renders **thousands** of rows. Rating a row, filtering, sorting, and real-time sync must stay responsive at that scale — a single action must never degrade into a multi-second stall as the row count grows. (The requirement is the responsiveness, not any particular technique for achieving it.)
 
 ---

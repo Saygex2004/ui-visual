@@ -10,10 +10,10 @@
 // never write to Firestore; asserted directly via the admin SDK against the
 // emulator (FIRESTORE_EMULATOR_HOST is already in the Playwright process's
 // env, set by `firebase emulators:exec` before it spawns `playwright test`).
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { Timestamp, type Firestore } from 'firebase-admin/firestore';
 import { connectDb } from '../seed/lib.js';
-import { loginAsAdmin } from './helpers.js';
+import { clickExpectingConfirm, loginAsAdmin } from './helpers.js';
 
 function normalize(value: unknown): unknown {
   if (value instanceof Timestamp) return value.toMillis();
@@ -31,28 +31,6 @@ async function snapshotListings(db: Firestore): Promise<Record<string, unknown>>
   const out: Record<string, unknown> = {};
   for (const doc of snap.docs) out[doc.id] = normalize(doc.data());
   return out;
-}
-
-/** Registers a one-shot dialog handler BEFORE clicking, then clicks and
- *  returns the dialog's type/message — the canonical Playwright idiom
- *  (`page.once('dialog', ...)`, not `Promise.all([waitForEvent, click()])`):
- *  a synchronous `window.alert`/`confirm` blocks the page's JS thread, and a
- *  click that itself triggers one can leave `click()` waiting on
- *  post-action stability that never arrives unless the dialog is already
- *  being handled by a live listener at the moment it opens. */
-async function clickExpectingDialog(
-  page: Page,
-  buttonName: string,
-  accept: boolean,
-): Promise<{ type: string; message: string }> {
-  let captured: { type: string; message: string } | undefined;
-  page.once('dialog', (dialog) => {
-    captured = { type: dialog.type(), message: dialog.message() };
-    void (accept ? dialog.accept() : dialog.dismiss());
-  });
-  await page.getByRole('button', { name: buttonName }).click();
-  await expect.poll(() => captured).toBeDefined();
-  return captured!;
 }
 
 test.describe('same-session past-sale handling', () => {
@@ -83,16 +61,15 @@ test.describe('same-session past-sale handling', () => {
 
     // Aggiorna: nothing new has crossed the threshold since load (same
     // calendar day) — reports 0 moved this click, 3 as the running total.
-    const refreshMsg = await clickExpectingDialog(page, 'Aggiorna alla data odierna', true);
-    expect(refreshMsg.type).toBe('alert');
-    expect(refreshMsg.message).toContain('0');
-    expect(refreshMsg.message).toContain('3');
+    // Phase 13: the native alert()/confirm() flows became ConfirmDialogs.
+    const refreshMsg = await clickExpectingConfirm(page, 'Aggiorna alla data odierna', 'OK');
+    expect(refreshMsg).toContain('0');
+    expect(refreshMsg).toContain('3');
     await expect(page.getByText('3 listing', { exact: true })).toBeVisible();
 
     // Svuota: guarded, states the count, removes only the session move.
-    const confirmMsg = await clickExpectingDialog(page, 'Svuota archivio', true);
-    expect(confirmMsg.type).toBe('confirm');
-    expect(confirmMsg.message).toContain('1');
+    const confirmMsg = await clickExpectingConfirm(page, 'Svuota archivio', 'Conferma');
+    expect(confirmMsg).toContain('1');
 
     await expect(page.getByText('2 listing', { exact: true })).toBeVisible();
     await expect(movedRow).toHaveCount(0);
@@ -100,9 +77,8 @@ test.describe('same-session past-sale handling', () => {
     await expect(permanentMilano).toBeVisible();
 
     // Svuota again: nothing left to clear.
-    const nothingMsg = await clickExpectingDialog(page, 'Svuota archivio', true);
-    expect(nothingMsg.type).toBe('alert');
-    expect(nothingMsg.message).toContain('scomparsi');
+    const nothingMsg = await clickExpectingConfirm(page, 'Svuota archivio', 'OK');
+    expect(nothingMsg).toContain('scomparsi');
     await expect(page.getByText('2 listing', { exact: true })).toBeVisible();
 
     const after = await snapshotListings(db);

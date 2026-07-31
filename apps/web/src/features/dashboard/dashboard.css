@@ -429,27 +429,15 @@
 }
 
 .archive-svuota-control {
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-danger);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease-out);
+  color: var(--color-danger-strong);
 }
 
-.archive-svuota-control:hover {
+.archive-svuota-control:hover:not(:disabled) {
   border-color: var(--color-danger);
 }
 
-.archive-svuota-control:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
-.archive-svuota-control:active {
-  background: var(--color-surface-2);
+.archive-section-icon {
+  color: var(--color-text-muted);
 }
 
 /* Bucket tabs (UI §3.1, Phase 13) — the shared underline-tab voice

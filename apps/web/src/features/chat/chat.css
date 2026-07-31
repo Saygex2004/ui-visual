@@ -36,8 +36,17 @@
 .chat-thread-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: var(--space-4);
+}
+
+/* Standalone route: the title leads, the close/reopen control trails. */
+.chat-thread-header:has(.chat-thread-title) {
+  justify-content: space-between;
+}
+
+.chat-thread-header:empty {
+  display: none;
 }
 
 .chat-thread-title {

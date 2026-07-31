@@ -21,7 +21,7 @@
 // packages/shared/src/domain/omi.test.ts, since UI never distinguishes it
 // from the absent-doc case anyway, DATA_MODEL.md §4).
 import { test, expect } from '@playwright/test';
-import { loginAsAdmin } from './helpers.js';
+import { loginAsAdmin, selectRegion } from './helpers.js';
 
 test.describe('drill-down + OMI panel', () => {
   test('capital vs province give different counts; both show real OMI data', async ({ page }) => {
@@ -30,7 +30,9 @@ test.describe('drill-down + OMI panel', () => {
     await expect(page.getByRole('heading', { name: /Cluster 2: Blue Chip Zone/ })).toBeVisible();
     await expect(page.getByText('6 listing', { exact: true })).toBeVisible();
 
-    await page.getByRole('radio', { name: 'Lazio', exact: true }).click();
+    // Phase 13: the region chip row became a combobox in the selector
+    // toolbar; the capital chips below it are still radios.
+    await selectRegion(page, 'Lazio');
     await expect(page.getByRole('radio', { name: /Roma \(capoluogo\)/ })).toBeVisible();
 
     // Capital: 3 rows (the comune=Roma ones only).
@@ -53,7 +55,7 @@ test.describe('drill-down + OMI panel', () => {
     await expect(page.getByText(/Prezzo di riferimento OMI/)).toBeVisible();
 
     // Changing region clears both capital and province, and hides the panel.
-    await page.getByRole('radio', { name: 'Lombardia', exact: true }).click();
+    await selectRegion(page, 'Lombardia');
     await expect(page.getByLabel('Provincia')).toHaveValue('');
     await expect(page.getByText(/Prezzo di riferimento OMI/)).toHaveCount(0);
 
@@ -69,7 +71,7 @@ test.describe('drill-down + OMI panel', () => {
     await page.goto('/aste/immobili?cluster=1'); // Red Zone
     await expect(page.getByRole('heading', { name: /Cluster 1: Red Zone/ })).toBeVisible();
 
-    await page.getByRole('radio', { name: 'Campania', exact: true }).click();
+    await selectRegion(page, 'Campania');
     // Only Caserta is present — Napoli (id 1001) already moved to the
     // Archivio via the automatic same-session rule before this page loaded.
     await expect(page.getByRole('radio', { name: /Caserta \(capoluogo\)/ })).toBeVisible();
@@ -81,7 +83,7 @@ test.describe('drill-down + OMI panel', () => {
     ).toBeVisible();
 
     // "Tutte le regioni" clears the geographic filter and hides the panel.
-    await page.getByRole('radio', { name: 'Tutte le regioni' }).click();
+    await selectRegion(page, 'Tutte le regioni');
     await expect(page.getByText(/Prezzo di riferimento OMI/)).toHaveCount(0);
   });
 });
