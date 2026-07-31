@@ -1,0 +1,36 @@
+# Keep the Cloud Build context small and reproducible: exclude everything the
+# multi-stage build re-creates or never needs. Source stays (pnpm install +
+# esbuild bundle run inside the build stage).
+node_modules
+**/node_modules
+dist
+**/dist
+build
+**/build
+*.tsbuildinfo
+
+.git
+.github
+
+# Secrets / local env — must never enter the image
+.env
+.env.*
+!.env.example
+*.local
+*-service-account*.json
+service-account*.json
+gcp-*.json
+
+# Emulator data & debug logs
+firebase/emulator-data
+*-debug.log
+firestore-debug.log
+firebase-debug.log
+
+# Test / e2e artifacts
+coverage
+playwright-report
+test-results
+
+# The web app's build output is served by Hosting, never by this container
+apps/web/dist
