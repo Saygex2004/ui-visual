@@ -7,7 +7,7 @@
     "rules": "storage.rules"
   },
   "hosting": {
-    "public": "../apps/web/dist",
+    "public": "hosting-dist",
     "ignore": ["**/.*", "**/node_modules/**"],
     "rewrites": [
       {

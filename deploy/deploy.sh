@@ -80,6 +80,10 @@ deploy_server() {
 deploy_hosting() {
   log "Building the SPA and deploying Firebase Hosting to ${PROJECT}"
   pnpm --filter @pvp/web build
+  # The Firebase CLI refuses a `public` dir outside the directory that holds
+  # firebase.json, so stage the build inside firebase/ (gitignored).
+  rm -rf "${REPO_ROOT}/firebase/hosting-dist"
+  cp -R "${REPO_ROOT}/apps/web/dist" "${REPO_ROOT}/firebase/hosting-dist"
   firebase deploy \
     --only hosting \
     --project "${PROJECT}" \

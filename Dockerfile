@@ -38,8 +38,9 @@ RUN pnpm --filter @pvp/server build
 # Production node_modules for the server's external (non-bundled) deps —
 # argon2 (native), firebase-admin, fastify, @fastify/*, zod. pnpm copies real
 # folders (not workspace symlinks) into /prod, with argon2's linux binary.
-# If a future pnpm changes `deploy` semantics, add `--legacy`.
-RUN pnpm --filter=@pvp/server --prod deploy /prod
+# --legacy: required since pnpm v10 for workspaces without
+# inject-workspace-packages (ERR_PNPM_DEPLOY_NONINJECTED_WORKSPACE).
+RUN pnpm --filter=@pvp/server --prod deploy --legacy /prod
 
 # ---- Runtime stage ------------------------------------------------------------
 FROM node:22-slim AS runtime

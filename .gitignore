@@ -19,6 +19,8 @@ gcp-*.json
 
 # Emulator data & logs
 firebase/emulator-data/
+firebase/hosting-dist/
+firebase/.firebase/
 firebase-debug.log
 firestore-debug.log
 ui-debug.log

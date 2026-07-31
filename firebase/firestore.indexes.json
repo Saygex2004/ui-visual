@@ -31,6 +31,14 @@
         { "fieldPath": "user_id", "order": "ASCENDING" },
         { "fieldPath": "date", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "attachments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "message_id", "order": "ASCENDING" },
+        { "fieldPath": "uploaded_at", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []
