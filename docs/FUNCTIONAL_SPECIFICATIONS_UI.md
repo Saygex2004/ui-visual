@@ -46,14 +46,14 @@ The primary language of all on-screen copy is **Italian**. Short control and scr
 |---|---|
 | **Landing screen** | The opening *Scegli una vista* screen offering a choice between two areas. |
 | **Area** | One of the two top-level views chosen on the landing screen: **Cluster Immobiliari** (real estate) or **Cluster Crediti** (credits & company shares). |
-| **Area view** | The screen shown after picking an area: a header with update metadata and a refresh region, a cluster navigation bar, an **Archivio** entry, and the cluster sections. |
+| **Area view** | The screen shown after picking an area: a header with update metadata and a refresh region, a **selector toolbar** (cluster chooser, with **Archivio** as its last option, plus the geographic controls), and the cluster or archive section. |
 | **Cluster section** | A titled block (*Cluster N: «Name»*) containing region controls (or an explanatory subtitle) and a pair of tabs holding the data tables. |
 | **Bucket tabs** | The **Procedure principali** / **Fallimenti** tab pair inside a cluster section; exactly one table is shown at a time. |
-| **Drill-down** | The panel that appears under a cluster's region controls once a region is chosen: capital-city choices and province choices. |
+| **Drill-down** | The geographic controls in the selector toolbar: a region chooser, and — once a region is chosen — capital-city choices and province choices beside it. |
 | **Price panel** | The OMI €/m² reference shown when a province is selected. |
-| **Valutazione cell** | The per-row cell holding the rating controls and the chat entry point. |
+| **Azioni cell** | The per-row cell holding *Apri scheda* and the overflow menu (chat, history, public listing). |
 | **Listing workspace** | The detail panel (side drawer) opened from a row: full details, rating, activity history, chat, and attachments for one listing. |
-| **Rating** | A shared verdict on a listing (good deal / to verify / to avoid) that also marks the row. |
+| **Rating** | A shared verdict on a listing (good deal / to verify / to avoid) that also marks the row; set in the listing workspace (and, on the calendar day view, in the row itself). |
 | **Blocco** | A group of listings that are lots of one and the same court proceeding; surfaced as a lot-count badge. |
 | **User menu** | The account menu: account name, Calendario, Le mie chat, Amministrazione (admins), and sign-out. |
 | **Day view / Month view** | The calendar's two screens: a month grid, and a single day's assigned listings. |
@@ -204,7 +204,7 @@ Tables stay lean on purpose: a row shows only the columns of §4.1, and everythi
 **Opening and closing.** The **whole row** is a click target that opens the workspace on its details — the fastest path, and the one that needs no aiming. The row's **Azioni** cell, always reachable regardless of horizontal scrolling, additionally offers:
 
 - **Apri scheda** — the same thing as a real link (so it is keyboard-reachable, opens in a new tab on a modified click, and can be copied);
-- an **overflow menu** ("⋯") holding the less-frequent per-row actions: **Apri chat** (opens the workspace directly on its chat, §6, carrying that thread's unread count), **Storico** (opens it on the activity history), and **Vai all'annuncio** (the public listing, in a new tab — Appendix B applies).
+- an **overflow menu** ("⋯") holding the less-frequent per-row actions: **Apri chat** (opens the workspace directly on its chat, §6, carrying that thread's unread count), **Storico** (opens it on the activity history), and **Vai all'annuncio** (the public listing, in a new tab).
 
 Action labels are never truncated: infrequent actions move into the menu rather than being squeezed into the row. Clicks that land on a control inside the row (a link, a button, the block badge) do **that** control's job and never also open the workspace.
 
@@ -212,7 +212,7 @@ The open workspace is part of the application's address state, so a specific lis
 
 **Contents.** The workspace presents, for the selected listing:
 
-- **Details** — every stored fact, including the **full, untruncated description** (tables show at most an excerpt), the key facts of §4.1, geography, dates, and the *Vai all'annuncio* link (Appendix B applies).
+- **Details** — every stored fact, including the **full, untruncated description** (tables show at most an excerpt), the key facts of §4.1, geography, dates, and the *Vai all'annuncio* link.
 - **Rating** — the shared Valutazione control (§5). This is **where a rating is set**: rows show the verdict, the workspace changes it.
 - **Related lots** — when the listing belongs to a blocco (§4.4), the other lots of the same proceeding, each openable in the workspace in turn.
 - **Price context** — for a real-estate listing whose province has OMI data, the same €/m² reference as §3.3, with the same residential-reference caption.
@@ -399,12 +399,3 @@ Each area header shows an update-metadata row: **when** the area's data was last
 | Administration — accounts | Create/list accounts; links onward | Admin |
 | Administration — extraction categories | Choose which procedural categories are stored | Admin |
 | Administration — calendar assignment | Random / by-id / remove assignments | Admin |
-
----
-
-## Appendix B — Easter eggs
-
-These are deliberate, non-serious interaction behaviours, documented for completeness and kept out of the main specification. Only their behaviour is specified here; any specific media they present is a presentation detail left to the redesign.
-
-- **High-value confirmation.** Opening the public listing (*Vai all'annuncio →*) of any auction whose base value exceeds **€ 5.000.000** intercepts the action and shows a themed confirmation dialog with a proceed choice (which opens the listing in a new tab) and a dismiss choice. Pressing escape or interacting outside the dialog dismisses it.
-- **Roccaraso / L'Aquila.** Selecting the **province** drill-down choice for **L'Aquila** (the province, not the same-named capital) shows a themed dialog with a single dismiss action. The same dialog appears when opening the listing of any auction whose municipality is **Roccaraso** — and there the single action is the only way through: it both dismisses the dialog and opens the listing.

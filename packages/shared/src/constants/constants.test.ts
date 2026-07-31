@@ -8,7 +8,6 @@ import {
 } from './categories.js';
 import { OCCUPANCY_LABELS } from './occupancy.js';
 import { AREA_SLUG_TO_SCOPE, SCOPE_TO_AREA_SLUG } from './areas.js';
-import { HIGH_VALUE_THRESHOLD_EUR, EASTER_EGG_PROVINCE, EASTER_EGG_COMUNE } from './easterEggs.js';
 
 describe('cluster taxonomy', () => {
   it('20 recognized regions across the four geolocated clusters + Black catch-all', () => {
@@ -56,11 +55,5 @@ describe('other product constants', () => {
     expect(AREA_SLUG_TO_SCOPE.crediti).toBe('corporate');
     expect(SCOPE_TO_AREA_SLUG.corporate).toBe('crediti');
     expect(SCOPE_TO_AREA_SLUG.immobili).toBe('immobili');
-  });
-
-  it('easter-egg constants (UI Appendix B)', () => {
-    expect(HIGH_VALUE_THRESHOLD_EUR).toBe(5_000_000);
-    expect(EASTER_EGG_PROVINCE).toBe("L'Aquila");
-    expect(EASTER_EGG_COMUNE).toBe('Roccaraso');
   });
 });

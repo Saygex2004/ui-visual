@@ -51,7 +51,7 @@ Everything else the frontend needs (cadences, bands, limits it must mirror) come
 
 ## 5. Constants that are code, not configuration
 
-Deliberately **not** environment variables (changing them is a reviewed code change in `packages/shared`): the cluster taxonomy, exclusion set, and category catalog (`DOMAIN_RULES.md`); price-band boundaries; polling cadences (`API_CONTRACT.md` §10); the rich-text node allowlist; the easter-egg constants (UI Appendix B). Rationale: they are product rules with tests over them, not deployment knobs.
+Deliberately **not** environment variables (changing them is a reviewed code change in `packages/shared`): the cluster taxonomy, exclusion set, and category catalog (`DOMAIN_RULES.md`); price-band boundaries; polling cadences (`API_CONTRACT.md` §10); the rich-text node allowlist. Rationale: they are product rules with tests over them, not deployment knobs.
 
 ## 6. `.env.example`
 

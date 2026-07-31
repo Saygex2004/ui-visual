@@ -50,7 +50,7 @@ pvp-dashboard/
 │       └── src/
 │           ├── schemas/          # Zod: Part A docs, Part B docs, API payloads
 │           ├── domain/           # DOMAIN_RULES.md as pure functions
-│           ├── constants/        # clusters, exclusions, catalog, bands, cadences, easter eggs
+│           ├── constants/        # clusters, exclusions, catalog, bands, cadences
 │           └── index.ts
 ├── firebase/
 │   ├── firebase.json             # emulators (firestore, storage), hosting config + rewrites
@@ -81,7 +81,7 @@ pvp-dashboard/
 | 8 | `modules/calendar/`; `features/calendar/`; admin assignment screens |
 | 9 | `apps/web/src/components/` (shared Radix primitives); PrimeReact removed everywhere; `theme/preset.ts` deleted — behaviour- and appearance-preserving |
 | 10 | `theme/tokens.css` rewritten (light + dark token sets); theme toggle in the shell; every surface restyled to the modern-enterprise design system |
-| 11 | No new areas — audits and fixes across `apps/web`, `e2e/` consolidated regression, easter-egg constants + dialogs, payload/perf assertions |
+| 11 | No new areas — audits and fixes across `apps/web`, `e2e/` consolidated regression, payload/perf assertions |
 | 12 | `deploy/`, `firebase/` production values, `docs/RUNBOOK.md` |
 
 ## 3. Never committed

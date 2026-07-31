@@ -76,7 +76,7 @@ Notes binding on the implementation:
 - **Visual language + dark mode** (Phase 13, from the project owner's Claude Design reference): a **navy brand anchor** for identity (headings, logo, at most one filled brand button per screen) and a **blue accent** for interaction (links, active states, primary actions), on cool near-white paper; one type family; a single **micro-label voice** (small spaced capitals) for field labels, column headers, and KV keys. **Full dark mode**: a `:root[data-theme="dark"]` token set overrides the light custom properties, driven by a theme toggle (default: OS `prefers-color-scheme`; the explicit choice persisted). Both themes live entirely in the token layer — including the navy split (`--color-brand` is ink in dark, so filled brand buttons take their own `--color-brand-fill`).
 - **Motion** is named once in the token layer (`pvp-fade`, `pvp-pop`, `pvp-slide`, `pvp-up`, `pvp-shimmer`, `pvp-spin`) and consumed by feature CSS, so entrances stay consistent and the `prefers-reduced-motion` guard covers all of them in one place.
 - **Icons:** one locked open-source set (Lucide). **No emoji as icons** anywhere in the interface.
-- **Design cadence:** foundations in Phase 0, systematized with dark mode in Phase 10 (Hallmark `redesign`), superseded by the reference-driven redesign in Phase 13, re-audited during hardening (Phase 11). Anti-slop gates (structural variety, token discipline, full interactive-state coverage, mobile floors) are part of the quality bar, not decoration.
+- **Design cadence:** foundations in Phase 0, systematized with dark mode in Phase 10, superseded by the reference-driven redesign in Phase 13. `design.md` is the standing rule; Phase 11's conformance sweep re-checks its mechanical disciplines (token discipline, one shared primitive per pattern, one stacking scale, no native dialogs, no emoji-as-icon) rather than running a separate design audit.
 
 ## 6. Internationalization
 
@@ -96,4 +96,3 @@ Implementation stances for UI §11, fixed here so they are built in, not retrofi
 - **Reduced motion:** all transitions behind a `prefers-reduced-motion` guard in the token layer.
 - **Responsive:** tables scroll inside their own container (`overflow-x: auto`); the page body never scrolls horizontally; calendar and admin are width-capped and centred; toolbars wrap.
 - **Empty/loading/error states** are designed states with copy in the catalog — never blank panels or raw error text.
-- **Easter eggs** (UI Appendix B): the €5M confirmation and the Roccaraso/L'Aquila dialogs are ordinary modal dialogs (Radix `Dialog`) behind constants in `packages/shared` (threshold, province, comune) — themed content is a Phase 11 (hardening) concern; the media they present ships bundled (no external hosts).
