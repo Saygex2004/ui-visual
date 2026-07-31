@@ -187,7 +187,7 @@
   left: 0;
   right: 0;
   bottom: calc(100% + var(--space-2));
-  z-index: 5;
+  z-index: var(--z-popover);
   display: flex;
   flex-direction: column;
   padding: var(--space-2);

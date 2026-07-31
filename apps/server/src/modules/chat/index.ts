@@ -32,6 +32,7 @@ import {
 } from '../../repositories/index.js';
 import type { StoredMessage } from '../../repositories/chat.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
+import { firstHeaderValue } from '../../lib/http.js';
 
 export interface ChatModuleDeps {
   db: Firestore;
@@ -138,8 +139,16 @@ export function registerChatModule(app: FastifyInstance, deps: ChatModuleDeps): 
     return ThreadsListResponseSchema.parse({ threads: items });
   });
 
-  app.get('/chats/unread', async (req) => {
+  app.get('/chats/unread', async (req, reply) => {
     const total = await userCountersRepo.getTotal(db, req.user!.id);
+    // API_CONTRACT.md §10: "single-doc read, 304" — the whole response is
+    // this one number, so it's its own ETag.
+    const etag = `"${total}"`;
+    reply.header('ETag', etag);
+    const ifNoneMatch = firstHeaderValue(req.headers['if-none-match']);
+    if (ifNoneMatch === etag) {
+      return reply.code(304).send();
+    }
     return UnreadResponseSchema.parse({ total });
   });
 

@@ -15,6 +15,7 @@
 import {
   forwardRef,
   useEffect,
+  useId,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -28,11 +29,13 @@ import { Bold, Italic, Link as LinkIcon, List, ListOrdered } from 'lucide-react'
 import type { RichTextNode } from '@pvp/shared';
 import {
   createMentionExtension,
+  mentionOptionId,
   type MentionCandidate,
   type MentionController,
   type MentionState,
 } from './mention/mentionExtension.js';
 import { MentionPopup } from './mention/MentionPopup.js';
+import { registerMentionCloser } from './mention/activeMentionRegistry.js';
 import { PromptDialog } from '../../components/PromptDialog.js';
 import './chat.css';
 
@@ -86,6 +89,7 @@ export interface RichTextEditorProps {
 export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorProps>(
   function RichTextEditor({ onChange, disabled, onSubmit, mention }, ref) {
     const { t } = useTranslation('chat');
+    const mentionListboxId = useId();
 
     const [mentionState, setMentionState] = useState<MentionState | null>(null);
     const [linkDialogOpen, setLinkDialogOpen] = useState(false);
@@ -118,6 +122,17 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       }),
       [],
     );
+
+    // See activeMentionRegistry.ts for why this exists: Radix's Dialog
+    // (workspace drawer) would otherwise also close on the same Escape that
+    // dismisses this popup. WorkspacePanel calls `closeActiveMention()`
+    // directly from its own `onEscapeKeyDown`, so register/unregister
+    // whenever a mention is open here.
+    useEffect(() => {
+      if (!mentionState) return;
+      registerMentionCloser(() => controller.setState(null));
+      return () => registerMentionCloser(null);
+    }, [mentionState, controller]);
 
     // The candidates fetch is lazy, so it can resolve while the picker is
     // already open — re-filter into the open picker instead of leaving it
@@ -165,10 +180,25 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
       ];
     }, [controller]);
 
+    // TipTap's `createView` merges `role: 'textbox'` with `editorProps.
+    // attributes` only once, at construction — a later reconfigure (Tiptap
+    // calls `view.setOptions` whenever this object's reference changes,
+    // which it would on every render if inlined) applies `attributes`
+    // as-is, with no such merge, silently dropping the role. Memoized so it
+    // never churns, and `role` is listed explicitly anyway so the element's
+    // accessible role doesn't depend on which code path last touched it.
+    const editorProps = useMemo(
+      () => ({
+        attributes: { role: 'textbox', 'aria-label': t('compose.textboxLabel') },
+      }),
+      [t],
+    );
+
     const editor = useEditor({
       extensions,
       editable: !disabled,
       immediatelyRender: false,
+      editorProps,
       onFocus: () => {
         // Start loading mention candidates on first focus, so the picker is
         // already populated when someone types "@".
@@ -182,6 +212,40 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     useEffect(() => {
       editor?.setEditable(!disabled);
     }, [editor, disabled]);
+
+    // Links the editable surface to the mention popup for assistive
+    // technology: `MentionPopup` renders `role="listbox"`/`role="option"`
+    // (mentionOptionId), but the real DOM focus never leaves the
+    // contenteditable root — TipTap's suggestion plugin drives the popup
+    // through React state, not real focus moves. `aria-activedescendant`
+    // is the standard way to announce "this option is current" without
+    // moving focus; `aria-controls`/`aria-expanded` announce that the
+    // editor owns a collapsible listbox at all.
+    useEffect(() => {
+      const dom = editor?.view.dom;
+      if (!dom) return;
+      if (mentionState) {
+        dom.setAttribute('aria-expanded', 'true');
+        dom.setAttribute('aria-controls', mentionListboxId);
+        if (mentionState.items.length > 0) {
+          dom.setAttribute(
+            'aria-activedescendant',
+            mentionOptionId(mentionListboxId, mentionState.activeIndex),
+          );
+        } else {
+          dom.removeAttribute('aria-activedescendant');
+        }
+      } else {
+        dom.removeAttribute('aria-expanded');
+        dom.removeAttribute('aria-controls');
+        dom.removeAttribute('aria-activedescendant');
+      }
+      return () => {
+        dom.removeAttribute('aria-expanded');
+        dom.removeAttribute('aria-controls');
+        dom.removeAttribute('aria-activedescendant');
+      };
+    }, [editor, mentionState, mentionListboxId]);
 
     useImperativeHandle(
       ref,
@@ -218,7 +282,11 @@ export const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorPro
     return (
       <div className="chat-editor">
         {mentionState ? (
-          <MentionPopup state={mentionState} onPick={(item) => controller.pick(item)} />
+          <MentionPopup
+            state={mentionState}
+            onPick={(item) => controller.pick(item)}
+            listboxId={mentionListboxId}
+          />
         ) : null}
         <div className="chat-editor-toolbar" role="toolbar" aria-label={t('compose.placeholder')}>
           <button

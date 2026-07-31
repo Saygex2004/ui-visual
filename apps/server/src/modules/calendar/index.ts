@@ -24,6 +24,7 @@ import {
   activityRepo,
 } from '../../repositories/index.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
+import { firstHeaderValue } from '../../lib/http.js';
 import { toCalendarRow } from './rows.js';
 
 const ACTIONABLE_VALUES: ReadonlySet<RatingValue> = new Set(['ottimo_affare', 'da_verificare']);
@@ -70,7 +71,7 @@ export function registerCalendarModule(app: FastifyInstance, deps: CalendarModul
     return MonthResponseSchema.parse({ days: responseDays });
   });
 
-  app.get<{ Params: { date: string } }>('/calendar/day/:date', async (req) => {
+  app.get<{ Params: { date: string } }>('/calendar/day/:date', async (req, reply) => {
     const parsedDate = calendarDate.safeParse(req.params.date);
     if (!parsedDate.success) throw new ApiError(400, 'errors.common.validation');
     const date = parsedDate.data;
@@ -114,6 +115,17 @@ export function registerCalendarModule(app: FastifyInstance, deps: CalendarModul
     });
 
     const completed = listingIds.filter((id) => completedMap.get(id)?.completed_at != null).length;
+
+    // API_CONTRACT.md §10: "304" — the assigned set is frozen (UI §7.3), so
+    // only `completed` (driven by the separate live ratings poll, not this
+    // route) can change between polls; the assignment order captures the
+    // set itself.
+    const etag = `"${listingIds.join(',')}:${completed}"`;
+    reply.header('ETag', etag);
+    const ifNoneMatch = firstHeaderValue(req.headers['if-none-match']);
+    if (ifNoneMatch === etag) {
+      return reply.code(304).send();
+    }
 
     return DayResponseSchema.parse({
       listings: rows,

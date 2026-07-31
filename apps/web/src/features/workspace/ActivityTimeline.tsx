@@ -5,13 +5,17 @@ import { useListingActivity } from './hooks.js';
 import { activityLabelFor } from './activityLabels.js';
 import { formatTimestamp } from '../dashboard/DataTable/formatting.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
+import { translateLoadError } from '../../lib/translateApiError.js';
 
 export function ActivityTimeline({ listingId }: { listingId: string }) {
   const { t } = useTranslation('workspace');
-  const { data, isLoading, isError } = useListingActivity(listingId, true);
+  const { data, isLoading, isError, error } = useListingActivity(listingId, true);
 
   if (isLoading) return <StatusDisplay variant="loading" message={t('activity.loading')} />;
-  if (isError || !data) return <StatusDisplay variant="error" message={t('activity.loadError')} />;
+  if (isError || !data)
+    return (
+      <StatusDisplay variant="error" message={translateLoadError(t, error, 'activity.loadError')} />
+    );
   if (data.events.length === 0)
     return <StatusDisplay variant="empty" message={t('activity.empty')} />;
 

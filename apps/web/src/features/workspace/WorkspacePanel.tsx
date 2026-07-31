@@ -51,10 +51,12 @@ import { useListingDetail } from './hooks.js';
 import { DettagliTab } from './DettagliTab.js';
 import { ActivityTimeline } from './ActivityTimeline.js';
 import { ThreadView } from '../chat/ThreadView.js';
+import { closeActiveMention } from '../chat/mention/activeMentionRegistry.js';
 import { useMyThreadsMap } from '../chat/hooks.js';
 import { useRatingsMap } from '../ratings/hooks.js';
 import { RatingDot } from '../ratings/RatingControl.js';
 import { formatText, formatNumeroAnno } from '../dashboard/DataTable/formatting.js';
+import { translateLoadError } from '../../lib/translateApiError.js';
 import './workspace.css';
 
 export function WorkspacePanel() {
@@ -63,7 +65,7 @@ export function WorkspacePanel() {
   const search = useSearch({ from: '/protected-layout/aste/$area/lotto/$id' });
   const navigate = useNavigate({ from: '/aste/$area/lotto/$id' });
 
-  const { data: detail, isLoading, isError } = useListingDetail(id);
+  const { data: detail, isLoading, isError, error } = useListingDetail(id);
   const ratings = useRatingsMap();
   const unread = useMyThreadsMap().get(id)?.unread ?? 0;
   const rating = detail ? (ratings.get(detail.id) ?? detail.rating?.value ?? null) : null;
@@ -102,6 +104,14 @@ export function WorkspacePanel() {
         <DialogOverlay className="workspace-drawer-backdrop" />
         <DialogContent
           className="workspace-drawer-popup"
+          onEscapeKeyDown={(event) => {
+            // The chat tab's @-mention popup owns this Escape first — see
+            // activeMentionRegistry.ts for why the drawer can't just let its
+            // own Esc-close and the popup's Esc-close both run off the same
+            // event. If a mention was open, this closes it and keeps the
+            // drawer open; otherwise the drawer closes as normal.
+            if (closeActiveMention()) event.preventDefault();
+          }}
           onCloseAutoFocus={(event) => {
             event.preventDefault();
             opener?.focus({ preventScroll: true });
@@ -127,7 +137,9 @@ export function WorkspacePanel() {
           </div>
           <div className="workspace-drawer-content">
             {isLoading ? <StatusDisplay variant="loading" message={t('loading')} /> : null}
-            {isError ? <StatusDisplay variant="error" message={t('loadError')} /> : null}
+            {isError ? (
+              <StatusDisplay variant="error" message={translateLoadError(t, error, 'loadError')} />
+            ) : null}
             {detail ? (
               <TabsRoot
                 className="workspace-tabs-root"

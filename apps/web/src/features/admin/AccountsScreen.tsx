@@ -8,11 +8,12 @@ import { useAdminUsers } from './hooks.js';
 import { CreateUserForm } from './CreateUserForm.js';
 import { AccountRow } from './AccountRow.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
+import { translateLoadError } from '../../lib/translateApiError.js';
 import './admin.css';
 
 export function AccountsScreen() {
   const { t } = useTranslation('admin');
-  const { data, isLoading, isError } = useAdminUsers();
+  const { data, isLoading, isError, error } = useAdminUsers();
 
   const activeAdminCount = data?.users.filter((u) => u.role === 'admin' && !u.disabled).length ?? 0;
   // Client-side heuristic only, to disable the button proactively — the
@@ -29,7 +30,12 @@ export function AccountsScreen() {
       <section>
         <h2 className="admin-form-title">{t('accounts.listTitle')}</h2>
         {isLoading ? <StatusDisplay variant="loading" message={t('accounts.loading')} /> : null}
-        {isError ? <StatusDisplay variant="error" message={t('accounts.loadError')} /> : null}
+        {isError ? (
+          <StatusDisplay
+            variant="error"
+            message={translateLoadError(t, error, 'accounts.loadError')}
+          />
+        ) : null}
         {data ? (
           <div className="admin-table-wrap">
             <table className="admin-table">

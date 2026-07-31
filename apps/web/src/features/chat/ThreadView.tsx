@@ -24,6 +24,7 @@ import { ParticipantList } from './ParticipantList.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { Button } from '../../components/Button.js';
 import { ConfirmDialog } from '../../components/ConfirmDialog.js';
+import { translateLoadError } from '../../lib/translateApiError.js';
 import './chat.css';
 
 export interface ThreadViewProps {
@@ -37,13 +38,14 @@ export interface ThreadViewProps {
 export function ThreadView({ listingId, embedded = false }: ThreadViewProps) {
   const { t } = useTranslation('chat');
   const { data: me } = useMe();
-  const { data, isLoading, isError } = useThread(listingId, true);
+  const { data, isLoading, isError, error } = useThread(listingId, true);
   const closeThread = useCloseThread(listingId);
   const reopenThread = useReopenThread(listingId);
   const [confirmClose, setConfirmClose] = useState(false);
 
   if (isLoading) return <StatusDisplay variant="loading" message={t('loading')} />;
-  if (isError || !data) return <StatusDisplay variant="error" message={t('loadError')} />;
+  if (isError || !data)
+    return <StatusDisplay variant="error" message={translateLoadError(t, error, 'loadError')} />;
 
   const { thread, messages } = data;
   const isAdmin = me?.user.role === 'admin';
@@ -52,11 +54,16 @@ export function ThreadView({ listingId, embedded = false }: ThreadViewProps) {
     <div className="chat-thread-view">
       <div className="chat-thread-header">
         {embedded ? null : (
-          <h2 className="chat-thread-title">
+          // The standalone /chat/:listingId route has no other page-level
+          // heading (unlike the workspace drawer, whose own title already
+          // covers that role for `embedded`) — this must be an h1, not h2,
+          // or the page has none at all (found by Phase 11's axe pass,
+          // e2e/accessibility.spec.ts's page-has-heading-one check).
+          <h1 className="chat-thread-title">
             {formatText(thread.listing.tipo_bene)}
             {' — '}
             {formatText(thread.listing.tribunale)}
-          </h2>
+          </h1>
         )}
         {isAdmin ? (
           thread.closed ? (

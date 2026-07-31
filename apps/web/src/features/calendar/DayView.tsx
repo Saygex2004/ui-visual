@@ -15,6 +15,7 @@ import { useRatingsMap } from '../ratings/hooks.js';
 import { useMyThreadsMap } from '../chat/hooks.js';
 import { useMe } from '../auth/hooks.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
+import { translateLoadError } from '../../lib/translateApiError.js';
 import './calendar.css';
 
 // The workspace route (opened from a row's actions) needs an AreaSearch-
@@ -37,7 +38,7 @@ function formatDayLabel(date: string): string {
 export function DayView() {
   const { t } = useTranslation('calendar');
   const { date } = useParams({ from: '/protected-layout/calendario/$date' });
-  const { data, isLoading, isError } = useDay(date);
+  const { data, isLoading, isError, error } = useDay(date);
   const ratings = useRatingsMap();
   const chatsByListing = useMyThreadsMap();
   const { data: me } = useMe();
@@ -54,7 +55,9 @@ export function DayView() {
       <h1 className="calendar-day-title">{formatDayLabel(date)}</h1>
 
       {isLoading ? <StatusDisplay variant="loading" message={t('loading')} /> : null}
-      {isError ? <StatusDisplay variant="error" message={t('loadError')} /> : null}
+      {isError ? (
+        <StatusDisplay variant="error" message={translateLoadError(t, error, 'loadError')} />
+      ) : null}
 
       {data ? (
         <>

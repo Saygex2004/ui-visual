@@ -127,9 +127,17 @@
   padding: 0;
 }
 
-/* Success / danger — status-coloured, same shape as primary */
+/* Success / danger — status-coloured, same shape as primary.
+   Background is the "-strong" status variant, not the base one: the base
+   --color-success/--color-danger are calibrated for dots/borders against
+   --color-paper (design.md), never verified for white text directly on a
+   solid fill — found by Phase 11's axe pass to give only 3.35:1/4.25:1 here
+   (e2e/ui-accessibility.spec.ts, surfaced only once a non-last-admin
+   account's enabled Disabilita/Riabilita buttons were on screen). "-strong"
+   is already the darker/more-saturated variant Phase 13 introduced for
+   exactly this kind of text-legibility need, and clears AA with margin. */
 .ui-button-success {
-  background: var(--color-success);
+  background: var(--color-success-strong);
   color: var(--color-accent-contrast);
 }
 
@@ -139,7 +147,7 @@
 }
 
 .ui-button-danger {
-  background: var(--color-danger);
+  background: var(--color-danger-strong);
   color: var(--color-accent-contrast);
 }
 

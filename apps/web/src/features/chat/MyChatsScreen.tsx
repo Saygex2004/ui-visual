@@ -12,6 +12,7 @@ import {
 } from '../dashboard/DataTable/formatting.js';
 import { useMyChatsQuery } from './hooks.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
+import { translateLoadError } from '../../lib/translateApiError.js';
 import './chat.css';
 
 function previewText(thread: ThreadListItem, t: (key: string) => string): string {
@@ -64,10 +65,11 @@ function ThreadItemContent({ thread }: { thread: ThreadListItem }) {
 
 export function MyChatsScreen() {
   const { t } = useTranslation('chat');
-  const { data, isLoading, isError } = useMyChatsQuery();
+  const { data, isLoading, isError, error } = useMyChatsQuery();
 
   if (isLoading) return <StatusDisplay variant="loading" message={t('loading')} />;
-  if (isError) return <StatusDisplay variant="error" message={t('loadError')} />;
+  if (isError)
+    return <StatusDisplay variant="error" message={translateLoadError(t, error, 'loadError')} />;
 
   const threads = data?.threads ?? [];
 

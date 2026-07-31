@@ -36,6 +36,7 @@ import { computeSessionMoves, eligibleMoved, todayIso } from './sessionArchive.j
 import { useRatingsMap } from '../ratings/hooks.js';
 import { useMyThreadsMap } from '../chat/hooks.js';
 import type { AreaTableKind } from './DataTable/columns.js';
+import { translateLoadError } from '../../lib/translateApiError.js';
 import './dashboard.css';
 
 const RESET_KEYS = [
@@ -60,7 +61,7 @@ export function AreaView() {
   const search = useSearch({ from: '/protected-layout/aste/$area' });
   const navigate = useNavigate({ from: '/aste/$area' });
 
-  const { data: snapshot, isLoading, isError } = useAreaSnapshot(area as AreaSlug);
+  const { data: snapshot, isLoading, isError, error } = useAreaSnapshot(area as AreaSlug);
   const areaKind: AreaTableKind = area === 'immobili' ? 'real_estate' : 'credits';
   const ratings = useRatingsMap();
   const chatsByListing = useMyThreadsMap();
@@ -147,7 +148,9 @@ export function AreaView() {
     );
   }
   if (isError || !snapshot) {
-    return <StatusDisplay variant="error" message={t('area.loadError')} />;
+    return (
+      <StatusDisplay variant="error" message={translateLoadError(t, error, 'area.loadError')} />
+    );
   }
 
   const resolvedCluster = resolveClusterSelector(search.cluster, snapshot.clusters.length);

@@ -45,6 +45,11 @@
   background: var(--color-surface-2);
 }
 
+.ui-menu-item:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}
+
 .ui-menu-item[data-disabled] {
   opacity: 0.55;
   cursor: not-allowed;

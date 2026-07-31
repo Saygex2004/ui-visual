@@ -5,17 +5,26 @@
 import { useTranslation } from 'react-i18next';
 import { Avatar } from '../../../components/Avatar.js';
 import { Badge } from '../../../components/Badge.js';
-import type { MentionCandidate, MentionState } from './mentionExtension.js';
+import { mentionOptionId, type MentionCandidate, type MentionState } from './mentionExtension.js';
 
 export interface MentionPopupProps {
   state: MentionState;
   onPick: (item: MentionCandidate) => void;
+  /** Shared with `RichTextEditor`, which points the editable surface's
+   *  `aria-activedescendant` at `mentionOptionId(listboxId, activeIndex)` —
+   *  this is the one place the two files must agree on the id scheme. */
+  listboxId: string;
 }
 
-export function MentionPopup({ state, onPick }: MentionPopupProps) {
+export function MentionPopup({ state, onPick, listboxId }: MentionPopupProps) {
   const { t } = useTranslation('chat');
   return (
-    <div className="chat-mention-popup" role="listbox" aria-label={t('mention.title')}>
+    <div
+      id={listboxId}
+      className="chat-mention-popup"
+      role="listbox"
+      aria-label={t('mention.title')}
+    >
       <span className="ui-micro-label chat-mention-popup-title">{t('mention.title')}</span>
       {state.items.length === 0 ? (
         <span className="chat-mention-empty">{t('mention.empty')}</span>
@@ -23,6 +32,7 @@ export function MentionPopup({ state, onPick }: MentionPopupProps) {
         state.items.map((item, index) => (
           <div
             key={item.id}
+            id={mentionOptionId(listboxId, index)}
             role="option"
             aria-selected={index === state.activeIndex}
             className={`chat-mention-item${index === state.activeIndex ? ' chat-mention-item-active' : ''}`}

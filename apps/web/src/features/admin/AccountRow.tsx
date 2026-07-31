@@ -12,6 +12,7 @@ import { StatusDisplay } from '../../components/StatusDisplay.js';
 import type { AdminUser } from '@pvp/shared';
 import { useSetPassword, useSetRole, useSetDisabled } from './hooks.js';
 import { translateApiError } from '../../lib/translateApiError.js';
+import { formatTimestampDate } from '../dashboard/DataTable/formatting.js';
 
 export function AccountRow({
   user,
@@ -90,7 +91,7 @@ export function AccountRow({
         <td>{user.username}</td>
         <td>{user.role === 'admin' ? t('accounts.roleAdmin') : t('accounts.roleUser')}</td>
         <td>{user.disabled ? t('accounts.stateDisabled') : t('accounts.stateActive')}</td>
-        <td>{new Date(user.created_at).toLocaleDateString('it-IT')}</td>
+        <td>{formatTimestampDate(user.created_at)}</td>
         <td className="admin-row-actions">
           <Button size="small" severity="secondary" onClick={() => setPasswordPanelOpen((v) => !v)}>
             {t('accounts.actionChangePassword')}

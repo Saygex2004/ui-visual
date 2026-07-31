@@ -11,6 +11,7 @@ import type { MonthDay } from '@pvp/shared';
 import { useMonth } from './hooks.js';
 import { todayIso } from '../dashboard/sessionArchive.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
+import { translateLoadError } from '../../lib/translateApiError.js';
 import './calendar.css';
 
 function monthOf(dateIso: string): string {
@@ -72,7 +73,7 @@ export function MonthView() {
   const today = todayIso();
   const month = search.mese ?? monthOf(today);
 
-  const { data, isLoading, isError } = useMonth(month);
+  const { data, isLoading, isError, error } = useMonth(month);
   const cells = useMemo(() => buildGrid(month), [month]);
   const dayByDate = useMemo(() => new Map((data?.days ?? []).map((d) => [d.date, d])), [data]);
 
@@ -103,7 +104,9 @@ export function MonthView() {
       </div>
 
       {isLoading ? <StatusDisplay variant="loading" message={t('loading')} /> : null}
-      {isError ? <StatusDisplay variant="error" message={t('loadError')} /> : null}
+      {isError ? (
+        <StatusDisplay variant="error" message={translateLoadError(t, error, 'loadError')} />
+      ) : null}
 
       {!isLoading && !isError ? (
         <>

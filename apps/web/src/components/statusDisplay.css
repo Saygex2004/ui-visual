@@ -116,20 +116,11 @@
 }
 
 .status-display-spin {
-  animation: status-display-spin 0.8s linear infinite;
+  animation: pvp-spin 0.8s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .status-display-spin {
     animation: none;
-  }
-}
-
-@keyframes status-display-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
   }
 }

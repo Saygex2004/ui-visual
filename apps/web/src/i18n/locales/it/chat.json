@@ -37,6 +37,7 @@
   },
   "compose": {
     "placeholder": "Scrivi un messaggio…",
+    "textboxLabel": "Messaggio",
     "send": "Invia",
     "attach": "Allega file",
     "hint": "Premi Invio per inviare · Maiusc+Invio per andare a capo · @ per menzionare",

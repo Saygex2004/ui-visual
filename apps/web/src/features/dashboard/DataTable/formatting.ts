@@ -46,6 +46,14 @@ export function formatTimestamp(isoInstant: string | null): string {
   return Number.isNaN(date.getTime()) ? NOT_AVAILABLE : timestampFormatter.format(date);
 }
 
+/** Same instant-parsing as `formatTimestamp`, date-only display (e.g. an
+ *  account's `created_at` in a table column that has no room for a time). */
+export function formatTimestampDate(isoInstant: string | null): string {
+  if (isoInstant == null) return NOT_AVAILABLE;
+  const date = new Date(isoInstant);
+  return Number.isNaN(date.getTime()) ? NOT_AVAILABLE : dateFormatter.format(date);
+}
+
 export function formatText(value: string | null | undefined): string {
   return value == null || value.length === 0 ? NOT_AVAILABLE : value;
 }

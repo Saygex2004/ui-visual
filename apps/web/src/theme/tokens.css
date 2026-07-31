@@ -28,9 +28,16 @@
   --color-text: oklch(24.4% 0.035 265); /* ink (#182031) */
   --color-text-body: oklch(47.9% 0.032 269); /* body copy (#565d70) */
   --color-text-muted: oklch(
-    56% 0.028 269
+    53% 0.028 269
   ); /* meta, micro-labels — mockup
-     grey darkened for AA (raw #8a91a3 is 3.15:1 on white; this is ~4.7:1) */
+     grey darkened for AA (raw #8a91a3 is 3.15:1 on white). The first darkening
+     pass (56%, ~4.7:1) was verified only against --color-surface (pure
+     white); it actually drops to 4.16–4.31:1 against the --color-paper/
+     --color-surface-2 tints this token is used on just as often (table
+     headers, metadata labels) — found by Phase 11's committed axe pass
+     (e2e/accessibility.spec.ts), the same class of "checked one background,
+     not all of them" gap Phase 10 found in --color-accent. 53% clears
+     4.5:1 against the tightest of those backgrounds with margin. */
   --color-graphite: oklch(22% 0.016 260); /* code/terminal surfaces */
 
   /* --- Brand (identity): navy — headings, logo tile, brand button --- */
@@ -63,14 +70,20 @@
   --color-danger-soft: oklch(95.1% 0.019 17); /* #fbeaea */
   --color-info: var(--color-accent);
 
-  /* --- Categorical ramp: cluster dots, avatar fills (index-stable) --- */
-  --color-cat-1: oklch(59.7% 0.182 25); /* red */
+  /* --- Categorical ramp: cluster dots, avatar fills (index-stable).
+     -1/-3/-4/-7 darkened for AA: `.ui-avatar` always renders white
+     (--color-surface) initials on these fills (avatar.css), and axe
+     (Phase 11, e2e/accessibility.spec.ts) found four of the seven original
+     values gave white text only 3.15–4.38:1, short of the 4.5:1 floor.
+     Non-text uses of this ramp (dashboard.css's category-legend swatches)
+     only need 3:1 non-text contrast and were never at risk. --- */
+  --color-cat-1: oklch(58% 0.182 25); /* red, was 59.7% (avatar text 4.38:1) */
   --color-cat-2: oklch(50.8% 0.132 252); /* blue */
-  --color-cat-3: oklch(61.8% 0.13 161); /* green */
-  --color-cat-4: oklch(65.7% 0.028 269); /* grey */
+  --color-cat-3: oklch(54% 0.13 161); /* green, was 61.8% (avatar text 3.44:1) */
+  --color-cat-4: oklch(56% 0.028 269); /* grey, was 65.7% (avatar text 3.15:1) */
   --color-cat-5: oklch(30.6% 0.021 269); /* graphite */
   --color-cat-6: oklch(54.9% 0.247 291); /* violet */
-  --color-cat-7: oklch(64.8% 0.13 232); /* cyan */
+  --color-cat-7: oklch(54% 0.13 232); /* cyan, was 64.8% (avatar text 3.17:1) */
 
   /* --- Typography: single family (see fonts.css) --- */
   --font-display: 'Hanken Grotesk', system-ui, sans-serif;

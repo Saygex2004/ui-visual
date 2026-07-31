@@ -53,8 +53,41 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return handleResponse<T>(res);
 }
 
+// API_CONTRACT.md §10's "cheap path" (snapshot, unread, calendar day: ETag/
+// 304) was server-side-only until Phase 11 hardening: nothing on the client
+// ever sent `If-None-Match`, so every poll transferred the full payload
+// regardless — found by that phase's own e2e request-cadence assertions
+// (e2e/polling-cadence.spec.ts), not assumed fixed by the server change
+// alone. One small per-path cache, keyed by the exact request path (so
+// `/ratings?since=...`/`/chats/:id?after=...`'s ever-changing query strings
+// naturally never collide or grow unbounded — only the handful of paths
+// that actually return an `ETag` — snapshot ×2 areas, unread, a few visited
+// calendar dates — ever get an entry at all).
+const etagCache = new Map<string, { etag: string; data: unknown }>();
+
+async function getWithEtag<T>(path: string): Promise<T> {
+  const cached = etagCache.get(path);
+  const res = await fetch(`${API_BASE}${path}`, {
+    credentials: 'include',
+    headers: cached ? { 'If-None-Match': cached.etag } : undefined,
+  });
+
+  if (res.status === 304 && cached) {
+    return cached.data as T;
+  }
+
+  const data = await handleResponse<T>(res);
+  const etag = res.headers.get('ETag');
+  if (etag) {
+    etagCache.set(path, { etag, data });
+  } else {
+    etagCache.delete(path);
+  }
+  return data;
+}
+
 export const api = {
-  get: <T>(path: string): Promise<T> => request<T>(path, { method: 'GET' }),
+  get: <T>(path: string): Promise<T> => getWithEtag<T>(path),
   post: <T>(path: string, body?: unknown): Promise<T> =>
     request<T>(path, {
       method: 'POST',

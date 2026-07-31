@@ -354,31 +354,3 @@ td.data-table-actions-cell {
   border-color: var(--color-accent);
   color: var(--color-accent-strong);
 }
-
-/* The chooser panel is a shared Popover (portalled); the list inside just
-   resets ul chrome. */
-.blocco-jump-menu-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.blocco-jump-menu-item {
-  display: block;
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: none;
-  border-radius: var(--radius-sm);
-  background: none;
-  color: var(--color-text-body);
-  font-size: var(--text-sm);
-  text-align: left;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.blocco-jump-menu-item:hover,
-.blocco-jump-menu-item:focus-visible {
-  background: var(--color-surface-2);
-  outline: none;
-}

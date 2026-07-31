@@ -6,17 +6,15 @@ import { useTranslation } from 'react-i18next';
 import type { AdminEventView, Run } from '@pvp/shared';
 import { useAdminEvents, useAdminRuns } from './hooks.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
+import { formatTimestamp } from '../dashboard/DataTable/formatting.js';
+import { translateLoadError } from '../../lib/translateApiError.js';
 import './admin.css';
-
-function formatInstant(iso: string): string {
-  return new Date(iso).toLocaleString('it-IT');
-}
 
 function EventRow({ event }: { event: AdminEventView }) {
   const { t } = useTranslation('admin');
   return (
     <tr>
-      <td>{formatInstant(event.at)}</td>
+      <td>{formatTimestamp(event.at)}</td>
       <td>{t(`activity.eventType.${event.type}`)}</td>
       <td>{event.actor_id}</td>
       <td>{event.subject}</td>
@@ -28,7 +26,7 @@ function RunRow({ run }: { run: Run }) {
   const { t } = useTranslation('admin');
   return (
     <tr>
-      <td>{formatInstant(run.started_at)}</td>
+      <td>{formatTimestamp(run.started_at)}</td>
       <td>{t(`activity.runScope.${run.scope}`)}</td>
       <td>{t(`activity.runStatus.${run.status}`)}</td>
       <td>{run.total_enumerated}</td>
@@ -54,7 +52,10 @@ export function AdminActivityScreen() {
           <StatusDisplay variant="loading" message={t('activity.loading')} />
         ) : null}
         {events.isError ? (
-          <StatusDisplay variant="error" message={t('activity.eventsLoadError')} />
+          <StatusDisplay
+            variant="error"
+            message={translateLoadError(t, events.error, 'activity.eventsLoadError')}
+          />
         ) : null}
         {events.data ? (
           <div className="admin-table-wrap">
@@ -89,7 +90,10 @@ export function AdminActivityScreen() {
           <StatusDisplay variant="loading" message={t('activity.loading')} />
         ) : null}
         {runs.isError ? (
-          <StatusDisplay variant="error" message={t('activity.runsLoadError')} />
+          <StatusDisplay
+            variant="error"
+            message={translateLoadError(t, runs.error, 'activity.runsLoadError')}
+          />
         ) : null}
         {runs.data ? (
           <div className="admin-table-wrap">

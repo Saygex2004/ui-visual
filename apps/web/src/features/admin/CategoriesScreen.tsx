@@ -11,12 +11,13 @@ import { Button } from '../../components/Button.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { CATEGORY_GROUPS, type CategoryGroup } from '@pvp/shared';
 import { useAdminCategories, useSaveCategories } from './hooks.js';
-import { translateApiError } from '../../lib/translateApiError.js';
+import { translateApiError, translateLoadError } from '../../lib/translateApiError.js';
+import { formatTimestamp } from '../dashboard/DataTable/formatting.js';
 import './admin.css';
 
 export function CategoriesScreen() {
   const { t } = useTranslation('admin');
-  const { data, isLoading, isError } = useAdminCategories();
+  const { data, isLoading, isError, error } = useAdminCategories();
   const saveCategories = useSaveCategories();
   const [checked, setChecked] = useState<Set<string> | null>(null);
   const [message, setMessage] = useState<{ kind: 'error' | 'success'; text: string } | null>(null);
@@ -56,7 +57,12 @@ export function CategoriesScreen() {
       <h1>{t('categories.title')}</h1>
 
       {isLoading ? <StatusDisplay variant="loading" message={t('categories.loading')} /> : null}
-      {isError ? <StatusDisplay variant="error" message={t('categories.loadError')} /> : null}
+      {isError ? (
+        <StatusDisplay
+          variant="error"
+          message={translateLoadError(t, error, 'categories.loadError')}
+        />
+      ) : null}
 
       {data && checked ? (
         <>
@@ -69,7 +75,7 @@ export function CategoriesScreen() {
             <p className="admin-note">
               {t('categories.updatedBy', {
                 username: data.updated_by,
-                date: data.updated_at ? new Date(data.updated_at).toLocaleString('it-IT') : '',
+                date: data.updated_at ? formatTimestamp(data.updated_at) : '',
               })}
             </p>
           )}

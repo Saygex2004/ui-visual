@@ -484,6 +484,58 @@ describe('chat module (HTTP, over the emulator)', () => {
       expect(res.json().total).toBe(await counterOf('user-admin-1'));
     });
 
+    it('ETag/If-None-Match: repeating the request with the returned ETag answers 304, empty body', async () => {
+      const first = await app.inject({
+        method: 'GET',
+        url: '/api/chats/unread',
+        headers: { cookie: adminCookie },
+      });
+      const etag = first.headers.etag as string;
+      expect(etag).toBe(`"${first.json().total as number}"`);
+
+      const second = await app.inject({
+        method: 'GET',
+        url: '/api/chats/unread',
+        headers: { cookie: adminCookie, 'if-none-match': etag },
+      });
+      expect(second.statusCode).toBe(304);
+      expect(second.body).toBe('');
+    });
+
+    it('the ETag changes once the counter changes (a stale If-None-Match returns 200 again)', async () => {
+      const before = await app.inject({
+        method: 'GET',
+        url: '/api/chats/unread',
+        headers: { cookie: adminCookie },
+      });
+      const staleEtag = before.headers.etag as string;
+
+      // Opening 1055 (no prior thread) creates one with the caller already
+      // read — doesn't change admin's own counter. Sending a message on it
+      // as mrossi does, since admin is a participant once mrossi @-mentions
+      // them... simpler: mrossi sends into the already-shared 1001 thread,
+      // which does increment admin's counter (admin has no read doc there).
+      await app.inject({
+        method: 'GET',
+        url: '/api/chats/1001',
+        headers: { cookie: mrossiCookie },
+      });
+      await app.inject({
+        method: 'POST',
+        url: '/api/chats/1001/messages',
+        headers: { cookie: mrossiCookie },
+        payload: { body: textBody('un altro messaggio') },
+      });
+
+      const after = await app.inject({
+        method: 'GET',
+        url: '/api/chats/unread',
+        headers: { cookie: adminCookie, 'if-none-match': staleEtag },
+      });
+      expect(after.statusCode).toBe(200);
+      expect(after.json().total).toBe(await counterOf('user-admin-1'));
+    });
+
     it('a user with no threads sees an empty list and 0 unread', async () => {
       const created = await app.inject({
         method: 'POST',

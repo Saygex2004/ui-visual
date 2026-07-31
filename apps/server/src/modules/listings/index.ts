@@ -15,12 +15,9 @@ import {
 import type { SnapshotCache } from '../../cache/index.js';
 import { listingsRepo, ratingsRepo, chatRepo } from '../../repositories/index.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
+import { firstHeaderValue } from '../../lib/http.js';
 
 const VALID_AREA_SLUGS: ReadonlySet<string> = new Set(Object.keys(AREA_SLUG_TO_SCOPE));
-
-function firstHeaderValue(v: string | string[] | undefined): string | undefined {
-  return Array.isArray(v) ? v[0] : v;
-}
 
 export interface ListingsModuleDeps {
   cache: SnapshotCache;

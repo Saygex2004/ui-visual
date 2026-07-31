@@ -37,6 +37,13 @@ export interface MentionController {
   pick: (item: MentionCandidate) => void;
 }
 
+/** Shared by `MentionPopup` (renders the id on each `role="option"`) and
+ *  `RichTextEditor` (points the editable surface's `aria-activedescendant`
+ *  at the same id) — the one place the two files must agree on the scheme. */
+export function mentionOptionId(listboxId: string, index: number): string {
+  return `${listboxId}-option-${index}`;
+}
+
 export function createMentionExtension(controller: MentionController) {
   return Extension.create({
     name: 'mentionSuggestion',
@@ -79,11 +86,20 @@ export function createMentionExtension(controller: MentionController) {
             onKeyDown: ({ event }) => {
               const state = controller.getState();
               if (!state) return false;
+              // Returning `true` only tells ProseMirror's own keymap the event
+              // is handled — it does not stop the native DOM event from
+              // bubbling past the editor to `document`, where Radix Dialog's
+              // global Escape listener lives. Without `stopPropagation()`
+              // here, dismissing the mention popup also closed the entire
+              // workspace drawer underneath it (found live, Phase 11
+              // hardening): Escape must dismiss only the topmost layer.
               if (event.key === 'Escape') {
+                event.stopPropagation();
                 controller.setState(null);
                 return true;
               }
               if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.stopPropagation();
                 const count = state.items.length;
                 if (count === 0) return true;
                 const delta = event.key === 'ArrowDown' ? 1 : -1;

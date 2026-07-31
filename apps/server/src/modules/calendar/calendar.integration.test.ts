@@ -242,4 +242,46 @@ describe('calendar module (HTTP, over the emulator)', () => {
     });
     expect(after.json().progress).toEqual({ completed: 2, total: 5 });
   });
+
+  it('ETag/If-None-Match: repeating the request with the returned ETag answers 304, empty body', async () => {
+    const first = await app.inject({
+      method: 'GET',
+      url: '/api/calendar/day/2026-07-02',
+      headers: { cookie: mrossiCookie },
+    });
+    const etag = first.headers.etag as string;
+
+    const second = await app.inject({
+      method: 'GET',
+      url: '/api/calendar/day/2026-07-02',
+      headers: { cookie: mrossiCookie, 'if-none-match': etag },
+    });
+    expect(second.statusCode).toBe(304);
+    expect(second.body).toBe('');
+  });
+
+  it('a rating that advances progress also changes the ETag (a stale If-None-Match returns 200 again)', async () => {
+    const before = await app.inject({
+      method: 'GET',
+      url: '/api/calendar/day/2026-07-02',
+      headers: { cookie: mrossiCookie },
+    });
+    const staleEtag = before.headers.etag as string;
+
+    await app.inject({
+      method: 'PUT',
+      url: '/api/ratings/1004',
+      headers: { cookie: mrossiCookie },
+      payload: { value: 'da_verificare' },
+    });
+
+    const after = await app.inject({
+      method: 'GET',
+      url: '/api/calendar/day/2026-07-02',
+      headers: { cookie: mrossiCookie, 'if-none-match': staleEtag },
+    });
+    expect(after.statusCode).toBe(200);
+    expect(after.headers.etag).not.toBe(staleEtag);
+    expect(after.json().progress).toEqual({ completed: 2, total: 5 });
+  });
 });

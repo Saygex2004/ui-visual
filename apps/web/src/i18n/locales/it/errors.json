@@ -22,6 +22,7 @@
     "notFound": "Risorsa non trovata.",
     "validation": "I dati inviati non sono validi.",
     "internal": "Si è verificato un errore imprevisto. Riprova più tardi.",
-    "unknown": "Si è verificato un errore imprevisto."
+    "unknown": "Si è verificato un errore imprevisto.",
+    "offline": "Impossibile contattare il server. Controlla la connessione e riprova."
   }
 }

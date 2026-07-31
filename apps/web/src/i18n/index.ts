@@ -12,7 +12,6 @@ import workspaceIt from './locales/it/workspace.json';
 import chatIt from './locales/it/chat.json';
 import calendarIt from './locales/it/calendar.json';
 import adminIt from './locales/it/admin.json';
-import archiveIt from './locales/it/archive.json';
 import errorsIt from './locales/it/errors.json';
 
 export const DEFAULT_LOCALE = 'it' as const;
@@ -25,7 +24,6 @@ export const NAMESPACES = [
   'chat',
   'calendar',
   'admin',
-  'archive',
   'errors',
 ] as const;
 
@@ -38,7 +36,6 @@ export const resources = {
     chat: chatIt,
     calendar: calendarIt,
     admin: adminIt,
-    archive: archiveIt,
     errors: errorsIt,
   },
 } as const;
