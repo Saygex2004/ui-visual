@@ -48,6 +48,15 @@
   text-align: center;
 }
 
+/* Bigger wordmark on the login screen (the header keeps the compact size). */
+.auth-brand .shell-logo-name {
+  font-size: var(--text-xl);
+}
+
+.auth-brand .shell-logo-sub {
+  font-size: var(--text-base);
+}
+
 .auth-title {
   margin: 0;
   font-size: var(--text-lg);
