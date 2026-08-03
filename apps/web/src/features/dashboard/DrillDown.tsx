@@ -6,13 +6,15 @@
 // unchanged: an explicit "Tutte le regioni" option, capital chips with no
 // "all" option (the active chip clears itself), and capital/province
 // mutually exclusive — picking one always clears the other.
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapPin } from 'lucide-react';
-import type { ListingRow } from '@pvp/shared';
+import { type ListingRow, EASTER_EGG_PROVINCE } from '@pvp/shared';
 import type { AreaSearch } from './urlState.js';
 import { Field } from '../../components/Field.js';
 import { SelectField } from '../../components/SelectField.js';
 import { SearchSelect } from '../../components/SearchSelect.js';
+import { NapoliDialog } from '../eggs/EasterEggs.js';
 import {
   regionsPresent,
   rowsForRegion,
@@ -91,6 +93,7 @@ function RegionPanel({
   const capitals = capitalsPresent(rows);
   const provinces = provincesPresent(rows);
   const activeCapital = search.capoluogo ?? null;
+  const [showNapoli, setShowNapoli] = useState(false);
 
   function toggleCapital(comune: string) {
     onPatch({
@@ -101,10 +104,19 @@ function RegionPanel({
 
   function selectProvince(value: string) {
     onPatch({ provincia: value === '' ? undefined : value, capoluogo: undefined });
+    if (value === EASTER_EGG_PROVINCE) setShowNapoli(true);
   }
 
   return (
     <>
+      <NapoliDialog
+        open={showNapoli}
+        onOpenChange={setShowNapoli}
+        title={t('common:egg.napoli.title')}
+        imgSrc="/eggs/roccaraso.jpg"
+        imgAlt={t('common:egg.napoli.imageAlt')}
+        buttonLabel={t('common:egg.napoli.button')}
+      />
       {capitals.length > 0 ? (
         <div className="ui-field selector-field-capitals">
           <span className="ui-micro-label">{t('drilldown.capitalLabel')}</span>

@@ -1,0 +1,75 @@
+/* design-system: design.md (Navy Ledger) · Easter-egg dialogs (owner request,
+ * 2026-08). Chrome reuses the confirm-modal pattern (scrim + pop, one --z-*
+ * scale); the GIF/photo content is the deliberate exception to the system's
+ * restraint — these are hidden surprises, not part of the working UI. */
+.egg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: var(--color-scrim);
+  animation: pvp-fade var(--dur-fast) var(--ease-out);
+}
+
+.egg-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: calc(var(--z-modal) + 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  width: min(30rem, calc(100vw - var(--space-8)));
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  animation: pvp-pop var(--dur-pop) var(--ease-out);
+}
+
+.egg-media {
+  display: block;
+  width: 100%;
+  max-width: 26rem;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+
+.egg-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+/* Napoli gag (L'Aquila / Roccaraso): a square photo + one wide dialect button. */
+.egg-dialog-napoli {
+  width: min(22rem, calc(100vw - var(--space-8)));
+}
+
+.egg-media-napoli {
+  width: 100%;
+  max-width: 18rem;
+  border-radius: var(--radius-lg);
+}
+
+.egg-napoli-button {
+  width: 100%;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.egg-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}

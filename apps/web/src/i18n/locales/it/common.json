@@ -6,6 +6,19 @@
     "homeLinkTitle": "Torna alla home (Scegli una vista)",
     "tagline": "Revisione delle vendite giudiziarie italiane"
   },
+  "egg": {
+    "highValue": {
+      "title": "Un'offerta che non puoi rifiutare",
+      "gifAlt": "Don Vito Corleone",
+      "proceed": "Sì, vai all'asta",
+      "cancel": "No, resto qui"
+    },
+    "napoli": {
+      "title": "Roccaraso",
+      "imageAlt": "Roccaraso",
+      "button": "CE STAMM' TUTT' QUANT'!"
+    }
+  },
   "bootstrap": {
     "proof": "Ambiente inizializzato correttamente."
   },

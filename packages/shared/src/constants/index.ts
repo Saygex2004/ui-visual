@@ -13,3 +13,4 @@ export * from './richtext.js';
 export * from './occupancy.js';
 export * from './ratings.js';
 export * from './activity.js';
+export * from './easterEggs.js';

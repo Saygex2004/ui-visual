@@ -3,10 +3,12 @@
 // blocco lots, and price context. The rating reads from the live poll
 // (features/ratings), not a one-shot `detail.rating` — falling back to it
 // only for the very first paint, before the poll has resolved even once.
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink } from 'lucide-react';
-import type { AreaSlug, ListingDetail } from '@pvp/shared';
+import { type AreaSlug, type ListingDetail, HIGH_VALUE_THRESHOLD_EUR } from '@pvp/shared';
 import { RatingControl } from '../ratings/RatingControl.js';
+import { HighValueDialog } from '../eggs/EasterEggs.js';
 import { useRatingsMap } from '../ratings/hooks.js';
 import {
   formatCurrency,
@@ -32,6 +34,9 @@ export function DettagliTab({
   const { t } = useTranslation('workspace');
   const ratings = useRatingsMap();
   const rating = ratings.get(detail.id) ?? detail.rating?.value ?? null;
+  const [showHighValue, setShowHighValue] = useState(false);
+  const isHighValue =
+    detail.valore_richiesto != null && detail.valore_richiesto > HIGH_VALUE_THRESHOLD_EUR;
 
   return (
     <div className="workspace-dettagli">
@@ -97,10 +102,29 @@ export function DettagliTab({
         target="_blank"
         rel="noopener noreferrer"
         className="workspace-annuncio-link"
+        onClick={(event) => {
+          if (isHighValue) {
+            event.preventDefault();
+            setShowHighValue(true);
+          }
+        }}
       >
         {t('details.goToListing')}
         <ExternalLink aria-hidden="true" size={15} />
       </a>
+
+      {isHighValue ? (
+        <HighValueDialog
+          open={showHighValue}
+          onOpenChange={setShowHighValue}
+          title={t('common:egg.highValue.title')}
+          gifSrc="/eggs/asta-5m.gif"
+          gifAlt={t('common:egg.highValue.gifAlt')}
+          proceedLabel={t('common:egg.highValue.proceed')}
+          cancelLabel={t('common:egg.highValue.cancel')}
+          onProceed={() => window.open(detail.link, '_blank', 'noopener,noreferrer')}
+        />
+      ) : null}
 
       {detail.blocco ? <RelatedLots blocco={detail.blocco} area={area} search={search} /> : null}
 

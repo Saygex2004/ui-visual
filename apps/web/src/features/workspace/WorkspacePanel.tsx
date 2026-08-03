@@ -45,8 +45,9 @@ import {
   DialogClose,
 } from '../../components/Dialog.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
-import type { AreaSlug } from '@pvp/shared';
+import { type AreaSlug, EASTER_EGG_COMUNE } from '@pvp/shared';
 import type { PanelTab } from '../dashboard/urlState.js';
+import { NapoliDialog } from '../eggs/EasterEggs.js';
 import { useListingDetail } from './hooks.js';
 import { DettagliTab } from './DettagliTab.js';
 import { ActivityTimeline } from './ActivityTimeline.js';
@@ -78,6 +79,11 @@ export function WorkspacePanel() {
     document.activeElement instanceof HTMLElement ? document.activeElement : null,
   );
 
+  // Roccaraso easter egg: opening any Roccaraso listing gates the scheda
+  // behind the dialog; its single button is the only way through.
+  const [roccarasoDismissed, setRoccarasoDismissed] = useState(false);
+  const showRoccaraso = detail?.comune === EASTER_EGG_COMUNE && !roccarasoDismissed;
+
   function handleClose() {
     void navigate({
       to: '/aste/$area',
@@ -94,12 +100,24 @@ export function WorkspacePanel() {
     : t('title');
 
   return (
-    <DialogRoot
-      open
-      onOpenChange={(open) => {
-        if (!open) handleClose();
-      }}
-    >
+    <>
+      <NapoliDialog
+        open={showRoccaraso}
+        onlyButton
+        onOpenChange={(open) => {
+          if (!open) setRoccarasoDismissed(true);
+        }}
+        title={t('common:egg.napoli.title')}
+        imgSrc="/eggs/roccaraso.jpg"
+        imgAlt={t('common:egg.napoli.imageAlt')}
+        buttonLabel={t('common:egg.napoli.button')}
+      />
+      <DialogRoot
+        open
+        onOpenChange={(open) => {
+          if (!open) handleClose();
+        }}
+      >
       <DialogPortal>
         <DialogOverlay className="workspace-drawer-backdrop" />
         <DialogContent
@@ -176,6 +194,7 @@ export function WorkspacePanel() {
           </div>
         </DialogContent>
       </DialogPortal>
-    </DialogRoot>
+      </DialogRoot>
+    </>
   );
 }
