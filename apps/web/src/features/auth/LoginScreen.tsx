@@ -14,6 +14,7 @@ import './auth.css';
 
 export function LoginScreen({ redirectTo }: { redirectTo?: string }) {
   const { t } = useTranslation('auth');
+  const { t: tCommon } = useTranslation('common');
   const navigate = useNavigate();
   const login = useLogin();
   const [username, setUsername] = useState('');
@@ -35,13 +36,17 @@ export function LoginScreen({ redirectTo }: { redirectTo?: string }) {
   }
 
   return (
-    <main className="auth-screen">
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <div className="auth-brand">
+    <main className="auth-split">
+      <aside className="auth-hero">
+        <div className="auth-hero-inner">
           <BrandLogo />
+          <p className="auth-hero-tagline">{tCommon('app.tagline')}</p>
         </div>
-        <h1 className="auth-title">{t('login.title')}</h1>
-        <div className="auth-field">
+      </aside>
+      <section className="auth-stage">
+        <form className="auth-card" onSubmit={handleSubmit}>
+          <h1 className="auth-title">{t('login.title')}</h1>
+          <div className="auth-field">
           <label htmlFor="login-username">{t('login.usernameLabel')}</label>
           <TextInput
             id="login-username"
@@ -67,7 +72,8 @@ export function LoginScreen({ redirectTo }: { redirectTo?: string }) {
         <Button type="submit" severity="brand" disabled={login.isPending}>
           {t('login.submit')}
         </Button>
-      </form>
+        </form>
+      </section>
     </main>
   );
 }

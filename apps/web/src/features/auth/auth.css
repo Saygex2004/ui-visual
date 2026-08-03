@@ -1,8 +1,11 @@
 /* Hallmark · genre: modern-minimal · macrostructure: Workbench (panel/form)
- * design-system: design.md · designed-as-app
- * Auth screens (login, forced password change) — tokens only, no raw hex.
- * Error/loading states now go through the shared StatusDisplay primitive
- * (components/StatusDisplay.tsx) — the old bespoke `.auth-error` is gone. */
+ *   → login front door elevated to a split brand-hero + form-stage composition
+ * design-system: design.md · designed-as-app · tokens only, no raw hex
+ * Pre-emit critique: P5 H4 E4 S4 R4 V4
+ * Shared by LoginScreen (.auth-split) and ForcedPasswordChange (.auth-screen).
+ * The form card, title, field-label voice are shared by both variants. */
+
+/* --- Centered variant: forced password change (unchanged behaviour) --- */
 .auth-screen {
   min-height: 100vh;
   display: flex;
@@ -12,59 +15,115 @@
   background: var(--color-auth-backdrop);
 }
 
-.auth-card {
-  width: 100%;
-  max-width: 22rem;
+/* --- Split variant: login (brand hero left, form stage right) --- */
+.auth-split {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+}
+
+.auth-hero {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16) var(--space-12);
+  color: var(--color-brand-fill-contrast);
+  /* Navy identity ground with two faint accent-blue glows — depth from the
+     system's own two blues, no imagery. Stays navy in light + dark. */
+  background:
+    radial-gradient(
+      115% 85% at 12% 8%,
+      color-mix(in oklch, var(--color-accent) 34%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      90% 70% at 92% 104%,
+      color-mix(in oklch, var(--color-accent) 18%, transparent),
+      transparent 55%
+    ),
+    var(--color-brand-fill);
+}
+
+.auth-hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  max-width: 26rem;
+  text-align: center;
+  animation: pvp-fade var(--dur-base) var(--ease-out);
+}
+
+/* Giant logo + wordmark on the navy hero — the single-navy asset is forced
+   white here so it reads on navy in BOTH themes. */
+.auth-hero .shell-logo {
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-8);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-1);
 }
 
-.auth-brand {
-  display: flex;
-  justify-content: center;
-  margin-bottom: var(--space-2);
+.auth-hero .shell-logo-tile {
+  width: 8rem;
+  height: 8rem;
 }
 
-/* Login/auth screen: a giant brand mark, centered and stacked ABOVE the
-   wordmark (the app header keeps the compact horizontal lockup). */
-.auth-brand .shell-logo {
-  flex-direction: column;
-  gap: var(--space-3);
+.auth-hero .shell-logo-img {
+  filter: brightness(0) invert(1);
 }
 
-.auth-brand .shell-logo-tile {
-  width: 9rem;
-  height: 9rem;
-}
-
-.auth-brand .shell-logo-wordmark {
+.auth-hero .shell-logo-wordmark {
   align-items: center;
   text-align: center;
 }
 
-/* Bigger wordmark on the login screen (the header keeps the compact size). */
-.auth-brand .shell-logo-name {
+.auth-hero .shell-logo-name {
   font-size: var(--text-xl);
+  color: var(--color-brand-fill-contrast);
 }
 
-.auth-brand .shell-logo-sub {
+.auth-hero .shell-logo-sub {
+  font-size: var(--text-sm);
+  color: color-mix(in oklch, var(--color-brand-fill-contrast) 68%, transparent);
+}
+
+.auth-hero-tagline {
+  margin: 0;
   font-size: var(--text-base);
+  line-height: 1.5;
+  color: color-mix(in oklch, var(--color-brand-fill-contrast) 80%, transparent);
+}
+
+.auth-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-10) var(--space-4);
+  background: var(--color-paper);
+}
+
+/* --- Shared form card (both variants) --- */
+.auth-card {
+  width: 100%;
+  max-width: 23rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-10);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  animation: pvp-fade var(--dur-base) var(--ease-out);
 }
 
 .auth-title {
   margin: 0;
-  font-size: var(--text-lg);
-  text-align: center;
+  font-size: var(--text-xl);
+  letter-spacing: -0.01em;
+  color: var(--color-brand);
 }
 
 .auth-subtitle {
-  margin: calc(-1 * var(--space-2)) 0 0;
+  margin: calc(-1 * var(--space-3)) 0 0;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
 }
@@ -81,4 +140,37 @@
   letter-spacing: var(--label-tracking);
   text-transform: uppercase;
   color: var(--color-text-muted);
+}
+
+/* --- Responsive: stack the hero above the form under 900px --- */
+@media (max-width: 900px) {
+  .auth-split {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .auth-hero {
+    padding: var(--space-10) var(--space-6);
+  }
+
+  .auth-hero-inner {
+    gap: var(--space-4);
+  }
+
+  .auth-hero .shell-logo-tile {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+
+  .auth-hero .shell-logo {
+    gap: var(--space-2);
+  }
+
+  .auth-hero .shell-logo-name {
+    font-size: var(--text-lg);
+  }
+
+  .auth-stage {
+    padding: var(--space-8) var(--space-4);
+  }
 }
