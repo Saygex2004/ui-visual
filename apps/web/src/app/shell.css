@@ -25,9 +25,10 @@
   flex: 1;
 }
 
-/* Logo block — real brand asset (public/logo.png) on a light rounded tile so
-   the navy monogram stays legible in both light and dark themes. One
-   implementation, reused by auth. */
+/* Logo block — real brand asset (public/logo.png), no backing tile. The
+   navy monogram sits directly on the surface; in dark mode a filter flips it
+   to white so it stays legible on dark grounds. One implementation, reused
+   by auth. */
 .shell-logo-link {
   display: inline-flex;
   margin-left: calc(-1 * var(--space-2));
@@ -58,16 +59,18 @@
   justify-content: center;
   width: 2.125rem;
   height: 2.125rem;
-  padding: 0.25rem;
-  border-radius: var(--radius-md);
-  background: var(--color-brand-fill-contrast);
-  box-shadow: var(--shadow-1);
 }
 
 .shell-logo-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+/* Dark mode: the navy monogram would vanish on dark grounds, so flip it to
+   white (single-colour asset — brightness(0) → black, invert(1) → white). */
+:root[data-theme='dark'] .shell-logo-img {
+  filter: brightness(0) invert(1);
 }
 
 .shell-logo-wordmark {
