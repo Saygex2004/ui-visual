@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  background: var(--color-paper);
+  background: var(--color-auth-backdrop);
 }
 
 .auth-card {
@@ -29,6 +29,13 @@
   display: flex;
   justify-content: center;
   margin-bottom: var(--space-2);
+}
+
+/* Larger brand mark on the login/auth screen than in the app header. */
+.auth-brand .shell-logo-tile {
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0.4rem;
 }
 
 .auth-title {

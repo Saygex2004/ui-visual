@@ -22,6 +22,7 @@
   --color-paper: oklch(97.3% 0.006 265); /* page background (#f4f6fa) */
   --color-surface: oklch(100% 0 0); /* cards, table, app bar */
   --color-surface-2: oklch(96.1% 0.007 269); /* fills, idle inputs, chips */
+  --color-auth-backdrop: oklch(91% 0.008 265); /* login page ground — soft grey so the white card lifts (light only) */
   --color-border: oklch(92.8% 0.013 267); /* standard hairline (#e3e7f0) */
   --color-border-soft: oklch(95.2% 0.008 271); /* row/section dividers */
   --color-border-strong: oklch(83% 0.026 266); /* hover borders */
@@ -170,6 +171,7 @@
   --color-paper: oklch(20% 0.012 265);
   --color-surface: oklch(24% 0.014 265);
   --color-surface-2: oklch(28% 0.016 265);
+  --color-auth-backdrop: oklch(20% 0.012 265); /* matches --color-paper in dark — login ground unchanged in dark mode */
   --color-border: oklch(34% 0.016 265);
   --color-border-soft: oklch(30% 0.014 265);
   --color-border-strong: oklch(44% 0.018 265);
