@@ -36,10 +36,8 @@ export function BrandLogo() {
   const { t } = useTranslation('common');
   return (
     <span className="shell-logo">
-      <span className="shell-logo-tile" aria-hidden="true">
-        <span className="shell-logo-bar shell-logo-bar-1" />
-        <span className="shell-logo-bar shell-logo-bar-2" />
-        <span className="shell-logo-bar shell-logo-bar-3" />
+      <span className="shell-logo-tile">
+        <img src="/logo.png" alt="" className="shell-logo-img" />
       </span>
       <span className="shell-logo-wordmark">
         <span className="shell-logo-name">{t('app.brandName')}</span>

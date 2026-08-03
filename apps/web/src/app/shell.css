@@ -25,8 +25,9 @@
   flex: 1;
 }
 
-/* Logo block — CSS-drawn placeholder mark (design.md: temporary, will be
-   replaced by a real asset later). One implementation, reused by auth. */
+/* Logo block — real brand asset (public/logo.png) on a light rounded tile so
+   the navy monogram stays legible in both light and dark themes. One
+   implementation, reused by auth. */
 .shell-logo-link {
   display: inline-flex;
   margin-left: calc(-1 * var(--space-2));
@@ -53,35 +54,20 @@
 
 .shell-logo-tile {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  gap: 2px;
   width: 2.125rem;
   height: 2.125rem;
-  padding: 0.55rem 0;
+  padding: 0.25rem;
   border-radius: var(--radius-md);
-  background: var(--color-brand-fill);
+  background: var(--color-brand-fill-contrast);
   box-shadow: var(--shadow-1);
 }
 
-.shell-logo-bar {
-  width: 3px;
-  border-radius: 2px;
-}
-
-.shell-logo-bar-1 {
-  height: 0.5rem;
-  background: var(--color-accent-soft);
-}
-
-.shell-logo-bar-2 {
-  height: 1rem;
-  background: var(--color-brand-fill-contrast);
-}
-
-.shell-logo-bar-3 {
-  height: 0.7rem;
-  background: var(--color-accent);
+.shell-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .shell-logo-wordmark {
