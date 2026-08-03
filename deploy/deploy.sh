@@ -33,6 +33,10 @@ STORAGE_BUCKET="${PVPDASH_STORAGE_BUCKET:-}"
 # min-instances: 0 = scale-to-zero (operator's choice for go-live; a cold start
 # of a few seconds, ~€0). Bump to 1 later for an always-warm instance.
 MIN_INSTANCES="${PVPDASH_MIN_INSTANCES:-0}"
+# Mount the bootstrap-admin secret ONLY on the very first deploy of a fresh
+# project (PVPDASH_WITH_BOOTSTRAP=1). After the production bootstrap the secret
+# must stay unmounted (DEPLOYMENT.md §4) — a redeploy must not re-add it.
+WITH_BOOTSTRAP="${PVPDASH_WITH_BOOTSTRAP:-0}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FIREBASE_CONFIG="${REPO_ROOT}/firebase/firebase.json"
@@ -61,6 +65,10 @@ deploy_server() {
   # --allow-unauthenticated: the app owns auth (session cookies); Hosting's
   #   /api/** rewrite forwards public traffic here. --max-instances 1 is the
   #   in-process snapshot cache's correctness setting (SPECIFICATIONS.md §8).
+  local secrets="PVPDASH_SESSION_SECRET=PVPDASH_SESSION_SECRET:latest"
+  if [ "${WITH_BOOTSTRAP}" = "1" ]; then
+    secrets="${secrets},PVPDASH_BOOTSTRAP_ADMIN_PASSWORD=PVPDASH_BOOTSTRAP_ADMIN_PASSWORD:latest"
+  fi
   gcloud run deploy "${SERVICE}" \
     --source "${REPO_ROOT}" \
     --project "${PROJECT}" \
@@ -70,7 +78,7 @@ deploy_server() {
     --min-instances "${MIN_INSTANCES}" \
     --allow-unauthenticated \
     --set-env-vars "PVPDASH_ENV=production,PVPDASH_FIRESTORE_PROJECT_ID=${PROJECT},PVPDASH_STORAGE_BUCKET=${STORAGE_BUCKET}" \
-    --set-secrets "PVPDASH_SESSION_SECRET=PVPDASH_SESSION_SECRET:latest,PVPDASH_BOOTSTRAP_ADMIN_PASSWORD=PVPDASH_BOOTSTRAP_ADMIN_PASSWORD:latest"
+    --set-secrets "${secrets}"
   echo "→ Verify now: curl \$(gcloud run services describe ${SERVICE} --region ${REGION} --project ${PROJECT} --format='value(status.url)')/readyz  → 200"
   echo "→ After the production bootstrap (first admin created + password changed), remove the bootstrap secret:"
   echo "    gcloud run services update ${SERVICE} --region ${REGION} --project ${PROJECT} \\"

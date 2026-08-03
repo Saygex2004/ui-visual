@@ -8,6 +8,7 @@ import type { SnapshotCache } from '../../cache/index.js';
 import { usersRepo } from '../../repositories/index.js';
 import { reseed, testDb } from '../../testSupport/emulator.js';
 import { loginAs, extractSessionCookie } from '../../testSupport/auth.js';
+import { SESSION_COOKIE_NAME } from '../../plugins/auth.js';
 
 const TEST_ENV = {
   PVPDASH_FIRESTORE_PROJECT_ID: 'demo-pvp-dashboard',
@@ -166,7 +167,7 @@ describe('auth module (HTTP, over the emulator)', () => {
 });
 
 function extractCookie(res: import('fastify').LightMyRequestResponse) {
-  const cookie = res.cookies.find((c) => c.name === 'pvpdash_session');
+  const cookie = res.cookies.find((c) => c.name === SESSION_COOKIE_NAME);
   if (!cookie) throw new Error('no session cookie in response');
   return cookie;
 }

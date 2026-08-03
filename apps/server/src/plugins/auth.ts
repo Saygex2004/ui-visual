@@ -13,7 +13,10 @@ import { usersRepo, sessionsRepo } from '../repositories/index.js';
 import { hashSessionToken } from '../lib/sessionToken.js';
 import { ApiError } from './errorEnvelope.js';
 
-export const SESSION_COOKIE_NAME = 'pvpdash_session';
+// `__session` is the ONLY cookie name Firebase Hosting's CDN forwards to the
+// Cloud Run backend behind the /api/** rewrite — every other cookie is
+// stripped from the request (DEPLOYMENT.md §1 topology).
+export const SESSION_COOKIE_NAME = '__session';
 /** Only write `last_used_at` when it is staler than this — "renewed on use"
  *  (SPECIFICATIONS.md §7) without a Firestore write on every single request. */
 const RENEW_THRESHOLD_MS = 60 * 60 * 1000; // 1 hour
