@@ -190,3 +190,37 @@
   font-weight: 600;
   color: var(--color-text-body);
 }
+
+/* Mobile: the month grid must fit all 7 weekday columns. The desktop cell
+   floor (aspect-ratio 1 + min-height 4rem) forces ≥64px per column, which
+   pushes Sat/Sun off-screen on a phone. Drop the height floor (squares now
+   size from the flexed column width) and tighten gaps/padding/labels. */
+@media (max-width: 640px) {
+  .calendar-month-view,
+  .calendar-day-view {
+    padding: var(--space-5) var(--space-3);
+  }
+
+  .calendar-month-title {
+    min-width: 0;
+    font-size: var(--text-base);
+  }
+
+  .calendar-grid {
+    gap: var(--space-1);
+    padding: var(--space-2);
+  }
+
+  .calendar-weekday-cell {
+    padding: var(--space-1) 0;
+    font-size: 0.625rem;
+    letter-spacing: 0;
+  }
+
+  .calendar-day-cell {
+    min-height: 0;
+    padding: var(--space-1);
+    gap: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
