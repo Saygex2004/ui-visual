@@ -15,9 +15,19 @@
 // listings. Rating in the row is the point of that screen, unlike the
 // dashboard where it is an occasional judgement made with the facts open.
 import { useTranslation } from 'react-i18next';
+import { X } from 'lucide-react';
 import { RATING_VALUES, type RatingValue } from '@pvp/shared';
 import { useSetRating, useClearRating } from './hooks.js';
 import './ratings.css';
+
+/** Verdict glyphs (owner request, 2026-08): the three risk dots render as
+ *  emoji — great deal → rocket, to-verify → thinking, avoid → poop. This
+ *  deliberately overrides design.md's "no emoji as icons" for the rating. */
+const RATING_EMOJI: Record<RatingValue, string> = {
+  ottimo_affare: '🚀',
+  da_verificare: '🤔',
+  da_evitare: '💩',
+};
 
 export interface RatingControlProps {
   listingId: string;
@@ -39,29 +49,44 @@ export function RatingControl({ listingId, value, compact }: RatingControlProps)
   }
 
   return (
-    <div
-      className={`rating-control${compact ? ' rating-control-compact' : ''}`}
-      role="group"
-      aria-label={t('rating.groupLabel')}
-    >
-      {RATING_VALUES.map((option) => {
-        const label = t(`rating.value.${option}`);
-        return (
-          <button
-            key={option}
-            type="button"
-            aria-pressed={value === option}
-            className={`rating-option rating-option-${option}`}
-            title={label}
-            aria-label={label}
-            disabled={pending}
-            onClick={() => handleClick(option)}
-          >
-            <span className="rating-dot" aria-hidden="true" />
-            {compact ? null : label}
-          </button>
-        );
-      })}
+    <div className={`rating-control-field${compact ? ' rating-control-field-compact' : ''}`}>
+      <div
+        className={`rating-control${compact ? ' rating-control-compact' : ''}`}
+        role="group"
+        aria-label={t('rating.groupLabel')}
+      >
+        {RATING_VALUES.map((option) => {
+          const label = t(`rating.value.${option}`);
+          return (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={value === option}
+              className={`rating-option rating-option-${option}`}
+              title={label}
+              aria-label={label}
+              disabled={pending}
+              onClick={() => handleClick(option)}
+            >
+              <span className="rating-dot" aria-hidden="true">
+                {RATING_EMOJI[option]}
+              </span>
+              {compact ? null : label}
+            </button>
+          );
+        })}
+      </div>
+      {!compact && value != null ? (
+        <button
+          type="button"
+          className="rating-clear"
+          disabled={pending}
+          onClick={() => clearRating.mutate({ listingId })}
+        >
+          <X aria-hidden="true" size={14} />
+          {t('rating.clear')}
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -77,6 +102,8 @@ export function RatingDot({ value }: { value: RatingValue | null }) {
       role="img"
       title={label}
       aria-label={label}
-    />
+    >
+      {value ? RATING_EMOJI[value] : null}
+    </span>
   );
 }

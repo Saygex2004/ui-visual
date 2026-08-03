@@ -14,7 +14,6 @@ import './auth.css';
 
 export function LoginScreen({ redirectTo }: { redirectTo?: string }) {
   const { t } = useTranslation('auth');
-  const { t: tCommon } = useTranslation('common');
   const navigate = useNavigate();
   const login = useLogin();
   const [username, setUsername] = useState('');
@@ -40,7 +39,7 @@ export function LoginScreen({ redirectTo }: { redirectTo?: string }) {
       <aside className="auth-hero">
         <div className="auth-hero-inner">
           <BrandLogo />
-          <p className="auth-hero-tagline">{tCommon('app.tagline')}</p>
+          <p className="auth-hero-tagline">{t('common:app.tagline')}</p>
         </div>
       </aside>
       <section className="auth-stage">

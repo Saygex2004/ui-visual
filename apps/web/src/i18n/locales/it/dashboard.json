@@ -63,6 +63,7 @@
   "rating": {
     "groupLabel": "Valutazione",
     "none": "Non valutato",
+    "clear": "Rimuovi valutazione",
     "value": {
       "ottimo_affare": "Ottimo affare",
       "da_verificare": "Da verificare",
