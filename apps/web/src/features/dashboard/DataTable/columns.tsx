@@ -142,10 +142,15 @@ const BLOCCO: ColumnDef = {
   ),
 };
 
+/** Presence flag only (DOMAIN_RULES.md §12). The header is deliberately the
+ *  abbreviated "Proc." rather than the full "Procedura concorsuale": the cell
+ *  holds one small icon, and at any width that fits a boolean column the full
+ *  label would be clipped mid-word (observed: "PROC" at 40px). The full
+ *  meaning lives on the icon's own tooltip. */
 const PROCEDURA_CONCORSUALE: ColumnDef = {
   key: 'procedura_concorsuale',
   headerKey: 'table.columns.proceduraConcorsuale',
-  width: '40px',
+  width: '58px',
   render: (row) => <ProceduraConcorsualeIndicator present={row.has_procedura_concorsuale} />,
 };
 
