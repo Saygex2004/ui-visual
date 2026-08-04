@@ -30,9 +30,19 @@ RUNTIME_SA="${PVPDASH_RUNTIME_SA:-}"
 # `server` so attachments resolve to the correct bucket rather than the
 # hardcoded `${projectId}.appspot.com` default in firestore.ts. REQUIRED for `server`.
 STORAGE_BUCKET="${PVPDASH_STORAGE_BUCKET:-}"
-# min-instances: 0 = scale-to-zero (operator's choice for go-live; a cold start
-# of a few seconds, ~€0). Bump to 1 later for an always-warm instance.
-MIN_INSTANCES="${PVPDASH_MIN_INSTANCES:-0}"
+# min-instances: 0 = scale-to-zero (~€0, but a cold start pays the full
+# snapshot-cache rebuild — both scopes read the *entire* procedure_concorsuali
+# collection, DATA_MODEL.md §17.3; at ~24k documents that's tens of thousands
+# of Firestore reads per cold start, easily above the daily free-read quota
+# with more than a couple of cold starts in a day). Switched to 1 (2026-08,
+# post-Phase-14) for a permanently warm instance: ~€2-3/month for the
+# reserved memory (Cloud Run's free tier absorbs the rest), and it keeps the
+# collection's daily rebuild cadence (once per scope, when the scraper's own
+# meta actually changes) safely under Firestore's 50k-reads/day free quota —
+# cheaper in practice than frequent cold starts, not just faster. Applied
+# directly to the live service via `gcloud run services update` at the time;
+# this default keeps it from silently reverting to 0 on the next `server` deploy.
+MIN_INSTANCES="${PVPDASH_MIN_INSTANCES:-1}"
 # Mount the bootstrap-admin secret ONLY on the very first deploy of a fresh
 # project (PVPDASH_WITH_BOOTSTRAP=1). After the production bootstrap the secret
 # must stay unmounted (DEPLOYMENT.md §4) — a redeploy must not re-add it.
