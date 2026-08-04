@@ -66,6 +66,12 @@ export function registerListingsModule(app: FastifyInstance, deps: ListingsModul
       listing.scope === 'immobili'
         ? cache.selectOmi('immobili', listing.provincia, listing.comune)
         : null;
+    const procedura = cache.selectProcedura(
+      listing.scope,
+      listing.tribunale,
+      listing.numero,
+      listing.anno,
+    );
     const rating = await ratingsRepo.getById(db, id);
     const thread = await chatRepo.getThread(db, id);
     const unread = thread ? await chatRepo.unreadCountFor(db, id, req.user!.id) : 0;
@@ -102,6 +108,7 @@ export function registerListingsModule(app: FastifyInstance, deps: ListingsModul
       },
       blocco,
       omi,
+      procedura_concorsuale: procedura,
       rating,
       thread: { exists: thread !== null, closed: thread?.closed ?? false, unread },
     };

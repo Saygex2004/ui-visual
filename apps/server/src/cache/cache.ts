@@ -8,11 +8,14 @@ import type { Firestore } from 'firebase-admin/firestore';
 import {
   SCOPES,
   selectOmiEntry,
+  selectProceduraConcorsuale,
   type Scope,
   type AreaSnapshot,
   type BloccoSibling,
   type OmiPrice,
   type OmiSelection,
+  type ProceduraConcorsualeDoc,
+  type ProceduraConcorsualeSelection,
 } from '@pvp/shared';
 import { metaRepo, activityRepo } from '../repositories/index.js';
 import { buildSnapshot } from './build.js';
@@ -30,6 +33,7 @@ interface ScopeState {
   archivedIds: Set<string>;
   summariesById: Map<string, BloccoSibling>;
   omiBySlug: Record<string, OmiPrice>;
+  proceduraByKey: Record<string, ProceduraConcorsualeDoc>;
   unrecognizedCategoryCodes: string[];
   builtAtMs: number;
   hasPrevious: boolean;
@@ -109,6 +113,22 @@ export class SnapshotCache {
     return selectOmiEntry(state.omiBySlug, { provincia, comune });
   }
 
+  /**
+   * Matched procedura concorsuale for a listing (DOMAIN_RULES.md §12), from
+   * the in-memory raw map -- zero further Firestore reads. Not scope-gated
+   * (unlike `selectOmi`): relevant to both immobili and corporate listings.
+   */
+  selectProcedura(
+    scope: Scope,
+    tribunale: string | null,
+    numero: string | null,
+    anno: string | null,
+  ): ProceduraConcorsualeSelection | null {
+    const state = this.states.get(scope);
+    if (!state) return null;
+    return selectProceduraConcorsuale(state.proceduraByKey, { tribunale, numero, anno });
+  }
+
   /** `cod_tipo_rito` values observed on active immobili listings but not in
    *  the catalog (DOMAIN_RULES.md Appendix A) — feeds the admin categories
    *  screen's non-uncheckable 5th group (UI §8.2). Always empty for corporate. */
@@ -125,6 +145,7 @@ export class SnapshotCache {
       archivedIds,
       summariesById,
       omiBySlug,
+      proceduraByKey,
       unrecognizedCategoryCodes,
     } = await buildSnapshot(this.db, scope);
 
@@ -138,6 +159,7 @@ export class SnapshotCache {
       archivedIds,
       summariesById,
       omiBySlug,
+      proceduraByKey,
       unrecognizedCategoryCodes,
       builtAtMs: Date.now(),
       hasPrevious: true,

@@ -8,6 +8,7 @@ export * as omiPricesRepo from './omiPrices.js';
 export * as metaRepo from './meta.js';
 export * as runsRepo from './runs.js';
 export * as settingsRepo from './settings.js';
+export * as procedureConcorsualiRepo from './procedureConcorsuali.js';
 
 // Part B (app-owned, writable).
 export * as activityRepo from './activity.js';

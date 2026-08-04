@@ -87,6 +87,19 @@
     "residentialCaveat": "Il valore si riferisce sempre alla tipologia residenziale, anche per immobili di altro tipo: è un riferimento di contesto, non una valutazione del lotto.",
     "unavailable": "Dati OMI non disponibili per la provincia di {{provincia}}."
   },
+  "proceduraConcorsuale": {
+    "title": "Procedura concorsuale collegata",
+    "tipoProcedura": "Tipo: {{value}}",
+    "professionista": "Professionista: {{value}}",
+    "giudiceDelegato": "Giudice delegato: {{value}}",
+    "ragioneSociale": "Ragione sociale",
+    "codiceFiscale": "Codice fiscale",
+    "indirizzo": "Indirizzo",
+    "citta": "Città",
+    "debitoreNonDisponibile": "I dati del debitore non sono ancora disponibili per questa procedura.",
+    "vaiAllaProcedura": "Vai alla procedura",
+    "tableIndicatorTitle": "Procedura concorsuale collegata trovata"
+  },
   "archive": {
     "navLabel": "Archivio",
     "title": "Archivio",
@@ -122,6 +135,7 @@
       "descrizione": "Descrizione",
       "numeroAnno": "N° / Anno",
       "blocco": "Blocco",
+      "proceduraConcorsuale": "Proc. concorsuale",
       "tribunale": "Tribunale",
       "comuneProvincia": "Comune / Provincia",
       "valoreRichiesto": "Valore richiesto",

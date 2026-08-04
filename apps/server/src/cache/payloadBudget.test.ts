@@ -69,7 +69,7 @@ describe('AreaSnapshot payload budget (10k listings, API_CONTRACT.md §3)', () =
   const omiMeta = { fetched_at: '2026-06-30T12:00:00.000Z', semestre: '20252' };
 
   it(`assembles ${LISTING_COUNT} listings into a snapshot`, () => {
-    const { snapshot } = assembleSnapshot(scope, active, archived, omiMap, scopeMeta, omiMeta);
+    const { snapshot } = assembleSnapshot(scope, active, archived, omiMap, {}, scopeMeta, omiMeta);
     const totalRows = snapshot.clusters.reduce(
       (n, c) => n + c.buckets.principali.length + c.buckets.fallimenti.length,
       0,
@@ -80,7 +80,7 @@ describe('AreaSnapshot payload budget (10k listings, API_CONTRACT.md §3)', () =
   });
 
   it(`serializes under the ${(BUDGET_BYTES_GZIPPED / 1024 / 1024).toFixed(1)} MB gzipped budget, within the latency bound`, () => {
-    const { snapshot } = assembleSnapshot(scope, active, archived, omiMap, scopeMeta, omiMeta);
+    const { snapshot } = assembleSnapshot(scope, active, archived, omiMap, {}, scopeMeta, omiMeta);
 
     const serializeStart = performance.now();
     const json = JSON.stringify(snapshot);

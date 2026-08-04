@@ -7,6 +7,7 @@ import * as omiPricesRepo from './omiPrices.js';
 import * as metaRepo from './meta.js';
 import * as runsRepo from './runs.js';
 import * as settingsRepo from './settings.js';
+import * as procedureConcorsualiRepo from './procedureConcorsuali.js';
 import { reseed, testDb } from '../testSupport/emulator.js';
 
 beforeAll(async () => {
@@ -28,6 +29,7 @@ describe('Part A repository surface is structurally read-only', () => {
     metaRepo,
     runsRepo,
     settingsRepo,
+    procedureConcorsualiRepo,
   };
   const ALLOWED_WRITE_EXPORTS = new Set(['settingsRepo.setExtractionCategories']);
 
@@ -93,6 +95,13 @@ describe('omiPricesRepo (Part A, read-only)', () => {
       'roma-roma',
     ]);
     expect(map['napoli-napoli']?.error).not.toBeNull();
+  });
+});
+
+describe('procedureConcorsualiRepo (Part A, read-only, no emulator seed fixture yet — Phase 14)', () => {
+  it('returns an empty map against a collection with no documents, never throws', async () => {
+    const map = await procedureConcorsualiRepo.getAllByKey(testDb());
+    expect(map).toEqual({});
   });
 });
 

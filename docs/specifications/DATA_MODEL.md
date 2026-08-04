@@ -7,12 +7,13 @@
 | Collection | Writer | Reader | Defined in |
 |---|---|---|---|
 | `listings`, `omi_prices`, `meta`, `runs` | scraper project only | this application | Part A |
+| `procedure_concorsuali` | scraper project only (a separate, manually-run source within it — §17) | this application | Part A §17 |
 | `settings` | this application (admin panel); the scraper's CLI wrote it as a stopgap before this app existed | scraper (at save time) + this application | Part A §7 |
 | `users`, `sessions`, `ratings`, `chat_threads` (+ subcollections), `attachments`, `user_counters`, `calendar_days`, `assignment_index`, `listing_activity`, `admin_events` | this application only | this application | Part B |
 
 Binding rules:
 
-- **This application never writes a Part A collection** except `settings/extraction_categories`. The repository layer must contain **no code path** that creates, updates, or deletes documents in `listings`, `omi_prices`, `meta`, or `runs` — the guarantee is structural, not a runtime check.
+- **This application never writes a Part A collection** except `settings/extraction_categories`. The repository layer must contain **no code path** that creates, updates, or deletes documents in `listings`, `omi_prices`, `meta`, `runs`, or `procedure_concorsuali` — the guarantee is structural, not a runtime check.
 - **Additive tolerance:** the scraper may add new optional fields to Part A documents unilaterally. This application must ignore fields it does not know — never error, never strip-and-rewrite.
 - **Renames, removals, or semantic changes** on either side of the boundary require updating both projects together.
 - **`content_hash` is scraper bookkeeping** (its delta-write digest). This application must never read, compare, or otherwise interpret it. Likewise `runs` is an operational audit trail: it may be *displayed* on admin surfaces, but no feature may *depend* on its contents.
@@ -156,6 +157,7 @@ The scraper project has committed to keeping these queries working; the applicat
 - Recent `runs` ordered by `started_at` descending.
 - `settings/extraction_categories` by id.
 - **Blocco grouping:** the four fields (`tipo_procedura`, `tribunale`, `numero`, `anno`) are **load-bearing** — the scraper will not change their semantics; grouping rules are `DOMAIN_RULES.md` §6.
+- **`procedure_concorsuali`:** the full collection, read as a lookup map, with no independent invalidation signal — full detail in §17.3.
 
 **Quota context:** this per-document contract prices a whole-set read at ~1 Firestore read per document. That is why all listing reads are funneled through the server-side snapshot cache invalidated by `meta` polling (`SPECIFICATIONS.md` §8) — the application must never let per-client traffic reach these collections.
 
@@ -281,3 +283,57 @@ Part A queries are equality-shaped and served by automatic single-field indexes 
 - `messages` (collection group): `sent_at ASC` per thread is automatic; no composite needed in v1.
 
 Any further composite Firestore names at first use; add it to the file rather than clicking it into existence.
+
+## 17. Collection `procedure_concorsuali` (Part A, added Phase 14)
+
+> Numbered last for append-only stability (every other section number is referenced throughout the codebase) — it is a **Part A** collection in every other respect: scraper-owned, read-only here, same binding rules as §1.
+
+One document per Italian insolvency procedure, written by a **separate, independent scraper source** (`portalecreditori.it`) that is part of the same scraper project as `listings`/`omi_prices` but is **not on any schedule** — unlike those two, it is refreshed only when the operator manually re-runs its crawl/export/import cycle (documented in the scraper project's own README, not this one). Treat its contents as a slow-moving, occasionally-stale reference, not a live feed: there is no `meta` document for it and no cache-invalidation signal tied to it (§8 addendum below).
+
+**Document id:** the source portal's own opaque procedure id (a short alphanumeric string, e.g. `q5KwNjWqMx`).
+
+| Field | Type | Null? | Meaning |
+|---|---|---|---|
+| `id` | string | no | Duplicated from the document id, per this project's own convention (§3.1) |
+| `nome` | string | no (may be empty) | Procedure name as published |
+| `rg` | object | yes | `{ completo, numero, numero_base, anno }` — `numero_base`/`anno` are the **join fields** (below); `null` (never partial) when the source RG didn't parse |
+| `data_dichiarazione` | string `YYYY-MM-DD` | yes | Declaration date |
+| `tipo_code` | string | yes | One-letter procedure-type code |
+| `tipo_procedura` | string | yes | Spelled-out procedure type (e.g. `"Fallimento"`) — populated only once the detail page has been read (null until then, independent of `rg`/`tribunale`) |
+| `tribunale` | object | no | `{ nome, chiave }` — `nome` as published, `chiave` a normalized comparison key (accents stripped, `"Tribunale (ordinario) di"` prefix removed, uppercased, plus a small seat-spelling override table) — the **join field** (below) |
+| `professionista` | string | yes | Appointed curatore/commissario/liquidatore |
+| `giudice_delegato` | string | yes | As published |
+| `debitore` | object | yes | `{ codice_fiscale, partita_iva, ragione_sociale, citta, indirizzo }`, every sub-field individually nullable — **personal data** for individual debtors (a natural person's codice fiscale identifies them); populated only once the detail page has been read, `null` until then (not an error state — see §17.2) |
+| `link` | string | no | Public URL of the procedure on the source portal |
+| `estratto_il` | timestamp | no | When the index row was captured |
+| `scheda_letta_il` | timestamp | yes | When the detail page (and therefore `debitore`/`tipo_procedura`) was captured; `null` means "indexed, debtor data not yet collected" |
+
+### 17.1 The join to `listings` (load-bearing)
+
+`procedure_concorsuali` is not geography-keyed like `omi_prices` — it is joined to a `listings` document **per-procedure**, the same tuple already load-bearing for blocco grouping (§8's bullet on `tipo_procedura`/`tribunale`/`numero`/`anno`), minus `tipo_procedura` (the two sources don't reliably agree on its wording, so it is excluded from the key — see `DOMAIN_RULES.md`):
+
+```
+listings.tribunale  (normalized the same way as procedure_concorsuali.tribunale.chiave)
+   + listings.numero
+   + listings.anno
+       ⋈
+procedure_concorsuali.tribunale.chiave
+   + procedure_concorsuali.rg.numero_base
+   + procedure_concorsuali.rg.anno
+```
+
+`rg.numero_base`, not `rg.numero`, is the correct field: a group-insolvency sub-procedure's `rg.numero` (e.g. `"29-1"`) carries a suffix `listings.numero` never has — only `rg.numero_base` (`"29"`) is directly comparable. The normalization function for `tribunale`/`tribunale.chiave` is specified once, in `DOMAIN_RULES.md`, and used on **both** sides of the join so PVP's occasionally fuller court-name spelling (`"Tribunale di VICENZA ex Tribunale di BASSANO DEL GRAPPA"`) and the source portal's abbreviation (`"Vicenza - ex Bassano"`) still match.
+
+A `listings` document with `tribunale`, `numero`, or `anno` null is **never joined** — same "no partial-key matching" discipline as blocco grouping (§8).
+
+### 17.2 Two independent "not yet" states (not errors)
+
+Both are legitimate, common, non-error states the UI must render as "not available" without alarming copy:
+
+- **No matching procedure at all** — most listings are not insolvency procedures with a matching entry in this collection (the source only covers ~24k of the many kinds of proceedings PVP lists). Absence of a match is the default expectation, not a gap to explain.
+- **A match exists, but `scheda_letta_il` is still null** — the procedure is indexed but its debtor details haven't been collected yet by the source scraper (a large fraction of the collection, by design — see the scraper project's own operational notes). Show what's known (`nome`, `tipo_code`, `tribunale`) and state plainly that debtor details aren't available yet, rather than treating it the same as "no match."
+
+### 17.3 Addendum to §8's read patterns
+
+- The full `procedure_concorsuali` collection, read as a lookup map keyed by the §17.1 join tuple — same shape as the `omi_prices` full-collection read, but **not scope-restricted** (a matching procedure is relevant to both `immobili` and `corporate` listings, unlike OMI which is real-estate-only).
+- **No independent cache-invalidation signal.** Unlike `listings`/`omi_prices`, there is no `meta` document for this collection, so it is refreshed exactly when a scope's snapshot rebuilds for any other reason (a `listings`/`omi_prices` change, or the max-age safety rebuild) — acceptable because the source data itself only changes when an operator manually re-runs the separate scraper's export/import cycle, on the order of days-to-weeks, not minutes.

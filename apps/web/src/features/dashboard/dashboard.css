@@ -555,6 +555,75 @@
   color: var(--color-text-muted);
 }
 
+/* Procedura concorsuale panel (DOMAIN_RULES.md §12, Phase 14) — same card
+   treatment as .omi-panel*, its own class prefix. */
+.procedura-panel {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-soft);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.procedura-panel-title {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-body);
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--color-accent-strong);
+}
+
+.procedura-panel-nome {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.procedura-panel-facts {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.procedura-panel-unavailable {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.procedura-panel-debitore {
+  margin: var(--space-2) 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2) var(--space-4);
+}
+
+.procedura-panel-debitore dt {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--label-tracking);
+}
+
+.procedura-panel-debitore dd {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.procedura-panel-link {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-accent-strong);
+  text-decoration: underline;
+  width: fit-content;
+}
+
 /* Per-table toolbar (UI §4.2, Phase 13): labeled filter fields, then the
    active-chip footer with the live count. */
 .dashboard-toolbar {

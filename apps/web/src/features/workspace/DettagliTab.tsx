@@ -19,6 +19,7 @@ import {
   NOT_AVAILABLE,
 } from '../dashboard/DataTable/formatting.js';
 import { OmiFacts } from '../dashboard/OmiFacts.js';
+import { ProceduraConcorsualeFacts } from '../dashboard/ProceduraConcorsualeFacts.js';
 import type { ListingSearch } from '../dashboard/urlState.js';
 import { RelatedLots } from './RelatedLots.js';
 
@@ -132,6 +133,13 @@ export function DettagliTab({
         <div className="omi-panel" role="status">
           <h3 className="omi-panel-title">{t('dashboard:omi.title')}</h3>
           <OmiFacts data={detail.omi} />
+        </div>
+      ) : null}
+
+      {detail.procedura_concorsuale ? (
+        <div className="procedura-panel" role="status">
+          <h3 className="procedura-panel-title">{t('dashboard:proceduraConcorsuale.title')}</h3>
+          <ProceduraConcorsualeFacts data={detail.procedura_concorsuale} />
         </div>
       ) : null}
     </div>

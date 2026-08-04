@@ -2,7 +2,7 @@
 // stored field (untrimmed descrizione), its classification, blocco siblings,
 // OMI context (§9), current rating, thread summary, and header facts.
 import { z } from 'zod';
-import { PriceBandSchema, OmiEntrySchema } from './snapshot.js';
+import { PriceBandSchema, OmiEntrySchema, ProceduraConcorsualeEntrySchema } from './snapshot.js';
 import { RatingSchema } from '../partB/ratings.js';
 
 export const ClassificationSchema = z.object({
@@ -58,6 +58,7 @@ export const ListingDetailSchema = z.object({
     .object({ key: z.string(), count: z.number().int(), siblings: z.array(BloccoSiblingSchema) })
     .nullable(),
   omi: OmiEntrySchema.nullable(),
+  procedura_concorsuale: ProceduraConcorsualeEntrySchema.nullable(),
   rating: RatingSchema.nullable(),
   thread: ThreadSummarySchema,
 });

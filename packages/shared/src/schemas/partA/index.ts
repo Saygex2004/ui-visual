@@ -3,3 +3,4 @@ export * from './omiPrice.js';
 export * from './meta.js';
 export * from './run.js';
 export * from './extractionCategories.js';
+export * from './proceduraConcorsuale.js';
