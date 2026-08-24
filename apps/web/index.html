@@ -9,6 +9,11 @@
          which iOS renders as navy-on-BLACK on the home screen. These are
          white-on-navy with a solid background, so one artwork serves the
          browser tab and the iPhone home screen alike. -->
+    <!-- /favicon.ico is listed first and exists as a real file on purpose:
+         browsers request that exact path on their own, tag or no tag, and the
+         SPA rewrite would otherwise answer it with 200 + text/html — a valid
+         response that some browsers cache, and a confusing one to debug. -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
