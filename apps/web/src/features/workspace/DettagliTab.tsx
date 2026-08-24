@@ -22,6 +22,7 @@ import { OmiFacts } from '../dashboard/OmiFacts.js';
 import { ProceduraConcorsualeFacts } from '../dashboard/ProceduraConcorsualeFacts.js';
 import type { ListingSearch } from '../dashboard/urlState.js';
 import { RelatedLots } from './RelatedLots.js';
+import { DocumentiPanel } from './DocumentiPanel.js';
 
 export function DettagliTab({
   detail,
@@ -126,6 +127,8 @@ export function DettagliTab({
           onProceed={() => window.open(detail.link, '_blank', 'noopener,noreferrer')}
         />
       ) : null}
+
+      <DocumentiPanel allegati={detail.allegati} />
 
       {/* Sits directly under "Vai all'annuncio", ahead of related lots and
           the OMI panel: the debtor's identity is read as part of judging the

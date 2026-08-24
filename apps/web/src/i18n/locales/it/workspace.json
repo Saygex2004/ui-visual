@@ -45,5 +45,17 @@
       "listing_archived": "il listing è stato archiviato (rilevato dal sistema)",
       "listing_reactivated": "il listing è tornato attivo (rilevato dal sistema)"
     }
+  },
+  "documenti": {
+    "title_one": "Documento allegato",
+    "title_other": "Documenti allegati ({{count}})",
+    "tipo": {
+      "perizia": "Perizia",
+      "avvisoVendita": "Avviso di vendita",
+      "ordinanza": "Ordinanza",
+      "altro": "Altro documento",
+      "stima": "Stima",
+      "provvedimento": "Provvedimento"
+    }
   }
 }

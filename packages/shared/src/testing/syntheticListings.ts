@@ -83,6 +83,9 @@ export function buildSyntheticListings(count: number, seed: string): Listing[] {
       link: `https://pvp.giustizia.it/lotto/${900_000 + i}`,
       disponibilita: 'Non specificato',
       descrizione: REALISTIC_DESCRIZIONE,
+      // Attachments are detail-only (never in ListingRow), so they add
+      // nothing to the snapshot size this fixture exists to measure.
+      allegati: [],
       archived_at: archived ? '2026-05-01T00:00:00.000Z' : null,
       first_seen_at: '2026-01-01T00:00:00.000Z',
       last_seen_at: '2026-01-01T00:00:00.000Z',

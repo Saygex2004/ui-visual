@@ -25,6 +25,7 @@ function baseListing(overrides: Partial<Listing> = {}): Listing {
     link: 'https://example.test/1',
     disponibilita: 'Libero',
     descrizione: '',
+    allegati: [],
     archived_at: null,
     first_seen_at: '2026-01-01T00:00:00.000Z',
     last_seen_at: '2026-01-01T00:00:00.000Z',
