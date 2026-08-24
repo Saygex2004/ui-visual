@@ -127,19 +127,22 @@ export function DettagliTab({
         />
       ) : null}
 
+      {/* Sits directly under "Vai all'annuncio", ahead of related lots and
+          the OMI panel: the debtor's identity is read as part of judging the
+          listing itself, not as trailing context (owner's call). */}
+      {detail.procedura_concorsuale ? (
+        <div className="procedura-panel" role="status">
+          <h3 className="procedura-panel-title">{t('dashboard:proceduraConcorsuale.title')}</h3>
+          <ProceduraConcorsualeFacts data={detail.procedura_concorsuale} />
+        </div>
+      ) : null}
+
       {detail.blocco ? <RelatedLots blocco={detail.blocco} area={area} search={search} /> : null}
 
       {detail.omi ? (
         <div className="omi-panel" role="status">
           <h3 className="omi-panel-title">{t('dashboard:omi.title')}</h3>
           <OmiFacts data={detail.omi} />
-        </div>
-      ) : null}
-
-      {detail.procedura_concorsuale ? (
-        <div className="procedura-panel" role="status">
-          <h3 className="procedura-panel-title">{t('dashboard:proceduraConcorsuale.title')}</h3>
-          <ProceduraConcorsualeFacts data={detail.procedura_concorsuale} />
         </div>
       ) : null}
     </div>
