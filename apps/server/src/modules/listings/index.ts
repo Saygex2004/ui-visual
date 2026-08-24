@@ -96,6 +96,7 @@ export function registerListingsModule(app: FastifyInstance, deps: ListingsModul
       link: listing.link,
       disponibilita: listing.disponibilita,
       descrizione: listing.descrizione, // full, untruncated (UI §4.5)
+      allegati: listing.allegati ?? [],
       archived_at: listing.archived_at,
       classification: {
         area: classification.area,

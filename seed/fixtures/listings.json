@@ -22,7 +22,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1001"
+    "content_hash": "hash-1001",
+    "allegati": []
   },
   {
     "id": 1002,
@@ -47,7 +48,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1002"
+    "content_hash": "hash-1002",
+    "allegati": []
   },
   {
     "id": 1003,
@@ -72,7 +74,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1003"
+    "content_hash": "hash-1003",
+    "allegati": []
   },
   {
     "id": 1004,
@@ -97,7 +100,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1004"
+    "content_hash": "hash-1004",
+    "allegati": []
   },
   {
     "id": 1005,
@@ -122,7 +126,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1005"
+    "content_hash": "hash-1005",
+    "allegati": []
   },
   {
     "id": 1006,
@@ -147,7 +152,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1006"
+    "content_hash": "hash-1006",
+    "allegati": []
   },
   {
     "id": 1007,
@@ -172,7 +178,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1007"
+    "content_hash": "hash-1007",
+    "allegati": []
   },
   {
     "id": 1009,
@@ -197,7 +204,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1009"
+    "content_hash": "hash-1009",
+    "allegati": []
   },
   {
     "id": 1010,
@@ -222,7 +230,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1010"
+    "content_hash": "hash-1010",
+    "allegati": []
   },
   {
     "id": 1008,
@@ -247,7 +256,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1008"
+    "content_hash": "hash-1008",
+    "allegati": []
   },
   {
     "id": 1011,
@@ -272,7 +282,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1011"
+    "content_hash": "hash-1011",
+    "allegati": []
   },
   {
     "id": 1012,
@@ -297,7 +308,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1012"
+    "content_hash": "hash-1012",
+    "allegati": []
   },
   {
     "id": 1013,
@@ -322,7 +334,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1013"
+    "content_hash": "hash-1013",
+    "allegati": []
   },
   {
     "id": 1014,
@@ -347,7 +360,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1014"
+    "content_hash": "hash-1014",
+    "allegati": []
   },
   {
     "id": 1015,
@@ -372,7 +386,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1015"
+    "content_hash": "hash-1015",
+    "allegati": []
   },
   {
     "id": 1016,
@@ -397,7 +412,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1016"
+    "content_hash": "hash-1016",
+    "allegati": []
   },
   {
     "id": 1017,
@@ -422,7 +438,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1017"
+    "content_hash": "hash-1017",
+    "allegati": []
   },
   {
     "id": 1020,
@@ -447,7 +464,15 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1020"
+    "content_hash": "hash-1020",
+    "allegati": [
+      {
+        "nome": "Stima immobile.pdf",
+        "tipo": "STIMA",
+        "dimensione": 245760,
+        "url": "https://resource-pvp.giustizia.it/allegati/1020/Stima%20immobile.pdf?versionId=seed-5"
+      }
+    ]
   },
   {
     "id": 1021,
@@ -472,7 +497,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1021"
+    "content_hash": "hash-1021",
+    "allegati": []
   },
   {
     "id": 1030,
@@ -497,7 +523,33 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1030"
+    "content_hash": "hash-1030",
+    "allegati": [
+      {
+        "nome": "Perizia Completa_EP.pdf",
+        "tipo": "PERIZ",
+        "dimensione": 167305,
+        "url": "https://resource-pvp.giustizia.it/allegati/1030/Perizia%20Completa_EP.pdf?versionId=seed-1"
+      },
+      {
+        "nome": "avviso-di-vendita-1.pdf",
+        "tipo": "AVEND",
+        "dimensione": 393608,
+        "url": "https://resource-pvp.giustizia.it/allegati/1030/avviso-di-vendita-1.pdf?versionId=seed-2"
+      },
+      {
+        "nome": "Relazione fotografica completa.pdf",
+        "tipo": "ALTRO",
+        "dimensione": 1179648,
+        "url": "https://resource-pvp.giustizia.it/allegati/1030/Relazione%20fotografica%20completa.pdf?versionId=seed-3"
+      },
+      {
+        "nome": "PROVV. DI NOMINA NOTAIO.pdf",
+        "tipo": "ORDIN",
+        "dimensione": 93184,
+        "url": "https://resource-pvp.giustizia.it/allegati/1030/PROVV.%20DI%20NOMINA%20NOTAIO.pdf?versionId=seed-4"
+      }
+    ]
   },
   {
     "id": 1031,
@@ -522,7 +574,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1031"
+    "content_hash": "hash-1031",
+    "allegati": []
   },
   {
     "id": 1032,
@@ -547,7 +600,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1032"
+    "content_hash": "hash-1032",
+    "allegati": []
   },
   {
     "id": 1033,
@@ -572,7 +626,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1033"
+    "content_hash": "hash-1033",
+    "allegati": []
   },
   {
     "id": 1034,
@@ -597,7 +652,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1034"
+    "content_hash": "hash-1034",
+    "allegati": []
   },
   {
     "id": 1040,
@@ -622,7 +678,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1040"
+    "content_hash": "hash-1040",
+    "allegati": []
   },
   {
     "id": 1050,
@@ -647,7 +704,8 @@
     "archived_at": "2026-05-01T00:00:00.000Z",
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1050"
+    "content_hash": "hash-1050",
+    "allegati": []
   },
   {
     "id": 1051,
@@ -672,7 +730,8 @@
     "archived_at": "2026-05-02T00:00:00.000Z",
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1051"
+    "content_hash": "hash-1051",
+    "allegati": []
   },
   {
     "id": 1055,
@@ -697,7 +756,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1055"
+    "content_hash": "hash-1055",
+    "allegati": []
   },
   {
     "id": 1060,
@@ -722,7 +782,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1060"
+    "content_hash": "hash-1060",
+    "allegati": []
   },
   {
     "id": 1061,
@@ -747,7 +808,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-1061"
+    "content_hash": "hash-1061",
+    "allegati": []
   },
   {
     "id": 2001,
@@ -772,7 +834,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-2001"
+    "content_hash": "hash-2001",
+    "allegati": []
   },
   {
     "id": 2002,
@@ -797,7 +860,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-2002"
+    "content_hash": "hash-2002",
+    "allegati": []
   },
   {
     "id": 2003,
@@ -822,7 +886,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-2003"
+    "content_hash": "hash-2003",
+    "allegati": []
   },
   {
     "id": 2004,
@@ -847,7 +912,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-2004"
+    "content_hash": "hash-2004",
+    "allegati": []
   },
   {
     "id": 2005,
@@ -872,7 +938,8 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-2005"
+    "content_hash": "hash-2005",
+    "allegati": []
   },
   {
     "id": 2006,
@@ -897,6 +964,7 @@
     "archived_at": null,
     "first_seen_at": "2026-07-01T08:00:00.000Z",
     "last_seen_at": "2026-07-01T08:00:00.000Z",
-    "content_hash": "hash-2006"
+    "content_hash": "hash-2006",
+    "allegati": []
   }
 ]

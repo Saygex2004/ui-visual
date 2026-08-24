@@ -11,6 +11,10 @@ export default tseslint.config(
   {
     ignores: [
       '**/dist/**',
+      // Built SPA copied here by `deploy.sh hosting`; git-ignored but present
+      // on disk after any deploy, and minified bundles produce thousands of
+      // meaningless lint errors if walked.
+      'firebase/hosting-dist/**',
       '**/node_modules/**',
       '**/coverage/**',
       '**/*.gen.ts',

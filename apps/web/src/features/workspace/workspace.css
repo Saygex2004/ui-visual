@@ -283,3 +283,94 @@
     padding-right: var(--space-4);
   }
 }
+
+/* Lot documents (DATA_MODEL.md §3.5): perizia, avviso di vendita, ordinanze.
+   A plain list of download rows rather than a tinted card — these are
+   actions, and giving them the same card treatment as the OMI/procedura
+   context panels would read as "more context to skim" instead. */
+.documenti-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.documenti-panel-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--label-size);
+  font-weight: var(--label-weight);
+  letter-spacing: var(--label-tracking);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.documenti-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.documenti-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.documenti-item:hover {
+  border-color: var(--color-accent-strong);
+}
+
+.documenti-item-icon {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.documenti-item-link {
+  color: var(--color-text-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.documenti-item-link:hover {
+  text-decoration: underline;
+}
+
+.documenti-item-link:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.documenti-item-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.documenti-item-download {
+  color: var(--color-accent-strong);
+  flex-shrink: 0;
+}
+
+/* Narrow screens: the label/size drops under the filename rather than
+   squeezing it to a few characters. */
+@media (max-width: 640px) {
+  .documenti-item {
+    grid-template-columns: auto 1fr auto;
+  }
+  .documenti-item-meta {
+    grid-column: 2 / -1;
+    white-space: normal;
+  }
+}

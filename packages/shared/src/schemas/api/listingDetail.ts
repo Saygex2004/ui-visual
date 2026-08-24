@@ -3,6 +3,7 @@
 // OMI context (§9), current rating, thread summary, and header facts.
 import { z } from 'zod';
 import { PriceBandSchema, OmiEntrySchema, ProceduraConcorsualeEntrySchema } from './snapshot.js';
+import { AllegatoSchema } from '../partA/listing.js';
 import { RatingSchema } from '../partB/ratings.js';
 
 export const ClassificationSchema = z.object({
@@ -51,6 +52,9 @@ export const ListingDetailSchema = z.object({
   link: z.string(),
   disponibilita: z.string(),
   descrizione: z.string(),
+  // Detail-only by design: the documents are for reading a single lot, and
+  // keeping them out of ListingRow leaves the snapshot payload untouched.
+  allegati: z.array(AllegatoSchema).default([]),
   archived_at: z.string().nullable(),
 
   classification: ClassificationSchema,
