@@ -11,15 +11,12 @@ export interface PraticheFilters {
   portafoglio: string;
   /** A specific stage, or '' for all. */
   stato: StatoPratica | '';
-  /** 'tutte' | 'si' | 'no' — extinguished position. */
-  estinto: 'tutte' | 'si' | 'no';
 }
 
 export const EMPTY_FILTERS: PraticheFilters = {
   q: '',
   portafoglio: '',
   stato: '',
-  estinto: 'tutte',
 };
 
 // ---- money ----
@@ -67,8 +64,6 @@ export function filterPratiche(
   return pratiche.filter((p) => {
     if (filters.portafoglio && (p.portafoglio ?? '') !== filters.portafoglio) return false;
     if (filters.stato && p.stato !== filters.stato) return false;
-    if (filters.estinto === 'si' && !p.estinto) return false;
-    if (filters.estinto === 'no' && p.estinto) return false;
     if (needle && !haystack(p, nomeUtente).includes(needle)) return false;
     return true;
   });
@@ -123,7 +118,6 @@ export const CSV_HEADERS = [
   'Numero pratica',
   'Portafoglio',
   'Stato',
-  'Estinto',
   'N. scatole',
   'Data richiesta',
   'Data spedizione',
@@ -153,7 +147,6 @@ export function praticheToCsv(
       p.numero_pratica,
       p.portafoglio ?? '',
       statoLabel(p.stato),
-      p.estinto ? 'Sì' : 'No',
       p.n_scatole ?? '',
       csvDate(p.data_richiesta),
       csvDate(p.data_spedizione),

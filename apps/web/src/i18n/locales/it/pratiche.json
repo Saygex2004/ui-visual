@@ -7,7 +7,6 @@
     "numeroPratica": "Numero pratica",
     "portafoglio": "Portafoglio",
     "stato": "Stato",
-    "estinto": "Estinto",
     "scatole": "N. scatole",
     "note": "Note e riferimenti",
     "ordinatoDa": "Ordinata da",
@@ -25,9 +24,7 @@
     "portafoglioLabel": "Filtra per portafoglio",
     "allPortafogli": "Tutti i portafogli",
     "statoLabel": "Filtra per stato",
-    "allStati": "Tutti gli stati",
-    "estintoLabel": "Filtra per estinto",
-    "allEstinto": "Tutte"
+    "allStati": "Tutti gli stati"
   },
   "actions": {
     "new": "Nuova pratica",

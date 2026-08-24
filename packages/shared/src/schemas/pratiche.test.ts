@@ -10,7 +10,6 @@ describe('PraticaInputSchema (creation)', () => {
   it('fills the documented defaults for everything not supplied', () => {
     const p = PraticaInputSchema.parse(MINIMO);
     expect(p.stato).toBe('richiesto'); // a file exists because it was asked for
-    expect(p.estinto).toBe(false);
     expect(p.portafoglio).toBeNull();
     expect(p.data_spedizione).toBeNull();
     expect(p.costo_spedizione_cent).toBeNull();
@@ -63,10 +62,10 @@ describe('PraticaPatchSchema', () => {
 
   it('leaves an untouched field absent even when other fields are sent', () => {
     const patch = PraticaPatchSchema.parse({
-      estinto: true,
+      portafoglio: 'Augusto',
       data_consegna_effettiva: '2026-08-24',
     });
-    expect(Object.keys(patch).sort()).toEqual(['data_consegna_effettiva', 'estinto']);
+    expect(Object.keys(patch).sort()).toEqual(['data_consegna_effettiva', 'portafoglio']);
     expect('data_spedizione' in patch).toBe(false);
   });
 

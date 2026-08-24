@@ -139,14 +139,6 @@ export function PraticaWindow({
                       ) : null}
                     </dd>
                   </div>
-                  <div className="pratiche-window-row">
-                    <dt>{t('fields.estinto')}</dt>
-                    <dd>
-                      <Badge variant={pratica.estinto ? 'success' : 'neutral'}>
-                        {pratica.estinto ? t('common.si') : t('common.no')}
-                      </Badge>
-                    </dd>
-                  </div>
                   <Riga label={t('fields.scatole')} value={show(pratica.n_scatole)} />
                   <Riga
                     label={t('fields.ordinatoDa')}

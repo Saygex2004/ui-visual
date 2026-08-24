@@ -20,7 +20,6 @@ function pratica(over: Partial<Pratica> = {}): Pratica {
     numero_pratica: '163354',
     portafoglio: 'Augusto',
     stato: 'richiesto',
-    estinto: false,
     n_scatole: '3',
     note: null,
     ordinato_da: null,
@@ -161,33 +160,12 @@ describe('filterPratiche', () => {
     expect(filterPratiche(all, { ...EMPTY_FILTERS, stato: '' })).toHaveLength(3);
   });
 
-  it('filters extinguished independently of the stage', () => {
-    // An extinguished position can still have its file in transit — the two
-    // must not imply each other.
-    const all = [
-      pratica({ id: 'a', estinto: true, stato: 'spedito' }),
-      pratica({ id: 'b', estinto: false, stato: 'spedito' }),
-    ];
-    expect(filterPratiche(all, { ...EMPTY_FILTERS, estinto: 'si' }).map((p) => p.id)).toEqual([
-      'a',
-    ]);
-    expect(filterPratiche(all, { ...EMPTY_FILTERS, estinto: 'no' }).map((p) => p.id)).toEqual([
-      'b',
-    ]);
-    expect(filterPratiche(all, { ...EMPTY_FILTERS, stato: 'spedito' })).toHaveLength(2);
-  });
-
   it('combines filters conjunctively', () => {
     const all = [
       pratica({ id: 'a', portafoglio: 'Augusto', stato: 'spedito', ndg: 'X1' }),
       pratica({ id: 'b', portafoglio: 'Augusto', stato: 'richiesto', ndg: 'X1' }),
     ];
-    const got = filterPratiche(all, {
-      q: 'X1',
-      portafoglio: 'Augusto',
-      stato: 'spedito',
-      estinto: 'tutte',
-    });
+    const got = filterPratiche(all, { q: 'X1', portafoglio: 'Augusto', stato: 'spedito' });
     expect(got.map((p) => p.id)).toEqual(['a']);
   });
 });
@@ -240,11 +218,6 @@ describe('praticheToCsv', () => {
     // Not the stored form: an ISO string often lands in Excel as text and
     // stops sorting as a date.
     expect(csv).not.toContain('2026-08-21');
-  });
-
-  it('writes the extinguished flag as Sì/No, not true/false', () => {
-    expect(praticheToCsv([pratica({ estinto: true })])).toContain(';Sì;');
-    expect(praticheToCsv([pratica({ estinto: false })])).toContain(';No;');
   });
 
   it('quotes a field containing the separator, so it stays one cell', () => {

@@ -156,18 +156,6 @@ export function PraticheScreen() {
             </option>
           ))}
         </SelectField>
-        <SelectField
-          label={t('filters.estintoLabel')}
-          id="filtro-estinto"
-          value={filters.estinto}
-          onChange={(e) =>
-            setFilters((f) => ({ ...f, estinto: e.target.value as PraticheFilters['estinto'] }))
-          }
-        >
-          <option value="tutte">{t('filters.allEstinto')}</option>
-          <option value="si">{t('common.si')}</option>
-          <option value="no">{t('common.no')}</option>
-        </SelectField>
       </div>
 
       {isLoading ? <StatusDisplay variant="loading" message={t('states.loading')} /> : null}
@@ -198,7 +186,6 @@ export function PraticheScreen() {
                 <th scope="col">{t('fields.consegnaEffettiva')}</th>
                 <th scope="col">{t('fields.costoSpedizione')}</th>
                 <th scope="col">{t('fields.scatole')}</th>
-                <th scope="col">{t('fields.estinto')}</th>
               </tr>
             </thead>
             <tbody>
@@ -234,11 +221,6 @@ export function PraticheScreen() {
                       : `€ ${formatEuro(p.costo_spedizione_cent)}`}
                   </td>
                   <td>{p.n_scatole ?? '—'}</td>
-                  <td>
-                    <Badge variant={p.estinto ? 'success' : 'neutral'}>
-                      {p.estinto ? t('common.si') : t('common.no')}
-                    </Badge>
-                  </td>
                 </tr>
               ))}
             </tbody>

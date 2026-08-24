@@ -35,7 +35,6 @@ export function PraticaForm({
   const [numeroPratica, setNumeroPratica] = useState(initial?.numero_pratica ?? '');
   const [portafoglio, setPortafoglio] = useState(initial?.portafoglio ?? '');
   const [stato, setStato] = useState<StatoPratica>(initial?.stato ?? 'richiesto');
-  const [estinto, setEstinto] = useState(initial?.estinto ?? false);
   const [scatole, setScatole] = useState(initial?.n_scatole ?? '');
   const [note, setNote] = useState(initial?.note ?? '');
   const [ordinatoDa, setOrdinatoDa] = useState(initial?.ordinato_da ?? '');
@@ -56,7 +55,6 @@ export function PraticaForm({
       numero_pratica: numeroPratica.trim(),
       portafoglio: portafoglio.trim() || null,
       stato,
-      estinto,
       n_scatole: scatole.trim() || null,
       note: note.trim() || null,
       ordinato_da: ordinatoDa || null,
@@ -134,15 +132,6 @@ export function PraticaForm({
               {u.username}
             </option>
           ))}
-        </SelectField>
-        <SelectField
-          label={t('fields.estinto')}
-          id="pratica-estinto"
-          value={estinto ? 'si' : 'no'}
-          onChange={(e) => setEstinto(e.target.value === 'si')}
-        >
-          <option value="no">{t('common.no')}</option>
-          <option value="si">{t('common.si')}</option>
         </SelectField>
       </div>
 

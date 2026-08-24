@@ -60,9 +60,6 @@ const CampiPratica = z.object({
   portafoglio: optionalText,
   /** Where the file is in its journey. */
   stato: StatoPraticaSchema,
-  /** Whether the position is extinguished. Independent of `stato` — an
-   *  extinguished position can still have its file in transit. */
-  estinto: z.boolean(),
   /** Which physical box(es) hold the file. Free text, not a number: a single
    *  file can span several boxes ("3, 7") and a numeric field could only ever
    *  record one of them. */
@@ -100,7 +97,6 @@ const CampiPratica = z.object({
 export const PraticaInputSchema = CampiPratica.extend({
   portafoglio: optionalText.default(null),
   stato: StatoPraticaSchema.default('richiesto'),
-  estinto: z.boolean().default(false),
   n_scatole: optionalText.default(null),
   note: optionalText.default(null),
   ordinato_da: z.string().trim().nullable().default(null),

@@ -25,7 +25,6 @@ const NUOVA = {
   numero_pratica: '163354',
   portafoglio: 'Augusto',
   stato: 'spedito',
-  estinto: false,
   n_scatole: '3, 7',
   note: 'Rinnovo ipoteca',
   ordinato_da: null,
@@ -156,11 +155,10 @@ describe('pratiche module (HTTP, over the emulator)', () => {
       method: 'PATCH',
       url: `/api/pratiche/${id}`,
       headers: { cookie: adminCookie },
-      payload: { estinto: true, stato: 'consegnato', data_consegna_effettiva: '2026-08-24' },
+      payload: { stato: 'consegnato', data_consegna_effettiva: '2026-08-24' },
     });
     expect(patched.statusCode).toBe(200);
     const p = patched.json().pratica;
-    expect(p.estinto).toBe(true);
     expect(p.stato).toBe('consegnato');
     expect(p.data_consegna_effettiva).toBe('2026-08-24');
     expect(p.data_spedizione).toBe('2026-08-21'); // untouched by a partial patch
@@ -178,7 +176,7 @@ describe('pratiche module (HTTP, over the emulator)', () => {
           method: 'PATCH',
           url: '/api/pratiche/non-esiste',
           headers: { cookie: adminCookie },
-          payload: { estinto: true },
+          payload: { stato: 'consegnato' },
         })
       ).statusCode,
     ).toBe(404);
