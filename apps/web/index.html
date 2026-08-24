@@ -4,7 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Duepuntozero Aste Dashboard</title>
-    <link rel="icon" type="image/png" href="/logo.png" />
+    <!-- Icons are their own assets, deliberately not /logo.png: that file is
+         also the in-app header mark (Shell.tsx) and is navy-on-transparent,
+         which iOS renders as navy-on-BLACK on the home screen. These are
+         white-on-navy with a solid background, so one artwork serves the
+         browser tab and the iPhone home screen alike. -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Label under the iPhone home-screen icon. Without this iOS falls back
+         to <title>, which is too long and gets truncated mid-word. -->
+    <meta name="apple-mobile-web-app-title" content="Duepuntozero" />
     <script>
       (function () {
         // No-FOUC theme bootstrap (Phase 10): runs before any stylesheet
