@@ -18,6 +18,7 @@ import { AREA_SLUGS, type AreaSlug, type MeResponse } from '@pvp/shared';
 import { LoginScreen } from '../features/auth/LoginScreen.js';
 import { AccountsScreen } from '../features/admin/AccountsScreen.js';
 import { CategoriesScreen } from '../features/admin/CategoriesScreen.js';
+import { PraticheScreen } from '../features/pratiche/PraticheScreen.js';
 import { AdminActivityScreen } from '../features/admin/AdminActivityScreen.js';
 import { CalendarAssignmentScreen } from '../features/admin/CalendarAssignmentScreen.js';
 import { LandingScreen } from '../features/dashboard/LandingScreen.js';
@@ -133,6 +134,16 @@ const adminRoute = createRoute({
   component: AccountsScreen,
 });
 
+// Pratiche: admin-only like the /admin/* routes, but deliberately at the top
+// level — it is a view chosen from the landing screen, not an administration
+// screen, and nesting it under /admin would say the opposite.
+const praticheRoute = createRoute({
+  getParentRoute: () => protectedRoute,
+  path: '/pratiche',
+  beforeLoad: requireAdmin,
+  component: PraticheScreen,
+});
+
 const adminCategoriesRoute = createRoute({
   getParentRoute: () => protectedRoute,
   path: '/admin/categorie',
@@ -186,6 +197,7 @@ const routeTree = rootRoute.addChildren([
     indexRoute,
     areaRoute.addChildren([listingRoute]),
     adminRoute,
+    praticheRoute,
     adminCategoriesRoute,
     adminActivityRoute,
     adminCalendarRoute,

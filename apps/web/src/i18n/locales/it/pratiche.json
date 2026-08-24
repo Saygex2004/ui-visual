@@ -1,0 +1,60 @@
+{
+  "title": "Pratiche",
+  "subtitle": "Registro dei fascicoli archiviati: inserimento, ricerca ed estrazione.",
+  "tableCaption": "Elenco delle pratiche archiviate",
+  "fields": {
+    "ndg": "NDG",
+    "numeroPratica": "Numero pratica",
+    "veicolo": "Veicolo",
+    "estinto": "Estinto",
+    "scatola": "N. scatola",
+    "plurima": "Plurima/Riscontro",
+    "note": "Note e riferimenti",
+    "ordinatoDa": "Ordinata da",
+    "ordinatoDaNessuno": "Nessuno"
+  },
+  "filters": {
+    "searchLabel": "Cerca fra le pratiche",
+    "searchPlaceholder": "Cerca per NDG, numero, note…",
+    "allVehicles": "Tutti i veicoli",
+    "allStates": "Tutte",
+    "veicoloLabel": "Filtra per veicolo",
+    "estintoLabel": "Filtra per stato"
+  },
+  "actions": {
+    "new": "Nuova pratica",
+    "export": "Scarica ({{count}})"
+  },
+  "form": {
+    "create": "Crea pratica",
+    "save": "Salva",
+    "saving": "Salvataggio…",
+    "cancel": "Annulla"
+  },
+  "window": {
+    "title": "Pratica {{numero}}",
+    "close": "Chiudi",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "deleteConfirmTitle": "Eliminare la pratica?",
+    "deleteConfirmBody": "La pratica {{numero}} verrà eliminata definitivamente. L'operazione non è reversibile.",
+    "createdAt": "Creata il {{when}}",
+    "updatedAt": "modificata il {{when}}"
+  },
+  "states": {
+    "loading": "Caricamento delle pratiche…",
+    "loadError": "Non è stato possibile caricare le pratiche.",
+    "empty": "Nessuna pratica inserita. Comincia con «Nuova pratica».",
+    "noMatches": "Nessuna pratica corrisponde ai filtri impostati."
+  },
+  "errors": {
+    "createFailed": "Non è stato possibile creare la pratica.",
+    "saveFailed": "Non è stato possibile salvare le modifiche.",
+    "deleteFailed": "Non è stato possibile eliminare la pratica."
+  },
+  "common": {
+    "si": "Sì",
+    "no": "No",
+    "assente": "—"
+  }
+}

@@ -6,9 +6,10 @@
 // "coming soon" placeholders); the grid is ready for future cards.
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
-import { ArrowRight, Building2, Coins } from 'lucide-react';
+import { ArrowRight, Building2, Coins, FolderArchive } from 'lucide-react';
 import type { AreaSlug } from '@pvp/shared';
 import { Badge } from '../../components/Badge.js';
+import { useMe } from '../auth/hooks.js';
 import { useAreaSnapshot } from './hooks.js';
 import { formatTimestamp } from './DataTable/formatting.js';
 import './dashboard.css';
@@ -35,6 +36,12 @@ const AREAS: {
 
 export function LandingScreen() {
   const { t } = useTranslation('dashboard');
+  // Pratiche is an internal archive register, not an auction area: it gets a
+  // card here because this is where a view is chosen, but it is admin-only and
+  // has no snapshot, so it renders separately from the AREAS loop rather than
+  // being bent into an AreaSlug it would never satisfy.
+  const { data: me } = useMe();
+  const isAdmin = me?.user.role === 'admin';
   const immobili = useAreaSnapshot('immobili');
   const crediti = useAreaSnapshot('crediti');
   const snapshots = { immobili, crediti } as const;
@@ -94,6 +101,25 @@ export function LandingScreen() {
             </Link>
           );
         })}
+        {isAdmin ? (
+          <Link to="/pratiche" className="landing-option">
+            <span className="landing-option-top">
+              <span className="landing-option-icon landing-option-icon-pratiche">
+                <FolderArchive aria-hidden="true" size={22} />
+              </span>
+              <Badge variant="accent">{t('landing.adminBadge')}</Badge>
+            </span>
+            <span className="landing-option-title">{t('landing.praticheTitle')}</span>
+            <span className="landing-option-description">{t('landing.praticheDescription')}</span>
+            <span className="landing-option-footer">
+              <span className="landing-option-stat" />
+              <span className="landing-option-cta">
+                {t('landing.openCta')}
+                <ArrowRight aria-hidden="true" size={14} />
+              </span>
+            </span>
+          </Link>
+        ) : null}
       </div>
     </div>
   );

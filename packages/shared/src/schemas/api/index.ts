@@ -7,3 +7,4 @@ export * from './activity.js';
 export * from './chat.js';
 export * from './calendar.js';
 export * from './admin.js';
+export * from './pratiche.js';

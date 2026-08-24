@@ -21,3 +21,4 @@ export * as chatRepo from './chat.js';
 export * as userCountersRepo from './userCounters.js';
 export * as attachmentsRepo from './attachments.js';
 export * as calendarRepo from './calendar.js';
+export * as praticheRepo from './pratiche.js';

@@ -15,6 +15,7 @@ import { registerAuthPlugin } from './plugins/auth.js';
 import { registerAuthModule } from './modules/auth/index.js';
 import { registerAdminModule } from './modules/admin/index.js';
 import { registerSettingsModule } from './modules/settings/index.js';
+import { registerPraticheModule } from './modules/pratiche/index.js';
 import { registerRatingsModule } from './modules/ratings/index.js';
 import { registerActivityModule } from './modules/activity/index.js';
 import { registerChatModule } from './modules/chat/index.js';
@@ -96,6 +97,7 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
         registerAdminCalendarModule(instance, { db });
         registerCalendarModule(instance, { db });
         registerSettingsModule(instance, { db, cache: primedCache });
+        registerPraticheModule(instance, { db });
         registerRatingsModule(instance, { db });
         registerActivityModule(instance, { db });
         registerListingsModule(instance, { cache: primedCache, db });

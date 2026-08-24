@@ -10,7 +10,10 @@
     "immobiliTitle": "Cluster Immobiliari",
     "immobiliDescription": "Aste immobiliari, organizzate per cluster di rischio geografico.",
     "creditiTitle": "Cluster Crediti",
-    "creditiDescription": "Aste di quote societarie e crediti ceduti da procedure giudiziarie."
+    "creditiDescription": "Aste di quote societarie e crediti ceduti da procedure giudiziarie.",
+    "praticheTitle": "Pratiche",
+    "praticheDescription": "Registro dei fascicoli archiviati: NDG, numero pratica, veicolo e collocazione fisica.",
+    "adminBadge": "Solo admin"
   },
   "area": {
     "title": {

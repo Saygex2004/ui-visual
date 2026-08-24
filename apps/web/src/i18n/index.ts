@@ -13,6 +13,7 @@ import chatIt from './locales/it/chat.json';
 import calendarIt from './locales/it/calendar.json';
 import adminIt from './locales/it/admin.json';
 import errorsIt from './locales/it/errors.json';
+import praticheIt from './locales/it/pratiche.json';
 
 export const DEFAULT_LOCALE = 'it' as const;
 
@@ -25,6 +26,7 @@ export const NAMESPACES = [
   'calendar',
   'admin',
   'errors',
+  'pratiche',
 ] as const;
 
 export const resources = {
@@ -37,6 +39,7 @@ export const resources = {
     calendar: calendarIt,
     admin: adminIt,
     errors: errorsIt,
+    pratiche: praticheIt,
   },
 } as const;
 
