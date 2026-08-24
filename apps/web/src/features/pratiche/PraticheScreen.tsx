@@ -1,4 +1,4 @@
-// The admin-only "Pratiche" view: filter bar, table, CSV export, and the
+// The admin-only "Pratiche" view: filter bar, table, Excel export, and the
 // per-row window. The table shows `filterPratiche(...)` and the export
 // serializes the same array — the export therefore always means "what I am
 // looking at", which is the whole point of having filters next to it.
@@ -25,21 +25,20 @@ import { PraticaForm } from './PraticaForm.js';
 import { PraticaWindow } from './PraticaWindow.js';
 import {
   EMPTY_FILTERS,
-  csvFilename,
   filterPratiche,
   formatEuro,
   inRitardo,
   portafogliPresenti,
-  praticheToCsv,
   type PraticheFilters,
 } from './praticheData.js';
+import { praticheToXlsx, xlsxFilename } from './praticheXlsx.js';
 import './pratiche.css';
 
-function scaricaCsv(contenuto: string, filename: string): void {
-  // text/csv with an explicit utf-8 charset: the BOM in the payload tells
-  // Excel, this tells the browser, and disagreeing about it is how a download
-  // ends up named .txt.
-  const blob = new Blob([contenuto], { type: 'text/csv;charset=utf-8;' });
+function scarica(contenuto: Uint8Array, filename: string, type: string): void {
+  // Cast because TypeScript's `BlobPart` does not accept the generic
+  // `Uint8Array<ArrayBufferLike>` the lib now infers; a Uint8Array is a valid
+  // BlobPart at runtime, which is what the browser cares about.
+  const blob = new Blob([contenuto as BlobPart], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
@@ -100,7 +99,11 @@ export function PraticheScreen() {
           <Button
             severity="secondary"
             onClick={() =>
-              scaricaCsv(praticheToCsv(visibili, nomeUtente, statoLabel), csvFilename(new Date()))
+              scarica(
+                praticheToXlsx(visibili, nomeUtente, statoLabel),
+                xlsxFilename(new Date()),
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+              )
             }
             disabled={visibili.length === 0}
           >

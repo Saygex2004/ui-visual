@@ -1,16 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Pratica } from '@pvp/shared';
 import {
-  CSV_HEADERS,
   EMPTY_FILTERS,
-  csvDate,
-  csvFilename,
   filterPratiche,
   formatEuro,
   inRitardo,
   parseEuro,
   portafogliPresenti,
-  praticheToCsv,
 } from './praticheData.js';
 
 function pratica(over: Partial<Pratica> = {}): Pratica {
@@ -179,94 +175,5 @@ describe('portafogliPresenti', () => {
       pratica({ portafoglio: null }),
     ];
     expect(portafogliPresenti(all)).toEqual(['Augusto', 'Diocleziano']);
-  });
-});
-
-describe('praticheToCsv', () => {
-  it('starts with a UTF-8 BOM so Excel does not mangle accents', () => {
-    expect(praticheToCsv([pratica()]).charCodeAt(0)).toBe(0xfeff);
-  });
-
-  it('separates with semicolons — a comma puts an Italian Excel row in one cell', () => {
-    const csv = praticheToCsv([pratica()]);
-    expect(csv.split('\r\n')[0]).toBe(`\uFEFF${CSV_HEADERS.join(';')}`);
-  });
-
-  it('writes the stage with the label the screen shows, not the stored code', () => {
-    const csv = praticheToCsv([pratica({ stato: 'archiviato' })], undefined, (s) =>
-      s === 'archiviato' ? 'Archiviato / rientrato' : s,
-    );
-    expect(csv).toContain('Archiviato / rientrato');
-  });
-
-  it('writes the cost in euros with an Italian decimal comma', () => {
-    const csv = praticheToCsv([pratica({ costo_spedizione_cent: 1250 })]);
-    expect(csv).toContain(';12,50;');
-  });
-
-  it('carries the tracking dates in Italian order, which Excel reads as dates', () => {
-    const csv = praticheToCsv([
-      pratica({
-        data_richiesta: '2026-08-20',
-        data_spedizione: '2026-08-21',
-        data_consegna_effettiva: '2026-08-25',
-      }),
-    ]);
-    expect(csv).toContain('20/08/2026');
-    expect(csv).toContain('21/08/2026');
-    expect(csv).toContain('25/08/2026');
-    // Not the stored form: an ISO string often lands in Excel as text and
-    // stops sorting as a date.
-    expect(csv).not.toContain('2026-08-21');
-  });
-
-  it('quotes a field containing the separator, so it stays one cell', () => {
-    const csv = praticheToCsv([pratica({ note: 'Corrispondenza; poi rinnovo' })]);
-    expect(csv).toContain('"Corrispondenza; poi rinnovo"');
-  });
-
-  it('doubles embedded quotes rather than truncating the field', () => {
-    const csv = praticheToCsv([pratica({ note: 'nota "importante"' })]);
-    expect(csv).toContain('"nota ""importante"""');
-  });
-
-  it('neutralizes a leading = so Excel keeps it as text, not a formula', () => {
-    const csv = praticheToCsv([pratica({ ndg: '=1+1' })]);
-    expect(csv).toContain("'=1+1");
-  });
-
-  it('exports exactly the filtered rows — export and table cannot diverge', () => {
-    const all = [pratica({ id: 'a', ndg: 'KEEP' }), pratica({ id: 'b', ndg: 'DROP' })];
-    const shown = filterPratiche(all, { ...EMPTY_FILTERS, q: 'keep' });
-    const csv = praticheToCsv(shown);
-    expect(csv).toContain('KEEP');
-    expect(csv).not.toContain('DROP');
-    expect(csv.trimEnd().split('\r\n')).toHaveLength(2); // header + one row
-  });
-
-  it('renders the ordering account by name', () => {
-    const csv = praticheToCsv([pratica({ ordinato_da: 'u7' })], () => 'rossi');
-    expect(csv).toContain(';rossi;');
-  });
-
-  it('leaves an absent cost and absent boxes empty rather than 0 or null', () => {
-    const csv = praticheToCsv([pratica({ costo_spedizione_cent: null, n_scatole: null })]);
-    expect(csv).not.toContain('null');
-    expect(csv).not.toContain(';0,00;');
-  });
-});
-
-describe('csvDate', () => {
-  it('writes dd/mm/yyyy, and empty for an absent date', () => {
-    expect(csvDate('2026-08-21')).toBe('21/08/2026');
-    // Empty, not "N/D": that string is fine on screen and wrong in a
-    // spreadsheet cell someone will try to sort.
-    expect(csvDate(null)).toBe('');
-  });
-});
-
-describe('csvFilename', () => {
-  it('dates the file so successive exports do not overwrite each other', () => {
-    expect(csvFilename(new Date('2026-08-24T15:00:00Z'))).toBe('pratiche-2026-08-24.csv');
   });
 });

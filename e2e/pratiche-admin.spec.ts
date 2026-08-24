@@ -5,6 +5,7 @@
 // function precisely so they cannot diverge, and this is what proves it in a
 // real browser rather than in a unit test of that function.
 import { test, expect } from '@playwright/test';
+import { unzipSync, strFromU8 } from 'fflate';
 import { loginAsAdmin } from './helpers.js';
 
 const NDG_A = 'E2E-900123';
@@ -64,19 +65,23 @@ test.describe('admin: pratiche', () => {
       page.waitForEvent('download'),
       page.getByRole('button', { name: /Scarica/ }).click(),
     ]);
-    expect(download.suggestedFilename()).toMatch(/^pratiche-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(download.suggestedFilename()).toMatch(/^pratiche-\d{4}-\d{2}-\d{2}\.xlsx$/);
 
     const stream = await download.createReadStream();
-    const csv = await new Promise<string>((resolve, reject) => {
+    const bytes = await new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = [];
       stream.on('data', (c: Buffer) => chunks.push(c));
-      stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+      stream.on('end', () => resolve(Buffer.concat(chunks)));
       stream.on('error', reject);
     });
 
-    expect(csv).toContain(NDG_A);
-    expect(csv).not.toContain(NDG_B); // the filter reached the file
-    expect(csv.charCodeAt(0)).toBe(0xfeff); // Excel reads the accents
-    expect(csv.split('\r\n')[0]).toContain('NDG;Numero pratica;Portafoglio;Stato');
+    // A real workbook, checked by unzipping what actually came down the wire
+    // rather than trusting the builder that produced it.
+    expect(bytes.subarray(0, 4)).toEqual(Buffer.from([0x50, 0x4b, 0x03, 0x04]));
+    const zip = unzipSync(new Uint8Array(bytes));
+    const sheet = strFromU8(zip['xl/worksheets/sheet1.xml']!);
+    expect(sheet).toContain(NDG_A);
+    expect(sheet).not.toContain(NDG_B); // the filter reached the file
+    expect(strFromU8(zip['xl/workbook.xml']!)).toContain('name="Pratiche"');
   });
 });
