@@ -58,8 +58,12 @@ export async function patch(
 ): Promise<Pratica | null> {
   const ref = db.collection(COLLECTION).doc(id);
   if (!(await ref.get()).exists) return null;
+  // Belt and braces with PraticaPatchSchema's no-defaults rule: an explicitly
+  // `undefined` key would be rejected by Firestore, and stripping it here
+  // keeps "not mentioned" meaning "left alone" whatever the caller sends.
+  const set = Object.fromEntries(Object.entries(changes).filter(([, v]) => v !== undefined));
   await ref.update({
-    ...changes,
+    ...set,
     updated_at: FieldValue.serverTimestamp(),
     updated_by: updatedBy,
   });

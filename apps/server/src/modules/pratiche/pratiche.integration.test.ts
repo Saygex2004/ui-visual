@@ -1,7 +1,7 @@
 // Integration — pratiche module, HTTP layer (TESTING.md §3). Exercises the
 // whole write path against the emulator: admin gating, create → list → patch
-// → delete, and the two shapes the schema is there to enforce (trimming to
-// null, refusing box 0). Fixture accounts: admin/AdminPass123! is an admin,
+// → delete, and the shapes the schema is there to enforce (trimming to null,
+// exact cents, valid stage, ISO dates). Fixture accounts: admin/AdminPass123! is an admin,
 // mrossi/UserPass123! is not (seed/fixtures/users.json).
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import type { FastifyInstance } from 'fastify';
@@ -23,12 +23,17 @@ const TEST_ENV = {
 const NUOVA = {
   ndg: '900123',
   numero_pratica: '163354',
-  veicolo: 'Augusto',
+  portafoglio: 'Augusto',
+  stato: 'spedito',
   estinto: false,
-  n_scatola: 3,
-  plurima_riscontro: 'Augusto',
+  n_scatole: '3, 7',
   note: 'Rinnovo ipoteca',
   ordinato_da: null,
+  data_richiesta: '2026-08-20',
+  data_spedizione: '2026-08-21',
+  data_consegna_prevista: '2026-08-25',
+  data_consegna_effettiva: null,
+  costo_spedizione_cent: 1250,
 };
 
 describe('pratiche module (HTTP, over the emulator)', () => {
@@ -108,18 +113,41 @@ describe('pratiche module (HTTP, over the emulator)', () => {
   });
 
   it('stores a blank optional field as null, not as an empty string', async () => {
-    // Otherwise "no vehicle" and "vehicle typed then cleared" become
+    // Otherwise "no portfolio" and "portfolio typed then cleared" become
     // indistinguishable in every later filter and export.
-    const res = await create({ ...NUOVA, veicolo: '   ', note: '' });
+    const res = await create({ ...NUOVA, portafoglio: '   ', note: '' });
     expect(res.statusCode).toBe(201);
-    expect(res.json().pratica.veicolo).toBeNull();
+    expect(res.json().pratica.portafoglio).toBeNull();
     expect(res.json().pratica.note).toBeNull();
   });
 
-  it('rejects a missing NDG and a box number of 0', async () => {
+  it('keeps the shipping cost as an exact integer number of cents', async () => {
+    const p = (await create({ ...NUOVA, costo_spedizione_cent: 17700 })).json().pratica;
+    expect(p.costo_spedizione_cent).toBe(17700);
+  });
+
+  it('keeps the tracking dates and the stage as sent', async () => {
+    const p = (await create(NUOVA)).json().pratica;
+    expect(p.stato).toBe('spedito');
+    expect(p.data_spedizione).toBe('2026-08-21');
+    expect(p.data_consegna_prevista).toBe('2026-08-25');
+    expect(p.data_consegna_effettiva).toBeNull();
+  });
+
+  it('defaults a new pratica to `richiesto` when no stage is given', async () => {
+    // A record exists because someone asked for the file; that IS the state.
+    const body = { ...NUOVA } as Record<string, unknown>;
+    delete body.stato;
+    expect((await create(body)).json().pratica.stato).toBe('richiesto');
+  });
+
+  it('rejects a missing NDG, an unknown stage, a negative cost and a bad date', async () => {
     expect((await create({ ...NUOVA, ndg: '  ' })).statusCode).toBe(400);
-    // 0 would read as "box zero" rather than "not filed yet".
-    expect((await create({ ...NUOVA, n_scatola: 0 })).statusCode).toBe(400);
+    expect((await create({ ...NUOVA, stato: 'smarrito' })).statusCode).toBe(400);
+    expect((await create({ ...NUOVA, costo_spedizione_cent: -1 })).statusCode).toBe(400);
+    // Cents, not euros: a fractional cent is not a thing.
+    expect((await create({ ...NUOVA, costo_spedizione_cent: 12.5 })).statusCode).toBe(400);
+    expect((await create({ ...NUOVA, data_spedizione: '21/08/2026' })).statusCode).toBe(400);
   });
 
   it('patches only the fields sent, and records who changed it', async () => {
@@ -128,12 +156,14 @@ describe('pratiche module (HTTP, over the emulator)', () => {
       method: 'PATCH',
       url: `/api/pratiche/${id}`,
       headers: { cookie: adminCookie },
-      payload: { estinto: true, n_scatola: 7 },
+      payload: { estinto: true, stato: 'consegnato', data_consegna_effettiva: '2026-08-24' },
     });
     expect(patched.statusCode).toBe(200);
     const p = patched.json().pratica;
     expect(p.estinto).toBe(true);
-    expect(p.n_scatola).toBe(7);
+    expect(p.stato).toBe('consegnato');
+    expect(p.data_consegna_effettiva).toBe('2026-08-24');
+    expect(p.data_spedizione).toBe('2026-08-21'); // untouched by a partial patch
     expect(p.ndg).toBe('900123'); // untouched by a partial patch
     expect(p.updated_at).not.toBeNull();
     expect(p.updated_by).toBeTruthy();

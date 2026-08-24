@@ -1,25 +1,33 @@
 {
   "title": "Pratiche",
-  "subtitle": "Registro dei fascicoli archiviati: inserimento, ricerca ed estrazione.",
+  "subtitle": "Richiesta, spedizione e tracciamento dei fascicoli cartacei.",
   "tableCaption": "Elenco delle pratiche archiviate",
   "fields": {
     "ndg": "NDG",
     "numeroPratica": "Numero pratica",
-    "veicolo": "Veicolo",
+    "portafoglio": "Portafoglio",
+    "stato": "Stato",
     "estinto": "Estinto",
-    "scatola": "N. scatola",
-    "plurima": "Plurima/Riscontro",
+    "scatole": "N. scatole",
     "note": "Note e riferimenti",
     "ordinatoDa": "Ordinata da",
-    "ordinatoDaNessuno": "Nessuno"
+    "ordinatoDaNessuno": "Nessuno",
+    "dataRichiesta": "Data richiesta",
+    "dataSpedizione": "Data spedizione",
+    "consegnaPrevista": "Consegna prevista",
+    "consegnaEffettiva": "Consegna effettiva",
+    "costoSpedizione": "Costo spedizione",
+    "costoSpedizioneAiuto": "In euro, es. 12,50"
   },
   "filters": {
     "searchLabel": "Cerca fra le pratiche",
     "searchPlaceholder": "Cerca per NDG, numero, note…",
-    "allVehicles": "Tutti i veicoli",
-    "allStates": "Tutte",
-    "veicoloLabel": "Filtra per veicolo",
-    "estintoLabel": "Filtra per stato"
+    "portafoglioLabel": "Filtra per portafoglio",
+    "allPortafogli": "Tutti i portafogli",
+    "statoLabel": "Filtra per stato",
+    "allStati": "Tutti gli stati",
+    "estintoLabel": "Filtra per estinto",
+    "allEstinto": "Tutte"
   },
   "actions": {
     "new": "Nuova pratica",
@@ -39,7 +47,9 @@
     "deleteConfirmTitle": "Eliminare la pratica?",
     "deleteConfirmBody": "La pratica {{numero}} verrà eliminata definitivamente. L'operazione non è reversibile.",
     "createdAt": "Creata il {{when}}",
-    "updatedAt": "modificata il {{when}}"
+    "updatedAt": "modificata il {{when}}",
+    "ritardo": "In ritardo",
+    "sezioneLogistica": "Spedizione"
   },
   "states": {
     "loading": "Caricamento delle pratiche…",
@@ -56,5 +66,12 @@
     "si": "Sì",
     "no": "No",
     "assente": "—"
+  },
+  "stati": {
+    "richiesto": "Richiesto",
+    "estratto": "Estratto",
+    "spedito": "Spedito",
+    "consegnato": "Consegnato",
+    "archiviato": "Archiviato / rientrato"
   }
 }

@@ -12,7 +12,7 @@ const NDG_B = 'E2E-777999';
 
 async function creaPratica(
   page: import('@playwright/test').Page,
-  campi: { ndg: string; numero: string; veicolo: string; scatola?: string },
+  campi: { ndg: string; numero: string; portafoglio: string; scatole?: string },
 ) {
   await page.getByRole('button', { name: 'Nuova pratica' }).click();
   // Scoped to the dialog: the screen behind it has its own filter controls,
@@ -20,8 +20,8 @@ async function creaPratica(
   const form = page.getByRole('dialog');
   await form.getByLabel('NDG').fill(campi.ndg);
   await form.getByLabel('Numero pratica').fill(campi.numero);
-  await form.getByLabel('Veicolo').fill(campi.veicolo);
-  if (campi.scatola) await form.getByLabel('N. scatola').fill(campi.scatola);
+  await form.getByLabel('Portafoglio').fill(campi.portafoglio);
+  if (campi.scatole) await form.getByLabel('N. scatole').fill(campi.scatole);
   await form.getByRole('button', { name: 'Crea pratica' }).click();
   await expect(page.getByRole('button', { name: campi.ndg })).toBeVisible();
 }
@@ -39,8 +39,8 @@ test.describe('admin: pratiche', () => {
     await expect(page).toHaveURL(/\/pratiche/);
     await expect(page.getByRole('heading', { name: 'Pratiche' })).toBeVisible();
 
-    await creaPratica(page, { ndg: NDG_A, numero: '163354', veicolo: 'Augusto', scatola: '3' });
-    await creaPratica(page, { ndg: NDG_B, numero: '888111', veicolo: 'Diocleziano' });
+    await creaPratica(page, { ndg: NDG_A, numero: '163354', portafoglio: 'Augusto', scatole: '3' });
+    await creaPratica(page, { ndg: NDG_B, numero: '888111', portafoglio: 'Diocleziano' });
 
     // The window: opens on the NDG, shows the record, and can edit in place.
     await page.getByRole('button', { name: NDG_A }).click();
@@ -49,14 +49,14 @@ test.describe('admin: pratiche', () => {
     await expect(window.getByText('Augusto')).toBeVisible();
 
     await window.getByRole('button', { name: 'Modifica' }).click();
-    await window.getByLabel('N. scatola').fill('12');
+    await window.getByLabel('N. scatole').fill('12');
     await window.getByRole('button', { name: 'Salva' }).click();
     await expect(window.getByText('12')).toBeVisible();
     await window.getByRole('button', { name: 'Chiudi' }).click();
 
     // Filter down to one vehicle, then export: the file must contain exactly
     // the row on screen.
-    await page.getByLabel('Filtra per veicolo').selectOption('Augusto');
+    await page.getByLabel('Filtra per portafoglio').selectOption('Augusto');
     await expect(page.getByRole('button', { name: NDG_A })).toBeVisible();
     await expect(page.getByRole('button', { name: NDG_B })).toHaveCount(0);
 
@@ -77,6 +77,6 @@ test.describe('admin: pratiche', () => {
     expect(csv).toContain(NDG_A);
     expect(csv).not.toContain(NDG_B); // the filter reached the file
     expect(csv.charCodeAt(0)).toBe(0xfeff); // Excel reads the accents
-    expect(csv.split('\r\n')[0]).toContain('NDG;Numero pratica');
+    expect(csv.split('\r\n')[0]).toContain('NDG;Numero pratica;Portafoglio;Stato');
   });
 });

@@ -19,14 +19,15 @@ import { Button } from '../../components/Button.js';
 import { ConfirmDialog } from '../../components/ConfirmDialog.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { translateApiError } from '../../lib/translateApiError.js';
-import { formatTimestamp } from '../dashboard/DataTable/formatting.js';
+import { formatDate, formatTimestamp } from '../dashboard/DataTable/formatting.js';
 import { PraticaForm } from './PraticaForm.js';
 import { useDeletePratica, useUpdatePratica } from './hooks.js';
+import { formatEuro, inRitardo } from './praticheData.js';
 
 export interface PraticaWindowProps {
   pratica: Pratica;
   utenti: { id: string; username: string }[];
-  veicoliNoti: string[];
+  portafogliNoti: string[];
   nomeUtente: (id: string | null) => string;
   onClose: () => void;
 }
@@ -43,7 +44,7 @@ function Riga({ label, value }: { label: string; value: string }) {
 export function PraticaWindow({
   pratica,
   utenti,
-  veicoliNoti,
+  portafogliNoti,
   nomeUtente,
   onClose,
 }: PraticaWindowProps) {
@@ -56,6 +57,12 @@ export function PraticaWindow({
 
   const vuoto = t('common.assente');
   const show = (v: string | null) => (v == null || v === '' ? vuoto : v);
+  // "Today" from the browser clock, formatted as the dates are stored, so the
+  // late check compares like with like (see inRitardo).
+  const ritardo = inRitardo(pratica, new Date().toISOString().slice(0, 10));
+  // formatDate already answers "N/D" for an absent date, which is the same
+  // job `show` does for text — so dates go through it directly.
+  const data = (v: string | null) => (v == null ? vuoto : formatDate(v));
 
   function handleSave(input: PraticaInput) {
     setErrorMessage(null);
@@ -110,7 +117,7 @@ export function PraticaWindow({
               <PraticaForm
                 initial={pratica}
                 utenti={utenti}
-                veicoliNoti={veicoliNoti}
+                portafogliNoti={portafogliNoti}
                 submitting={update.isPending}
                 onSubmit={handleSave}
                 onCancel={() => setEditing(false)}
@@ -120,7 +127,18 @@ export function PraticaWindow({
                 <dl className="pratiche-window-list">
                   <Riga label={t('fields.ndg')} value={pratica.ndg} />
                   <Riga label={t('fields.numeroPratica')} value={pratica.numero_pratica} />
-                  <Riga label={t('fields.veicolo')} value={show(pratica.veicolo)} />
+                  <Riga label={t('fields.portafoglio')} value={show(pratica.portafoglio)} />
+                  <div className="pratiche-window-row">
+                    <dt>{t('fields.stato')}</dt>
+                    <dd>
+                      <Badge variant="accent">{t(`stati.${pratica.stato}`)}</Badge>
+                      {ritardo ? (
+                        <Badge variant="danger" className="pratiche-badge-gap">
+                          {t('window.ritardo')}
+                        </Badge>
+                      ) : null}
+                    </dd>
+                  </div>
                   <div className="pratiche-window-row">
                     <dt>{t('fields.estinto')}</dt>
                     <dd>
@@ -129,16 +147,37 @@ export function PraticaWindow({
                       </Badge>
                     </dd>
                   </div>
-                  <Riga
-                    label={t('fields.scatola')}
-                    value={pratica.n_scatola == null ? vuoto : String(pratica.n_scatola)}
-                  />
-                  <Riga label={t('fields.plurima')} value={show(pratica.plurima_riscontro)} />
+                  <Riga label={t('fields.scatole')} value={show(pratica.n_scatole)} />
                   <Riga
                     label={t('fields.ordinatoDa')}
                     value={show(nomeUtente(pratica.ordinato_da))}
                   />
                   <Riga label={t('fields.note')} value={show(pratica.note)} />
+                </dl>
+
+                <dl className="pratiche-window-list">
+                  <div className="pratiche-window-row">
+                    <dt className="pratiche-window-section">{t('window.sezioneLogistica')}</dt>
+                    <dd />
+                  </div>
+                  <Riga label={t('fields.dataRichiesta')} value={data(pratica.data_richiesta)} />
+                  <Riga label={t('fields.dataSpedizione')} value={data(pratica.data_spedizione)} />
+                  <Riga
+                    label={t('fields.consegnaPrevista')}
+                    value={data(pratica.data_consegna_prevista)}
+                  />
+                  <Riga
+                    label={t('fields.consegnaEffettiva')}
+                    value={data(pratica.data_consegna_effettiva)}
+                  />
+                  <Riga
+                    label={t('fields.costoSpedizione')}
+                    value={
+                      pratica.costo_spedizione_cent == null
+                        ? vuoto
+                        : `€ ${formatEuro(pratica.costo_spedizione_cent)}`
+                    }
+                  />
                 </dl>
 
                 <p className="pratiche-window-meta">

@@ -1,29 +1,56 @@
-// Pure filtering + CSV building for the pratiche register. No React, no I/O:
-// the export must produce exactly the rows the table is showing, and keeping
-// both derived from the same function is what guarantees that.
-import type { Pratica } from '@pvp/shared';
+// Pure filtering, money formatting and CSV building for the pratiche
+// register. No React, no I/O: the export must produce exactly the rows the
+// table is showing, and keeping both derived from the same function is what
+// guarantees that.
+import type { Pratica, StatoPratica } from '@pvp/shared';
 
 export interface PraticheFilters {
   /** Free text, matched across every human-readable field. */
   q: string;
-  /** Exact vehicle, or '' for all. */
-  veicolo: string;
-  /** 'tutte' | 'si' | 'no' — extinguished state. */
+  /** Exact portfolio, or '' for all. */
+  portafoglio: string;
+  /** A specific stage, or '' for all. */
+  stato: StatoPratica | '';
+  /** 'tutte' | 'si' | 'no' — extinguished position. */
   estinto: 'tutte' | 'si' | 'no';
 }
 
-export const EMPTY_FILTERS: PraticheFilters = { q: '', veicolo: '', estinto: 'tutte' };
+export const EMPTY_FILTERS: PraticheFilters = {
+  q: '',
+  portafoglio: '',
+  stato: '',
+  estinto: 'tutte',
+};
+
+// ---- money ----
+
+/** Cents → "12,50". Italian decimal comma, always two digits: a cost shown as
+ *  "12,5" reads as a typo on an invoice line. */
+export function formatEuro(cent: number | null): string {
+  if (cent == null) return '';
+  return (cent / 100).toLocaleString('it-IT', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+/** "12,50" | "12.50" | "€ 12,50" → 1250 cents; null for anything that isn't a
+ *  usable amount. Accepts both separators because an operator typing on a
+ *  numeric keypad gets a dot and one typing prose gets a comma, and refusing
+ *  either would just look broken. Rounds rather than truncates so 0.005 does
+ *  not silently vanish. */
+export function parseEuro(raw: string): number | null {
+  const cleaned = raw.replace(/[^\d,.-]/g, '').replace(',', '.');
+  if (cleaned === '') return null;
+  const value = Number(cleaned);
+  if (!Number.isFinite(value) || value < 0) return null;
+  return Math.round(value * 100);
+}
+
+// ---- filtering ----
 
 function haystack(p: Pratica, nomeUtente: (id: string | null) => string): string {
-  return [
-    p.ndg,
-    p.numero_pratica,
-    p.veicolo,
-    p.plurima_riscontro,
-    p.note,
-    p.n_scatola == null ? '' : String(p.n_scatola),
-    nomeUtente(p.ordinato_da),
-  ]
+  return [p.ndg, p.numero_pratica, p.portafoglio, p.note, p.n_scatole, nomeUtente(p.ordinato_da)]
     .filter(Boolean)
     .join(' ')
     .toLowerCase();
@@ -38,7 +65,8 @@ export function filterPratiche(
 ): Pratica[] {
   const needle = filters.q.trim().toLowerCase();
   return pratiche.filter((p) => {
-    if (filters.veicolo && (p.veicolo ?? '') !== filters.veicolo) return false;
+    if (filters.portafoglio && (p.portafoglio ?? '') !== filters.portafoglio) return false;
+    if (filters.stato && p.stato !== filters.stato) return false;
     if (filters.estinto === 'si' && !p.estinto) return false;
     if (filters.estinto === 'no' && p.estinto) return false;
     if (needle && !haystack(p, nomeUtente).includes(needle)) return false;
@@ -46,14 +74,39 @@ export function filterPratiche(
   });
 }
 
-/** Distinct vehicles present in the data, sorted — the filter's options.
- *  Derived rather than configured, so a vehicle typed today is filterable
+/** Distinct portfolios present in the data, sorted — the filter's options.
+ *  Derived rather than configured, so a portfolio typed today is filterable
  *  today without anyone maintaining a list. */
-export function veicoliPresenti(pratiche: Pratica[]): string[] {
-  return [...new Set(pratiche.map((p) => p.veicolo).filter((v): v is string => Boolean(v)))].sort(
-    (a, b) => a.localeCompare(b, 'it'),
+export function portafogliPresenti(pratiche: Pratica[]): string[] {
+  return [
+    ...new Set(pratiche.map((p) => p.portafoglio).filter((v): v is string => Boolean(v))),
+  ].sort((a, b) => a.localeCompare(b, 'it'));
+}
+
+/** True when the file is late: it was expected by now and has not arrived.
+ *  Pure and date-injected rather than reading the clock, so the rule is
+ *  testable and the caller decides what "now" means. */
+export function inRitardo(p: Pratica, oggi: string): boolean {
+  return (
+    p.data_consegna_prevista != null &&
+    p.data_consegna_effettiva == null &&
+    p.data_consegna_prevista < oggi
   );
 }
+
+/** `2026-08-21` → `21/08/2026`, and '' when absent. Italian order because
+ *  that is how these dates are written and read here — and because Excel
+ *  under an it-IT locale parses dd/mm/yyyy as a real date, while an ISO string
+ *  often lands as text and stops sorting. Kept local rather than reusing the
+ *  table formatter, which returns "N/D" for absent — fine on screen, wrong in
+ *  a spreadsheet cell. */
+export function csvDate(iso: string | null): string {
+  if (iso == null) return '';
+  const [y, m, d] = iso.split('-');
+  return y && m && d ? `${d}/${m}/${y}` : iso;
+}
+
+// ---- CSV ----
 
 const SEP = ';';
 
@@ -68,12 +121,17 @@ function csvCell(value: string): string {
 export const CSV_HEADERS = [
   'NDG',
   'Numero pratica',
-  'Veicolo',
+  'Portafoglio',
+  'Stato',
   'Estinto',
-  'N. scatola',
-  'Plurima/Riscontro',
+  'N. scatole',
+  'Data richiesta',
+  'Data spedizione',
+  'Consegna prevista',
+  'Consegna effettiva',
+  'Costo spedizione',
   'Note',
-  'Ordinato da',
+  'Ordinata da',
   'Creata il',
 ] as const;
 
@@ -81,20 +139,27 @@ export const CSV_HEADERS = [
  * CSV for Italian Excel: semicolon-separated (what Excel expects under an
  * it-IT locale — a comma lands every row in one cell) and prefixed with a
  * UTF-8 BOM, without which Excel reads the file as Latin-1 and turns every
- * accented character into mojibake.
+ * accented character into mojibake. `statoLabel` is injected so the file
+ * carries the same words the screen does, without this module importing i18n.
  */
 export function praticheToCsv(
   pratiche: Pratica[],
   nomeUtente: (id: string | null) => string = () => '',
+  statoLabel: (s: StatoPratica) => string = (s) => s,
 ): string {
   const rows = pratiche.map((p) =>
     [
       p.ndg,
       p.numero_pratica,
-      p.veicolo ?? '',
+      p.portafoglio ?? '',
+      statoLabel(p.stato),
       p.estinto ? 'Sì' : 'No',
-      p.n_scatola == null ? '' : String(p.n_scatola),
-      p.plurima_riscontro ?? '',
+      p.n_scatole ?? '',
+      csvDate(p.data_richiesta),
+      csvDate(p.data_spedizione),
+      csvDate(p.data_consegna_prevista),
+      csvDate(p.data_consegna_effettiva),
+      formatEuro(p.costo_spedizione_cent),
       p.note ?? '',
       nomeUtente(p.ordinato_da),
       p.created_at,

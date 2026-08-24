@@ -19,14 +19,14 @@ for (const theme of ['light', 'dark'] as const) {
     for (const p of [
       // NDGs carry the theme: both runs share one emulator, and a repeated
       // NDG would make the row lookup match two buttons.
-      { ndg: `SHOT-${theme}-900123`, numero: '163354', veicolo: 'Augusto', scatola: '3' },
-      { ndg: `SHOT-${theme}-777999`, numero: '888111', veicolo: 'Diocleziano', scatola: '12' },
+      { ndg: `SHOT-${theme}-900123`, numero: '163354', portafoglio: 'Augusto', scatole: '3' },
+      { ndg: `SHOT-${theme}-777999`, numero: '888111', portafoglio: 'Diocleziano', scatole: '12' },
     ]) {
       await page.getByRole('button', { name: 'Nuova pratica' }).click();
       await dialog.getByLabel('NDG').fill(p.ndg);
       await dialog.getByLabel('Numero pratica').fill(p.numero);
-      await dialog.getByLabel('Veicolo').fill(p.veicolo);
-      await dialog.getByLabel('N. scatola').fill(p.scatola);
+      await dialog.getByLabel('Portafoglio').fill(p.portafoglio);
+      await dialog.getByLabel('N. scatole').fill(p.scatole);
       await dialog.getByLabel('Note e riferimenti').fill('Corrispondenza relativa alla pratica');
       await dialog.getByRole('button', { name: 'Crea pratica' }).click();
       await page.getByRole('button', { name: p.ndg }).waitFor();

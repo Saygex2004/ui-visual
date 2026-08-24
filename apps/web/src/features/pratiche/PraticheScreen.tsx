@@ -5,7 +5,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, Plus, Search } from 'lucide-react';
-import type { Pratica, PraticaInput } from '@pvp/shared';
+import { STATI_PRATICA, type Pratica, type PraticaInput, type StatoPratica } from '@pvp/shared';
 import { TextInput } from '../../components/TextInput.js';
 import { SelectField } from '../../components/SelectField.js';
 import { Button } from '../../components/Button.js';
@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from '../../components/Dialog.js';
 import { translateApiError } from '../../lib/translateApiError.js';
+import { formatDate } from '../dashboard/DataTable/formatting.js';
 import { usePratiche, useCreatePratica } from './hooks.js';
 import { PraticaForm } from './PraticaForm.js';
 import { PraticaWindow } from './PraticaWindow.js';
@@ -26,8 +27,10 @@ import {
   EMPTY_FILTERS,
   csvFilename,
   filterPratiche,
+  formatEuro,
+  inRitardo,
+  portafogliPresenti,
   praticheToCsv,
-  veicoliPresenti,
   type PraticheFilters,
 } from './praticheData.js';
 import './pratiche.css';
@@ -62,7 +65,10 @@ export function PraticheScreen() {
     return (id: string | null) => (id ? (byId.get(id) ?? id) : '');
   }, [utenti]);
 
-  const veicoli = useMemo(() => veicoliPresenti(pratiche), [pratiche]);
+  const portafogli = useMemo(() => portafogliPresenti(pratiche), [pratiche]);
+  // One "today" for the whole render, so every row's late badge agrees.
+  const oggi = new Date().toISOString().slice(0, 10);
+  const statoLabel = (st: StatoPratica) => t(`stati.${st}`);
   const visibili = useMemo(
     () => filterPratiche(pratiche, filters, nomeUtente),
     [pratiche, filters, nomeUtente],
@@ -93,7 +99,9 @@ export function PraticheScreen() {
         <div className="pratiche-header-actions">
           <Button
             severity="secondary"
-            onClick={() => scaricaCsv(praticheToCsv(visibili, nomeUtente), csvFilename(new Date()))}
+            onClick={() =>
+              scaricaCsv(praticheToCsv(visibili, nomeUtente, statoLabel), csvFilename(new Date()))
+            }
             disabled={visibili.length === 0}
           >
             <Download aria-hidden="true" size={15} />
@@ -116,20 +124,35 @@ export function PraticheScreen() {
             onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
           />
         </div>
-        {/* The filters are labelled "Filtra per…", not just "Veicolo"/"Estinto":
-            the form uses those plain names for its own inputs, and two
-            controls sharing an accessible name on one screen is ambiguous to
-            anyone navigating by label — screen reader or test alike. */}
+        {/* The filters are labelled "Filtra per…", not just "Portafoglio"/
+            "Stato": the form uses those plain names for its own inputs, and
+            two controls sharing an accessible name on one screen is ambiguous
+            to anyone navigating by label — screen reader or test alike. */}
         <SelectField
-          label={t('filters.veicoloLabel')}
-          id="filtro-veicolo"
-          value={filters.veicolo}
-          onChange={(e) => setFilters((f) => ({ ...f, veicolo: e.target.value }))}
+          label={t('filters.portafoglioLabel')}
+          id="filtro-portafoglio"
+          value={filters.portafoglio}
+          onChange={(e) => setFilters((f) => ({ ...f, portafoglio: e.target.value }))}
         >
-          <option value="">{t('filters.allVehicles')}</option>
-          {veicoli.map((v) => (
+          <option value="">{t('filters.allPortafogli')}</option>
+          {portafogli.map((v) => (
             <option key={v} value={v}>
               {v}
+            </option>
+          ))}
+        </SelectField>
+        <SelectField
+          label={t('filters.statoLabel')}
+          id="filtro-stato"
+          value={filters.stato}
+          onChange={(e) =>
+            setFilters((f) => ({ ...f, stato: e.target.value as PraticheFilters['stato'] }))
+          }
+        >
+          <option value="">{t('filters.allStati')}</option>
+          {STATI_PRATICA.map((st) => (
+            <option key={st} value={st}>
+              {t(`stati.${st}`)}
             </option>
           ))}
         </SelectField>
@@ -141,7 +164,7 @@ export function PraticheScreen() {
             setFilters((f) => ({ ...f, estinto: e.target.value as PraticheFilters['estinto'] }))
           }
         >
-          <option value="tutte">{t('filters.allStates')}</option>
+          <option value="tutte">{t('filters.allEstinto')}</option>
           <option value="si">{t('common.si')}</option>
           <option value="no">{t('common.no')}</option>
         </SelectField>
@@ -169,11 +192,13 @@ export function PraticheScreen() {
               <tr>
                 <th scope="col">{t('fields.ndg')}</th>
                 <th scope="col">{t('fields.numeroPratica')}</th>
-                <th scope="col">{t('fields.veicolo')}</th>
+                <th scope="col">{t('fields.portafoglio')}</th>
+                <th scope="col">{t('fields.stato')}</th>
+                <th scope="col">{t('fields.dataSpedizione')}</th>
+                <th scope="col">{t('fields.consegnaEffettiva')}</th>
+                <th scope="col">{t('fields.costoSpedizione')}</th>
+                <th scope="col">{t('fields.scatole')}</th>
                 <th scope="col">{t('fields.estinto')}</th>
-                <th scope="col">{t('fields.scatola')}</th>
-                <th scope="col">{t('fields.plurima')}</th>
-                <th scope="col">{t('fields.ordinatoDa')}</th>
               </tr>
             </thead>
             <tbody>
@@ -192,15 +217,28 @@ export function PraticheScreen() {
                     </button>
                   </td>
                   <td>{p.numero_pratica}</td>
-                  <td>{p.veicolo ?? '—'}</td>
+                  <td>{p.portafoglio ?? '—'}</td>
+                  <td>
+                    <Badge variant="accent">{t(`stati.${p.stato}`)}</Badge>
+                    {inRitardo(p, oggi) ? (
+                      <Badge variant="danger" className="pratiche-badge-gap">
+                        {t('window.ritardo')}
+                      </Badge>
+                    ) : null}
+                  </td>
+                  <td>{p.data_spedizione ? formatDate(p.data_spedizione) : '—'}</td>
+                  <td>{p.data_consegna_effettiva ? formatDate(p.data_consegna_effettiva) : '—'}</td>
+                  <td className="pratiche-cell-num">
+                    {p.costo_spedizione_cent == null
+                      ? '—'
+                      : `€ ${formatEuro(p.costo_spedizione_cent)}`}
+                  </td>
+                  <td>{p.n_scatole ?? '—'}</td>
                   <td>
                     <Badge variant={p.estinto ? 'success' : 'neutral'}>
                       {p.estinto ? t('common.si') : t('common.no')}
                     </Badge>
                   </td>
-                  <td>{p.n_scatola ?? '—'}</td>
-                  <td>{p.plurima_riscontro ?? '—'}</td>
-                  <td>{nomeUtente(p.ordinato_da) || '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -212,7 +250,7 @@ export function PraticheScreen() {
         <PraticaWindow
           pratica={praticaAperta}
           utenti={utenti}
-          veicoliNoti={veicoli}
+          portafogliNoti={portafogli}
           nomeUtente={nomeUtente}
           onClose={() => setAperta(null)}
         />
@@ -235,7 +273,7 @@ export function PraticheScreen() {
               {createError ? <StatusDisplay variant="error" message={createError} /> : null}
               <PraticaForm
                 utenti={utenti}
-                veicoliNoti={veicoli}
+                portafogliNoti={portafogli}
                 submitting={create.isPending}
                 onSubmit={handleCreate}
                 onCancel={() => setCreating(false)}
