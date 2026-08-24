@@ -7,6 +7,7 @@ import * as omiPricesRepo from './omiPrices.js';
 import * as metaRepo from './meta.js';
 import * as runsRepo from './runs.js';
 import * as settingsRepo from './settings.js';
+import * as procedureConcorsualiRepo from './procedureConcorsuali.js';
 import { reseed, testDb } from '../testSupport/emulator.js';
 
 beforeAll(async () => {
@@ -28,6 +29,7 @@ describe('Part A repository surface is structurally read-only', () => {
     metaRepo,
     runsRepo,
     settingsRepo,
+    procedureConcorsualiRepo,
   };
   const ALLOWED_WRITE_EXPORTS = new Set(['settingsRepo.setExtractionCategories']);
 
@@ -93,6 +95,24 @@ describe('omiPricesRepo (Part A, read-only)', () => {
       'roma-roma',
     ]);
     expect(map['napoli-napoli']?.error).not.toBeNull();
+  });
+});
+
+describe('procedureConcorsualiRepo (Part A, read-only — Phase 14)', () => {
+  it('reads the full map keyed by the JOIN tuple (not the doc id), incl. the composite-rg case', async () => {
+    const map = await procedureConcorsualiRepo.getAllByKey(testDb());
+    // Keys are `${tribunale.chiave} ${rg.numero_base} ${rg.anno}` — note the
+    // Roma fixture's rg is the COMPOSITE `77-1/2022`, so its key carries the
+    // numero_base `77` (what a listing's own `numero` holds), not `77-1`.
+    expect(Object.keys(map).sort()).toEqual(['BARI 55 2023', 'MILANO 99 2020', 'ROMA 77 2022']);
+  });
+
+  it('carries the two availability states the UI distinguishes (DATA_MODEL.md §17.2)', async () => {
+    const map = await procedureConcorsualiRepo.getAllByKey(testDb());
+    expect(map['BARI 55 2023']?.scheda_letta_il).not.toBeNull(); // debtor detail read
+    expect(map['BARI 55 2023']?.debitore?.codice_fiscale).toBe('05412330728');
+    expect(map['ROMA 77 2022']?.scheda_letta_il).toBeNull(); // indexed, no detail yet
+    expect(map['ROMA 77 2022']?.debitore).toBeNull();
   });
 });
 

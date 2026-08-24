@@ -11,7 +11,7 @@
 | Section | Folder | Role |
 |---|---|---|
 | **Specifications** | `../specifications/` (+ `../FUNCTIONAL_SPECIFICATIONS_UI.md`) | *What* to build: behaviour, architecture, decisions, data contract, domain rules, API surface, configuration, testing requirements. Authoritative and stable. |
-| **Execution Plan** | this folder | *How* to build it: thirteen self-contained phase documents, this overview, the repository structure, and the handoff records produced as work proceeds. |
+| **Execution Plan** | this folder | *How* to build it: fourteen self-contained phase documents, this overview, the repository structure, and the handoff records produced as work proceeds. |
 
 ## 3. Execution model
 
@@ -57,6 +57,9 @@ The **Specifications are authoritative**. If a task appears to conflict with the
 | 13 | [`PHASE_13_UX_REDESIGN.md`](PHASE_13_UX_REDESIGN.md) | Full UX/UI redesign to the owner's Claude Design reference: navy/Hanken system, combobox selectors, tab/filter/table/chat pattern changes | Gates green; e2e updated + green; URL contract unchanged; light+dark visual pass |
 | 11 | [`PHASE_11_HARDENING.md`](PHASE_11_HARDENING.md) | A11y, responsiveness, i18n completeness, performance/payload budgets, designed states | Axe clean (both themes); budgets met; full Playwright regression green |
 | 12 | [`PHASE_12_DEPLOYMENT.md`](PHASE_12_DEPLOYMENT.md) | Production on Hosting + Cloud Run, deny-all rules, runbook, drill | Live round-trip of every write path; rules verified; runbook drill passed |
+| 14 | [`PHASE_14_PROCEDURE_CONCORSUALI.md`](PHASE_14_PROCEDURE_CONCORSUALI.md) | New Part A collection `procedure_concorsuali` joined onto listings (`DATA_MODEL.md` §17, `DOMAIN_RULES.md` §12): workspace debtor-facts panel, table presence indicator | Gates green; join-key unit suite green; live read-only smoke against the real collection; light+dark visual pass |
+
+> **Ordering note (Phase 14).** Runs after Phase 12 (the app is already live in production) as ordinary post-launch feature work, not a pre-launch build phase — see its own document for why its verification includes a live-data smoke rather than only the emulator (the collection is new and has no emulator seed fixture yet).
 
 > **Ordering note (Phase 13).** Phase 13 was added after Phase 10 had completed but before Phases 11–12 had run, and it executes **in that position**: 0 → 10, then 13, then 11 → 12. It keeps the number 13 (rather than renumbering 11/12) so existing handoff cross-references stay valid; hardening (11) must verify the redesigned interface, not the pre-redesign one.
 
@@ -78,7 +81,7 @@ Phases 0–11 need **no Google/Firebase account access**: everything runs agains
 
 - Never delete or rewrite a filled handoff; append to it.
 - Never commit secrets (`.env`, service-account JSON, session secrets); the `.gitignore` from Phase 0 enforces this — keep it effective.
-- Default test runs stay offline; integration suites require the emulators and refuse to run without them; **nothing in Phases 0–11 touches the production database** except Phase 4's optional, explicitly read-only smoke (see [`../specifications/TESTING.md`](../specifications/TESTING.md) §1).
+- Default test runs stay offline; integration suites require the emulators and refuse to run without them; **nothing in Phases 0–11 touches the production database** except Phase 4's optional, explicitly read-only smoke (see [`../specifications/TESTING.md`](../specifications/TESTING.md) §1). Phase 14 is post-launch (the app already reads production for real) and its own verification includes a read-only production smoke for the same reason Phase 4's did — a brand-new collection with no emulator seed fixture yet.
 - Commit at least once per completed task group with clear messages; the repository history is part of the audit trail.
 - The **Hallmark** design skill (installed at `.agents/skills/hallmark/` in Phase 0 via `npx skills add nutlope/hallmark`) is part of the workflow: consult it whenever a phase builds or changes user-facing surfaces, per [`../specifications/FRONTEND.md`](../specifications/FRONTEND.md) §5.
 - When a step needs the developer's hands, follow the **manual-intervention protocol** of §7: pause, instruct plainly, wait, verify, record.

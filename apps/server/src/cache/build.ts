@@ -28,8 +28,14 @@ import {
   type BloccoIndexEntry,
   type BloccoSibling,
   type OmiPrice,
+  type ProceduraConcorsualeDoc,
 } from '@pvp/shared';
-import { listingsRepo, omiPricesRepo, metaRepo } from '../repositories/index.js';
+import {
+  listingsRepo,
+  omiPricesRepo,
+  metaRepo,
+  procedureConcorsualiRepo,
+} from '../repositories/index.js';
 import { toListingRow, toOmiEntry } from './rows.js';
 
 export interface BuiltSnapshot {
@@ -41,6 +47,9 @@ export interface BuiltSnapshot {
   summariesById: Map<string, BloccoSibling>;
   /** Raw OMI docs by slug (immobili only), for the detail OMI selection. */
   omiBySlug: Record<string, OmiPrice>;
+  /** Raw procedura concorsuale docs by join key (both scopes — DATA_MODEL.md
+   *  §17.1), for the detail selection and the row's presence flag. */
+  proceduraByKey: Record<string, ProceduraConcorsualeDoc>;
   /** `cod_tipo_rito` values observed on active immobili listings but not in
    *  the catalog (DOMAIN_RULES.md Appendix A) — admin-only data, deliberately
    *  not part of `AreaSnapshot` itself (no reason to grow the payload-budget-
@@ -65,12 +74,13 @@ export interface ScopeMetaInput {
   detail_errors: number;
 }
 
-/** Pure assembly: in-memory listings/OMI/meta → AreaSnapshot. No I/O. */
+/** Pure assembly: in-memory listings/OMI/procedure/meta → AreaSnapshot. No I/O. */
 export function assembleSnapshot(
   scope: Scope,
   active: readonly Listing[],
   archived: readonly Listing[],
   omiMap: Readonly<Record<string, OmiPrice>>,
+  proceduraMap: Readonly<Record<string, ProceduraConcorsualeDoc>>,
   scopeMeta: ScopeMetaInput | null,
   omiMeta: { fetched_at: string; semestre: string } | null,
 ): BuiltSnapshot {
@@ -110,12 +120,12 @@ export function assembleSnapshot(
       continue;
     }
     const block = blocks.get(clusterKey);
-    if (block) block.buckets[bucket].push(toListingRow(listing));
+    if (block) block.buckets[bucket].push(toListingRow(listing, proceduraMap));
   }
 
   // Archive rows carry their cluster-of-origin (the archive mixes clusters).
   const archive: ArchiveRow[] = archived.map((listing) => {
-    const row: ListingRow = toListingRow(listing);
+    const row: ListingRow = toListingRow(listing, proceduraMap);
     return { ...row, cluster_key: classifyListing(listing).clusterKey };
   });
 
@@ -162,6 +172,7 @@ export function assembleSnapshot(
     archivedIds: new Set(archived.map((l) => String(l.id))),
     summariesById,
     omiBySlug: omiMap,
+    proceduraByKey: proceduraMap,
     unrecognizedCategoryCodes: [...unrecognizedCodes].sort(),
   };
 }
@@ -171,13 +182,16 @@ export async function buildSnapshot(db: Firestore, scope: Scope): Promise<BuiltS
   const { active, archived } = await listingsRepo.getByScope(db, scope);
   const isImmobili = scope === 'immobili';
 
-  const [scopeMeta, omiMeta, omiMap] = await Promise.all([
+  const [scopeMeta, omiMeta, omiMap, proceduraMap] = await Promise.all([
     metaRepo.getScopeMeta(db, scope),
     isImmobili ? metaRepo.getOmiMeta(db) : Promise.resolve(null),
     isImmobili ? omiPricesRepo.getAllBySlug(db) : Promise.resolve<Record<string, OmiPrice>>({}),
+    // Not scope-gated (DATA_MODEL.md §17.1): a matching procedure is
+    // relevant to both immobili and corporate listings, unlike OMI.
+    procedureConcorsualiRepo.getAllByKey(db),
   ]);
 
-  return assembleSnapshot(scope, active, archived, omiMap, scopeMeta, omiMeta);
+  return assembleSnapshot(scope, active, archived, omiMap, proceduraMap, scopeMeta, omiMeta);
 }
 
 // Re-exported for callers that map an area slug ⇄ scope.

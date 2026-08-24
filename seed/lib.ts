@@ -68,6 +68,7 @@ export function emulatorSigningCredential(projectId: string): ServiceAccount {
 export const TOP_LEVEL_COLLECTIONS = [
   'listings',
   'omi_prices',
+  'procedure_concorsuali',
   'meta',
   'runs',
   'settings',
@@ -143,6 +144,27 @@ async function seedOmiPrices(db: Firestore): Promise<number> {
     bw.set(db.collection('omi_prices').doc(String(row.id)), {
       ...withoutId(row),
       fetched_at: toTs(row.fetched_at as string),
+    });
+  }
+  await bw.close();
+  return rows.length;
+}
+
+/** Part A, Phase 14 (DATA_MODEL.md §17). Three documents deliberately chosen
+ *  to exercise every display state against the *existing* listing fixtures:
+ *  Bari 55/2023 matches listings 1020/1021 (+ archived 1050) with debtor
+ *  detail read; Roma 77/2022 matches 1030–1034 via a COMPOSITE rg
+ *  (`77-1/2022` → numero_base `77`) and has no detail yet
+ *  (`scheda_letta_il: null`); Milano 99/2020 matches no listing at all. Every
+ *  other seeded listing exercises the "no match" default. */
+async function seedProcedureConcorsuali(db: Firestore): Promise<number> {
+  const rows = loadJson<Array<Record<string, unknown>>>('procedure_concorsuali.json');
+  const bw = db.bulkWriter();
+  for (const row of rows) {
+    bw.set(db.collection('procedure_concorsuali').doc(String(row.id)), {
+      ...row, // `id` is kept: it is a real field too (DATA_MODEL.md §17)
+      estratto_il: toTs(row.estratto_il as string),
+      scheda_letta_il: toTs(row.scheda_letta_il as string | null),
     });
   }
   await bw.close();
@@ -358,6 +380,7 @@ export async function seedContent(db: Firestore): Promise<Record<string, number>
   return {
     listings: await seedListings(db),
     omi_prices: await seedOmiPrices(db),
+    procedure_concorsuali: await seedProcedureConcorsuali(db),
     meta: await seedMeta(db),
     runs: await seedRuns(db),
     settings: await seedSettings(db),
@@ -372,6 +395,7 @@ export async function seedAll(db: Firestore): Promise<Record<string, number>> {
   return {
     listings: await seedListings(db),
     omi_prices: await seedOmiPrices(db),
+    procedure_concorsuali: await seedProcedureConcorsuali(db),
     meta: await seedMeta(db),
     runs: await seedRuns(db),
     settings: await seedSettings(db),

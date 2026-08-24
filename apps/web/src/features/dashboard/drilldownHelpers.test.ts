@@ -29,6 +29,7 @@ function row(overrides: Partial<ListingRow>): ListingRow {
     link: 'https://pvp.example/1',
     blocco_key: null,
     archived_at: null,
+    has_procedura_concorsuale: false,
     ...overrides,
   };
 }

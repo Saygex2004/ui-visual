@@ -41,6 +41,34 @@ export const ListingRowSchema = z.object({
   link: z.string(),
   blocco_key: z.string().nullable(),
   archived_at: z.string().nullable(),
+  /** Presence-only flag (DOMAIN_RULES.md §12) — a matching procedura
+   *  concorsuale exists, regardless of whether its debtor detail has been
+   *  read yet. The actual facts are workspace-detail-only. */
+  has_procedura_concorsuale: z.boolean(),
+});
+
+/** Procedura concorsuale display entry (DOMAIN_RULES.md §12); the workspace
+ *  detail panel's data, joined server-side, never per-row. */
+export const ProceduraConcorsualeEntrySchema = z.object({
+  nome: z.string(),
+  tipo_code: z.string().nullable(),
+  tipo_procedura: z.string().nullable(),
+  professionista: z.string().nullable(),
+  giudice_delegato: z.string().nullable(),
+  debitore: z
+    .object({
+      codice_fiscale: z.string().nullable(),
+      partita_iva: z.string().nullable(),
+      ragione_sociale: z.string().nullable(),
+      citta: z.string().nullable(),
+      indirizzo: z.string().nullable(),
+    })
+    .nullable(),
+  link: z.string(),
+  // true once the source's detail page has been read (debtor facts present);
+  // mirrors OmiEntry's `available`, but here it means "scheda_letta_il set",
+  // not "no error" — DATA_MODEL.md §17.2.
+  available: z.boolean(),
 });
 
 export const ArchiveRowSchema = ListingRowSchema.extend({
@@ -83,6 +111,7 @@ export const AreaSnapshotSchema = z.object({
 });
 
 export type OmiEntry = z.infer<typeof OmiEntrySchema>;
+export type ProceduraConcorsualeEntry = z.infer<typeof ProceduraConcorsualeEntrySchema>;
 export type ListingRow = z.infer<typeof ListingRowSchema>;
 export type ArchiveRow = z.infer<typeof ArchiveRowSchema>;
 export type ClusterBlock = z.infer<typeof ClusterBlockSchema>;

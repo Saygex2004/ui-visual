@@ -123,6 +123,35 @@ The one place header figures come from mixed sources — fixed here so no implem
 
 A row moves to the session Archivio when `data_vendita < today` in the **viewer's** timezone (string comparison of `YYYY-MM-DD` against the client's local date — the dates are timezone-less by contract). A listing with `data_vendita == null` is **never** moved. This is client view state; nothing is written (`SPECIFICATIONS.md` §14).
 
+## 12. Procedura concorsuale matching (`DATA_MODEL.md` §17)
+
+A listing is joined to at most one `procedure_concorsuali` document, by the exact tuple `(tribunale key, numero, anno)` — never a fuzzy or partial match, same discipline as blocco grouping (§6).
+
+**Tribunale-key normalization** — applied identically to `listings.tribunale` and to `procedure_concorsuali.tribunale.nome` (the source collection already ships the normalized form as `tribunale.chiave`, computed by the scraper the same way; this function exists here so the **listing's own** raw `tribunale` string can be normalized to the same key before lookup):
+
+1. Unicode-normalize and strip accents/diacritics/apostrophes (`Forlì` / `Forli'` → `FORLI`).
+2. Strip a leading `"Tribunale di"` or `"Tribunale (ordinario) di"` (with or without the parenthesized word) prefix.
+3. Uppercase; collapse whitespace/punctuation runs to a single space; trim.
+4. Apply the override table below (dataset spelling → the *portale creditori* source's own abbreviated spelling), since PVP occasionally spells out a historical court merger in full where the source collection abbreviates it:
+
+| PVP-side normalized form | Overridden to |
+|---|---|
+| `NAPOLI NORD IN AVERSA` | `NAPOLI NORD` |
+| `VICENZA EX BASSANO DEL GRAPPA` | `VICENZA EX BASSANO` |
+
+**Match key construction:**
+
+- Listing side: `tribunaleKey(listings.tribunale) + listings.numero + listings.anno`; `null` (never attempted) if any of the three source fields is `null`.
+- Procedure side: keyed by `procedure_concorsuali.tribunale.chiave + rg.numero_base + rg.anno` (already-normalized fields — no re-normalization needed on this side, `rg.numero_base` not `rg.numero`, per `DATA_MODEL.md` §17.1).
+
+**Two display states, both non-error** (`DATA_MODEL.md` §17.2):
+
+- **No match** — render nothing extra; this is the default outcome for most listings, not a state to caption or explain.
+- **Match found, `scheda_letta_il` still null** — show the matched procedure's `nome`/`tipo_code`/`tribunale` and state that debtor details aren't collected yet; never show a `debitore` section with all-null fields as if it were populated.
+- **Match found, `scheda_letta_il` set** — show the full `debitore` facts (ragione sociale, codice fiscale, città, indirizzo) alongside `tipo_procedura`, `professionista`, `giudice_delegato`.
+
+**Table indicator:** every listing row carries a boolean, computed the same way (a match exists in the lookup map, regardless of whether its detail has been read yet) — a small presence indicator, not a data preview; the workspace detail panel is where the actual facts render.
+
 ## Appendix A (informative) — Procedural-category catalog
 
 The full rito-code catalog observed on real-estate listings, with the four-group presentation the admin panel renders as grouped checkboxes (UI §8.2). The **default selection** — in effect when `settings/extraction_categories` is absent — is the "base" insolvency set:

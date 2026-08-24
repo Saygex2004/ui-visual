@@ -30,8 +30,19 @@ RUNTIME_SA="${PVPDASH_RUNTIME_SA:-}"
 # `server` so attachments resolve to the correct bucket rather than the
 # hardcoded `${projectId}.appspot.com` default in firestore.ts. REQUIRED for `server`.
 STORAGE_BUCKET="${PVPDASH_STORAGE_BUCKET:-}"
-# min-instances: 0 = scale-to-zero (operator's choice for go-live; a cold start
-# of a few seconds, ~€0). Bump to 1 later for an always-warm instance.
+# min-instances: 0 = scale-to-zero (~€0 fixed cost; the tradeoff is a cold
+# start on the first request after idle, and — once procedure_concorsuali is
+# actually deployed (DATA_MODEL.md §17.3, not live yet as of this note) — a
+# cold start's snapshot rebuild would read the *entire* ~24k-document
+# collection for both scopes, which is real but small money even if it
+# happened often (§0.06/100k reads over the free tier). Briefly switched to 1
+# (2026-08) to test an always-warm instance (~€2-3/month fixed for the
+# reserved memory) and reverted the same day at the operator's request — not
+# worth a guaranteed monthly cost before the feature driving the read-volume
+# concern is even in production, and real Firestore read volume checked via
+# Cloud Monitoring turned out to be a few thousand/day on quiet days (well
+# under the 50k free quota) outside of active-development spikes. Revisit
+# once procedure_concorsuali is live and real usage data exists.
 MIN_INSTANCES="${PVPDASH_MIN_INSTANCES:-0}"
 # Mount the bootstrap-admin secret ONLY on the very first deploy of a fresh
 # project (PVPDASH_WITH_BOOTSTRAP=1). After the production bootstrap the secret

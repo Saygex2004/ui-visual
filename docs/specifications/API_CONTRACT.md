@@ -28,7 +28,7 @@ While `must_change_password` is set, every route except `/auth/me`, `/auth/passw
 | Method & path | Response | Semantics |
 |---|---|---|
 | `GET /areas/:area/snapshot` | `AreaSnapshot` | `area` ∈ `immobili` \| `corporate`. The entire pre-computed dataset for the area, from the server cache — never from Firestore directly. ETag = snapshot version. |
-| `GET /listings/:id` | `ListingDetail` | One listing in full: every stored field (untrimmed `descrizione`), its classification, blocco siblings (id + summary), OMI context per `DOMAIN_RULES.md` §9, current rating, thread summary (exists? unread? closed?), and the workspace header facts. `404` if unknown. |
+| `GET /listings/:id` | `ListingDetail` | One listing in full: every stored field (untrimmed `descrizione`), its classification, blocco siblings (id + summary), OMI context per `DOMAIN_RULES.md` §9, matched procedura concorsuale per `DOMAIN_RULES.md` §12 (`null` if none), current rating, thread summary (exists? unread? closed?), and the workspace header facts. `404` if unknown. |
 | `GET /listings/:id/activity` | `{ events: ActivityEvent[] }` | The workspace timeline, newest first (UI §4.5). |
 
 **`AreaSnapshot` shape (the payload budget):**
@@ -47,7 +47,7 @@ While `must_change_password` is set, every route except `/auth/me`, `/auth/passw
 }
 ```
 
-`ListingRow` carries exactly the UI §4.1 columns plus routing facts (`id`, geography, band, `blocco_key`, `archived_at`) — **`descrizione` trimmed to a 200-char excerpt** (credits tables render only an excerpt; the workspace fetches the full text via `GET /listings/:id`). Ratings are **not** embedded (they change on a faster clock — §4); the client joins them from the ratings poll. Target: a 10k-listing snapshot ≤ ~3 MB gzipped; the size is asserted in tests (`TESTING.md` §4).
+`ListingRow` carries exactly the UI §4.1 columns plus routing facts (`id`, geography, band, `blocco_key`, `archived_at`, `has_procedura_concorsuale` — a boolean presence flag only, per `DOMAIN_RULES.md` §12; the matched procedure's actual facts are workspace-detail-only, not in the row) — **`descrizione` trimmed to a 200-char excerpt** (credits tables render only an excerpt; the workspace fetches the full text via `GET /listings/:id`). Ratings are **not** embedded (they change on a faster clock — §4); the client joins them from the ratings poll. Target: a 10k-listing snapshot ≤ ~3 MB gzipped; the size is asserted in tests (`TESTING.md` §4).
 
 ## 4. Ratings (`/api/ratings`)
 

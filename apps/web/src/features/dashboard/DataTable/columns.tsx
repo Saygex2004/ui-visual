@@ -11,6 +11,7 @@ import type { AreaSlug, ListingRow, BloccoIndexEntry, ClusterBlock } from '@pvp/
 import type { SortKey } from '../urlState.js';
 import { OccupancyIndicator } from './OccupancyIndicator.js';
 import { BloccoBadge } from './BloccoBadge.js';
+import { ProceduraConcorsualeIndicator } from './ProceduraConcorsualeIndicator.js';
 import { RatingControl, RatingDot } from '../../ratings/RatingControl.js';
 import type { RatingsMap } from '../../ratings/join.js';
 import {
@@ -141,6 +142,18 @@ const BLOCCO: ColumnDef = {
   ),
 };
 
+/** Presence flag only (DOMAIN_RULES.md §12). The header is deliberately the
+ *  abbreviated "Proc." rather than the full "Procedura concorsuale": the cell
+ *  holds one small icon, and at any width that fits a boolean column the full
+ *  label would be clipped mid-word (observed: "PROC" at 40px). The full
+ *  meaning lives on the icon's own tooltip. */
+const PROCEDURA_CONCORSUALE: ColumnDef = {
+  key: 'procedura_concorsuale',
+  headerKey: 'table.columns.proceduraConcorsuale',
+  width: '58px',
+  render: (row) => <ProceduraConcorsualeIndicator present={row.has_procedura_concorsuale} />,
+};
+
 const TRIBUNALE: ColumnDef = {
   key: 'tribunale',
   headerKey: 'table.columns.tribunale',
@@ -243,6 +256,7 @@ const CALENDAR_COLUMNS: ColumnDef[] = [
 const REAL_ESTATE_COLUMNS: ColumnDef[] = [
   NUMERO_ANNO,
   BLOCCO,
+  PROCEDURA_CONCORSUALE,
   TIPO_TRIBUNALE,
   TIPO_PROCEDURA,
   DISPONIBILITA,
@@ -255,6 +269,7 @@ const REAL_ESTATE_COLUMNS: ColumnDef[] = [
 const CREDITS_COLUMNS: ColumnDef[] = [
   NUMERO_ANNO,
   BLOCCO,
+  PROCEDURA_CONCORSUALE,
   TIPO_TRIBUNALE,
   TIPO_PROCEDURA,
   DESCRIZIONE,

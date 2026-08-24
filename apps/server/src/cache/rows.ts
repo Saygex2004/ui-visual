@@ -3,15 +3,20 @@
 import {
   priceBand,
   bloccoKey,
+  hasProceduraConcorsuale,
   type Listing,
   type ListingRow,
   type OmiPrice,
   type OmiEntry,
+  type ProceduraConcorsualeDoc,
 } from '@pvp/shared';
 
 export const DESCRIZIONE_EXCERPT_MAX = 200;
 
-export function toListingRow(listing: Listing): ListingRow {
+export function toListingRow(
+  listing: Listing,
+  proceduraByKey: Readonly<Record<string, ProceduraConcorsualeDoc>>,
+): ListingRow {
   return {
     id: String(listing.id),
     tipo_bene: listing.tipo_bene,
@@ -31,6 +36,11 @@ export function toListingRow(listing: Listing): ListingRow {
     link: listing.link,
     blocco_key: bloccoKey(listing),
     archived_at: listing.archived_at,
+    has_procedura_concorsuale: hasProceduraConcorsuale(proceduraByKey, {
+      tribunale: listing.tribunale,
+      numero: listing.numero,
+      anno: listing.anno,
+    }),
   };
 }
 

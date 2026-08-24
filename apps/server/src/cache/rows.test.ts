@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { toListingRow, toOmiEntry, DESCRIZIONE_EXCERPT_MAX } from './rows.js';
-import { bloccoKey, type Listing, type OmiPrice } from '@pvp/shared';
+import { bloccoKey, type Listing, type OmiPrice, type ProceduraConcorsualeDoc } from '@pvp/shared';
+
+const NO_PROCEDURE: Record<string, ProceduraConcorsualeDoc> = {};
 
 function baseListing(overrides: Partial<Listing> = {}): Listing {
   return {
@@ -34,21 +36,50 @@ function baseListing(overrides: Partial<Listing> = {}): Listing {
 describe('toListingRow (API_CONTRACT.md section 3 - descrizione excerpt)', () => {
   it(`trims a long descrizione to ${DESCRIZIONE_EXCERPT_MAX} characters`, () => {
     const long = 'x'.repeat(500);
-    const row = toListingRow(baseListing({ descrizione: long }));
+    const row = toListingRow(baseListing({ descrizione: long }), NO_PROCEDURE);
     expect(row.descrizione_excerpt).toHaveLength(DESCRIZIONE_EXCERPT_MAX);
     expect(row.descrizione_excerpt).toBe(long.slice(0, DESCRIZIONE_EXCERPT_MAX));
   });
 
   it('leaves a short descrizione unchanged', () => {
-    const row = toListingRow(baseListing({ descrizione: 'Breve.' }));
+    const row = toListingRow(baseListing({ descrizione: 'Breve.' }), NO_PROCEDURE);
     expect(row.descrizione_excerpt).toBe('Breve.');
   });
 
   it('computes the blocco_key (via the shared bloccoKey rule, not a hardcoded separator) and band', () => {
     const fields = { tipo_procedura: 'P', tribunale: 'T', numero: '9', anno: '2026' };
-    const row = toListingRow(baseListing({ ...fields, valore_richiesto: 0 }));
+    const row = toListingRow(baseListing({ ...fields, valore_richiesto: 0 }), NO_PROCEDURE);
     expect(row.blocco_key).toBe(bloccoKey(fields));
     expect(row.band).toBe('bassa');
+  });
+});
+
+describe('toListingRow — has_procedura_concorsuale (DOMAIN_RULES.md section 12)', () => {
+  it('false when no matching procedure exists in the map', () => {
+    const row = toListingRow(baseListing(), NO_PROCEDURE);
+    expect(row.has_procedura_concorsuale).toBe(false);
+  });
+
+  it('true when the listing key matches a procedure in the map, regardless of scheda_letta_il', () => {
+    const listing = baseListing({ tribunale: 'Tribunale di Modena', numero: '76', anno: '2021' });
+    const byKey: Record<string, ProceduraConcorsualeDoc> = {
+      'MODENA 76 2021': {
+        id: 'x',
+        nome: 'Test',
+        rg: { completo: '76/2021', numero: '76', numero_base: '76', anno: 2021 },
+        data_dichiarazione: null,
+        tipo_code: null,
+        tipo_procedura: null,
+        tribunale: { nome: 'Modena', chiave: 'MODENA' },
+        professionista: null,
+        giudice_delegato: null,
+        debitore: null,
+        link: 'https://example.test',
+        estratto_il: '2026-01-01T00:00:00.000Z',
+        scheda_letta_il: null,
+      },
+    };
+    expect(toListingRow(listing, byKey).has_procedura_concorsuale).toBe(true);
   });
 });
 
