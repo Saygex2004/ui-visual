@@ -66,6 +66,21 @@ describe('buildMessage', () => {
     expect(msg).not.toContain('<srl>');
   });
 
+  it('carries the expected delivery date, written the Italian way', () => {
+    const msg = buildMessage(
+      pratica({
+        stato: 'spedito',
+        data_spedizione: '2026-08-21',
+        data_consegna_prevista: '2026-08-25',
+      }),
+      { kind: 'stato', precedente: 'estratto' },
+    );
+    expect(msg).toContain('*Consegna prevista:* 25/08/2026');
+    expect(msg).toContain('*Spedita il:* 21/08/2026');
+    // Never the stored form — nobody reads 2026-08-25 in a chat message.
+    expect(msg).not.toContain('2026-08-25');
+  });
+
   it('formats the cost in euros with an Italian comma', () => {
     expect(buildMessage(pratica({ costo_spedizione_cent: 1250 }), { kind: 'creata' })).toContain(
       '€ 12,50',

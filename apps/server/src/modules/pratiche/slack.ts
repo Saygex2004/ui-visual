@@ -34,6 +34,15 @@ const STATO_LABEL: Record<StatoPratica, string> = {
   archiviato: 'Archiviato / rientrato',
 };
 
+/** `2026-08-25` → `25/08/2026`. The stored form is ISO; nobody reading a
+ *  Slack message wants to parse that, and the rest of the product already
+ *  speaks Italian dates. */
+function data(iso: string | null): string | null {
+  if (iso == null) return null;
+  const [y, m, d] = iso.split('-');
+  return y && m && d ? `${d}/${m}/${y}` : iso;
+}
+
 function euro(cent: number | null): string | null {
   if (cent == null) return null;
   return `€ ${(cent / 100).toFixed(2).replace('.', ',')}`;
@@ -63,9 +72,10 @@ export function buildMessage(pratica: Pratica, evento: Evento, mentionId?: strin
     riga('Portafoglio', pratica.portafoglio),
     evento.kind === 'creata' ? riga('Stato', STATO_LABEL[pratica.stato]) : null,
     riga('Scatole', pratica.n_scatole),
-    riga('Spedita il', pratica.data_spedizione),
-    riga('Consegna prevista', pratica.data_consegna_prevista),
-    riga('Consegna effettiva', pratica.data_consegna_effettiva),
+    riga('Richiesta il', data(pratica.data_richiesta)),
+    riga('Spedita il', data(pratica.data_spedizione)),
+    riga('Consegna prevista', data(pratica.data_consegna_prevista)),
+    riga('Consegna effettiva', data(pratica.data_consegna_effettiva)),
     riga('Costo spedizione', euro(pratica.costo_spedizione_cent)),
     riga('Note', pratica.note),
   ].filter((r): r is string => r !== null);
