@@ -11,6 +11,7 @@ import { ConfirmDialog } from '../../components/ConfirmDialog.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
 import type { AdminUser } from '@pvp/shared';
 import { useSetPassword, useSetRole, useSetDisabled } from './hooks.js';
+import { VistePicker } from './VistePicker.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 import { formatTimestampDate } from '../dashboard/DataTable/formatting.js';
 
@@ -92,6 +93,9 @@ export function AccountRow({
         <td>{user.role === 'admin' ? t('accounts.roleAdmin') : t('accounts.roleUser')}</td>
         <td>{user.disabled ? t('accounts.stateDisabled') : t('accounts.stateActive')}</td>
         <td>{formatTimestampDate(user.created_at)}</td>
+        <td>
+          <VistePicker user={user} />
+        </td>
         <td className="admin-row-actions">
           <Button size="small" severity="secondary" onClick={() => setPasswordPanelOpen((v) => !v)}>
             {t('accounts.actionChangePassword')}

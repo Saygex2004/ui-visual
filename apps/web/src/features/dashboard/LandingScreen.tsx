@@ -7,7 +7,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, Building2, Coins, FileBox } from 'lucide-react';
-import type { AreaSlug } from '@pvp/shared';
+import { hasVista, type AreaSlug } from '@pvp/shared';
 import { Badge } from '../../components/Badge.js';
 import { useMe } from '../auth/hooks.js';
 import { useAreaSnapshot } from './hooks.js';
@@ -41,7 +41,10 @@ export function LandingScreen() {
   // has no snapshot, so it renders separately from the AREAS loop rather than
   // being bent into an AreaSlug it would never satisfy.
   const { data: me } = useMe();
-  const isAdmin = me?.user.role === 'admin';
+  // Rendering only; the server checks every route regardless. Falling back to
+  // "nothing" while `me` loads avoids flashing cards the account cannot open.
+  const conto = me?.user ?? { role: 'user' as const, viste: [] };
+  const vedePratiche = hasVista(conto, 'pratiche');
   const immobili = useAreaSnapshot('immobili');
   const crediti = useAreaSnapshot('crediti');
   const snapshots = { immobili, crediti } as const;
@@ -68,7 +71,7 @@ export function LandingScreen() {
         <p className="landing-subtitle">{t('landing.subtitle')}</p>
       </div>
       <div className="landing-options">
-        {AREAS.map((area) => {
+        {AREAS.filter((area) => hasVista(conto, area.slug)).map((area) => {
           const Icon = area.icon;
           const totalStored = snapshots[area.slug].data?.meta.total_stored;
           return (
@@ -101,7 +104,7 @@ export function LandingScreen() {
             </Link>
           );
         })}
-        {isAdmin ? (
+        {vedePratiche ? (
           <Link to="/pratiche" className="landing-option">
             <span className="landing-option-top">
               <span className="landing-option-icon landing-option-icon-pratiche">

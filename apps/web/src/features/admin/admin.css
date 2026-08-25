@@ -232,3 +232,38 @@
   gap: var(--space-2);
   font-size: var(--text-sm);
 }
+
+/* ---- per-account view grants ---- */
+
+.admin-viste {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 12rem;
+}
+
+.admin-viste-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.admin-viste-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-body);
+  white-space: nowrap;
+}
+
+.admin-viste-option input:disabled + *,
+.admin-viste-option:has(input:disabled) {
+  color: var(--color-text-muted);
+}
+
+.admin-viste-note {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}

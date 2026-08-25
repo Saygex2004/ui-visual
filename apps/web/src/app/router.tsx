@@ -14,7 +14,7 @@ import {
 } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
-import { AREA_SLUGS, type AreaSlug, type MeResponse } from '@pvp/shared';
+import { AREA_SLUGS, hasVista, type AreaSlug, type MeResponse, type Vista } from '@pvp/shared';
 import { LoginScreen } from '../features/auth/LoginScreen.js';
 import { AccountsScreen } from '../features/admin/AccountsScreen.js';
 import { CategoriesScreen } from '../features/admin/CategoriesScreen.js';
@@ -99,13 +99,15 @@ const areaRoute = createRoute({
   getParentRoute: () => protectedRoute,
   path: '/aste/$area',
   validateSearch: areaSearchSchema,
-  beforeLoad: ({ params }) => {
+  beforeLoad: ({ params, context }) => {
     // Not a search param (FRONTEND.md §2's "fall back silently" rule) — an
     // unrecognized area segment isn't a valid page at all, so it redirects
     // rather than degrading in place.
     if (!AREA_SLUGS.includes(params.area as AreaSlug)) {
       throw redirect({ to: '/' });
     }
+    // An area slug is also a vista code, by construction (constants/areas.ts).
+    requireVista(params.area as Vista)({ context });
   },
   component: AreaView,
 });
@@ -138,11 +140,21 @@ const adminRoute = createRoute({
 // Pratiche: admin-only like the /admin/* routes, but deliberately at the top
 // level — it is a view chosen from the landing screen, not an administration
 // screen, and nesting it under /admin would say the opposite.
+/** Redirects home when the account may not open this view. Presentation
+ *  only — the API refuses independently; this exists so a typed URL lands
+ *  somewhere sensible instead of on an empty screen full of errors. */
+function requireVista(vista: Vista) {
+  return ({ context }: { context: RouterContext }) => {
+    const me = context.queryClient.getQueryData<MeResponse>(meQueryKey);
+    if (me && !hasVista(me.user, vista)) throw redirect({ to: '/' });
+  };
+}
+
 const praticheRoute = createRoute({
   getParentRoute: () => protectedRoute,
   path: '/pratiche',
   validateSearch: praticheSearchSchema,
-  beforeLoad: requireAdmin,
+  beforeLoad: requireVista('pratiche'),
   component: PraticheScreen,
 });
 

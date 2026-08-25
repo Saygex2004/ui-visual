@@ -17,6 +17,8 @@ import type {
   ByIdAssignResponse,
   ListingSearchResponse,
   CalendarRow,
+  SetVisteRequest,
+  SetVisteResponse,
 } from '@pvp/shared';
 
 export function fetchUsers(): Promise<UsersResponse> {
@@ -82,4 +84,11 @@ export function searchListings(q: string): Promise<ListingSearchResponse> {
 
 export function byIdAssign(body: ByIdAssignRequest): Promise<ByIdAssignResponse> {
   return api.post<ByIdAssignResponse>('/admin/calendar/by-id', body);
+}
+
+export function setViste(
+  userId: string,
+  viste: SetVisteRequest['viste'],
+): Promise<SetVisteResponse> {
+  return api.post<SetVisteResponse>(`/admin/users/${userId}/viste`, { viste });
 }

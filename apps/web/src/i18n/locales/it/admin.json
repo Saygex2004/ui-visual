@@ -157,5 +157,16 @@
       "degraded": "Degradata",
       "failed": "Fallita"
     }
+  },
+  "viste": {
+    "label": "Viste",
+    "nomi": {
+      "immobili": "Cluster Immobiliari",
+      "crediti": "Cluster Crediti",
+      "pratiche": "Pratiche cartacee"
+    },
+    "nessuna": "Nessuna vista assegnata: questo account non vede nulla.",
+    "adminVedeTutto": "Gli amministratori vedono tutte le viste.",
+    "saveError": "Non è stato possibile salvare le viste."
   }
 }

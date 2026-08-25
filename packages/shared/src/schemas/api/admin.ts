@@ -1,7 +1,7 @@
 // API — administration bodies (API_CONTRACT.md §8).
 import { z } from 'zod';
 import { instant } from '../common.js';
-import { RoleSchema } from '../partB/accounts.js';
+import { RoleSchema, VistaSchema } from '../partB/accounts.js';
 import { UserPublicSchema } from './auth.js';
 import { AdminEventTypeSchema } from '../partB/adminEvents.js';
 import { RunSchema } from '../partA/run.js';
@@ -13,6 +13,7 @@ export const AdminUserSchema = z.object({
   disabled: z.boolean(),
   must_change_password: z.boolean(),
   created_at: z.string(),
+  viste: z.array(VistaSchema).default([]),
 });
 
 export const UsersResponseSchema = z.object({ users: z.array(AdminUserSchema) });
@@ -82,3 +83,9 @@ export type AdminEventView = z.infer<typeof AdminEventViewSchema>;
 export type EventsResponse = z.infer<typeof EventsResponseSchema>;
 export type SetCategoriesResponse = z.infer<typeof SetCategoriesResponseSchema>;
 export type RunsResponse = z.infer<typeof RunsResponseSchema>;
+
+export const SetVisteRequestSchema = z.object({ viste: z.array(VistaSchema) });
+export const SetVisteResponseSchema = z.object({ user: AdminUserSchema });
+
+export type SetVisteRequest = z.infer<typeof SetVisteRequestSchema>;
+export type SetVisteResponse = z.infer<typeof SetVisteResponseSchema>;

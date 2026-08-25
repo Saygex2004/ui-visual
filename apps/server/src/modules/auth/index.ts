@@ -1,7 +1,12 @@
 // Auth module (API_CONTRACT.md §2): login, logout, me, self password change.
 import type { Firestore } from 'firebase-admin/firestore';
 import type { FastifyInstance } from 'fastify';
-import { LoginRequestSchema, PasswordChangeRequestSchema, type UserPublic } from '@pvp/shared';
+import {
+  LoginRequestSchema,
+  PasswordChangeRequestSchema,
+  type UserPublic,
+  type Vista,
+} from '@pvp/shared';
 import { usersRepo, sessionsRepo } from '../../repositories/index.js';
 import { hashPassword, verifyPassword, verifyDummyPassword } from '../../lib/passwords.js';
 import { setSessionCookie, clearSessionCookie } from '../../plugins/auth.js';
@@ -12,12 +17,14 @@ function toPublic(user: {
   username: string;
   role: 'user' | 'admin';
   must_change_password: boolean;
+  viste: Vista[];
 }): UserPublic {
   return {
     id: user.id,
     username: user.username,
     role: user.role,
     must_change_password: user.must_change_password,
+    viste: user.viste,
   };
 }
 

@@ -8,8 +8,10 @@ import {
   CreateUserRequestSchema,
   SetPasswordRequestSchema,
   SetRoleRequestSchema,
+  SetVisteRequestSchema,
   type AdminUser,
   type UserPublic,
+  type Vista,
 } from '@pvp/shared';
 import { usersRepo, sessionsRepo, adminEventsRepo, runsRepo } from '../../repositories/index.js';
 import { hashPassword } from '../../lib/passwords.js';
@@ -23,6 +25,7 @@ function toAdminView(user: {
   disabled: boolean;
   must_change_password: boolean;
   created_at: string;
+  viste: Vista[];
 }): AdminUser {
   return {
     id: user.id,
@@ -31,6 +34,7 @@ function toAdminView(user: {
     disabled: user.disabled,
     must_change_password: user.must_change_password,
     created_at: user.created_at,
+    viste: user.viste,
   };
 }
 
@@ -39,12 +43,14 @@ function toPublic(user: {
   username: string;
   role: 'user' | 'admin';
   must_change_password: boolean;
+  viste: Vista[];
 }): UserPublic {
   return {
     id: user.id,
     username: user.username,
     role: user.role,
     must_change_password: user.must_change_password,
+    viste: user.viste,
   };
 }
 
@@ -112,6 +118,27 @@ export function registerAdminModule(app: FastifyInstance, deps: AdminModuleDeps)
       return reply.code(204).send();
     },
   );
+
+  app.post<{ Params: { id: string } }>('/admin/users/:id/viste', adminOnly, async (req) => {
+    const { id } = req.params;
+    const target = await usersRepo.getById(db, id);
+    if (!target) throw new ApiError(404, 'errors.common.notFound');
+
+    const parsed = SetVisteRequestSchema.safeParse(req.body);
+    if (!parsed.success) throw new ApiError(400, 'errors.common.validation');
+
+    // Deduplicated: the client sends the checked boxes, and a repeated code
+    // would otherwise be stored and shown back as a duplicate row.
+    const viste = [...new Set(parsed.data.viste)];
+    await usersRepo.setViste(db, id, viste);
+    await adminEventsRepo.append(db, {
+      type: 'viste_changed',
+      actor_id: req.user!.id,
+      subject: id,
+      details: { from: target.viste, to: viste },
+    });
+    return { user: toAdminView({ ...target, viste }) };
+  });
 
   app.post<{ Params: { id: string } }>('/admin/users/:id/role', adminOnly, async (req) => {
     const { id } = req.params;

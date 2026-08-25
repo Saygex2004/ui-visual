@@ -9,6 +9,8 @@ import { loadConfig } from '../../config.js';
 import { buildApp } from '../../app.js';
 import type { SnapshotCache } from '../../cache/index.js';
 import { reseed, testDb } from '../../testSupport/emulator.js';
+import { usersRepo } from '../../repositories/index.js';
+import type { Vista } from '@pvp/shared';
 import { loginAs } from '../../testSupport/auth.js';
 
 const TEST_ENV = {
@@ -65,14 +67,35 @@ describe('pratiche module (HTTP, over the emulator)', () => {
     });
   }
 
+  /** The fixture's `mrossi` carries must_change_password: true, and the auth
+   *  plugin refuses every route with 403 before any permission is consulted.
+   *  A test that skips this proves the password gate, not the one it claims —
+   *  which is exactly how the first version of the "refuses a non-admin" case
+   *  passed while asserting nothing about views. */
+  async function utenteNormale(viste: Vista[] = []): Promise<string> {
+    const u = await usersRepo.getByUsername(testDb(), 'mrossi');
+    await testDb().collection('users').doc(u!.id).update({ must_change_password: false });
+    await usersRepo.setViste(testDb(), u!.id, viste);
+    return loginAs(app, 'mrossi', 'UserPass123!');
+  }
+
   async function list(cookie = adminCookie) {
     return await app.inject({ method: 'GET', url: '/api/pratiche', headers: { cookie } });
   }
 
-  it('refuses every route to a non-admin, reads included', async () => {
-    // The register names who ordered each file; hiding the card in the client
-    // is presentation, this is the actual boundary.
-    const userCookie = await loginAs(app, 'mrossi', 'UserPass123!');
+  it('opens every route to a normal account once the view is granted', async () => {
+    // The point of assignable views: a grant has to actually mean something.
+    // Enforced here, at the API — the client hiding a card is presentation.
+    const userCookie = await utenteNormale(['pratiche']);
+    expect((await list(userCookie)).statusCode).toBe(200);
+    expect((await create({ ...NUOVA, ndg: 'DA-UTENTE' }, userCookie)).statusCode).toBe(201);
+  });
+
+  it('refuses every route to an account without the view, reads included', async () => {
+    // The register names who ordered each file; a read is not harmless here.
+    // Granted a DIFFERENT view, so a pass here could only come from the
+    // permission check itself — not from the account being unprivileged.
+    const userCookie = await utenteNormale(['immobili']);
     expect((await list(userCookie)).statusCode).toBe(403);
     expect((await create(NUOVA, userCookie)).statusCode).toBe(403);
     expect(

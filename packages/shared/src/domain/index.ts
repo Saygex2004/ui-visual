@@ -18,3 +18,4 @@ export * from './procedureConcorsuali.js';
 // would collide at the package root barrel. Only the functions are public;
 // callers passing/receiving rich-text nodes already have the schema type.
 export { sanitizeRichText, extractPlainText } from './richtext.js';
+export * from './viste.js';

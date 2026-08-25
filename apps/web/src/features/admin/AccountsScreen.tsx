@@ -45,6 +45,7 @@ export function AccountsScreen() {
                   <th>{t('accounts.columnRole')}</th>
                   <th>{t('accounts.columnState')}</th>
                   <th>{t('accounts.columnCreatedAt')}</th>
+                  <th>{t('viste.label')}</th>
                   <th>{t('accounts.columnActions')}</th>
                 </tr>
               </thead>

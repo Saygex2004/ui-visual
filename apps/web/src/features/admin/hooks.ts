@@ -1,5 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { CreateUserRequest, Role, RandomAssignRequest, ByIdAssignRequest } from '@pvp/shared';
+import type {
+  CreateUserRequest,
+  Role,
+  Vista,
+  RandomAssignRequest,
+  ByIdAssignRequest,
+} from '@pvp/shared';
 import * as adminApi from './api.js';
 
 export const adminUsersQueryKey = ['admin', 'users'] as const;
@@ -108,5 +114,14 @@ export function useListingSearch(q: string, enabled: boolean) {
 export function useByIdAssign() {
   return useMutation({
     mutationFn: (body: ByIdAssignRequest) => adminApi.byIdAssign(body),
+  });
+}
+
+export function useSetViste() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, viste }: { userId: string; viste: Vista[] }) =>
+      adminApi.setViste(userId, viste),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: adminUsersQueryKey }),
   });
 }

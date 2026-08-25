@@ -20,9 +20,12 @@ export interface PraticheModuleDeps {
 
 export function registerPraticheModule(app: FastifyInstance, deps: PraticheModuleDeps): void {
   const { db, slack = {} } = deps;
-  const adminOnly = { config: { auth: { role: 'admin' as const } } };
+  // Gated on the VIEW, not on the role: an administrator may now grant
+  // "Pratiche cartacee" to a normal account, and the grant has to actually
+  // mean something. Admins still pass — `hasVista` lets them through.
+  const richiedeVista = { config: { auth: { vista: 'pratiche' as const } } };
 
-  app.get('/pratiche', adminOnly, async () => {
+  app.get('/pratiche', richiedeVista, async () => {
     // Accounts ship with the list so `ordinato_da` can render as a person
     // rather than an opaque id. Only id and username: this endpoint has no
     // business exposing roles or account state.
@@ -37,7 +40,7 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
   // carries no statusCode, so the error handler would answer 500 and the
   // caller would read a bad NDG as a server fault (verified against the
   // emulator, 2026-08-24). This is the convention modules/calendar uses.
-  app.post('/pratiche', adminOnly, async (req, reply) => {
+  app.post('/pratiche', richiedeVista, async (req, reply) => {
     const parsed = CreatePraticaRequestSchema.safeParse(req.body);
     if (!parsed.success) throw new ApiError(400, 'errors.common.validation');
     const pratica = await praticheRepo.create(db, parsed.data, req.user!.id);
@@ -53,7 +56,7 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
     return { pratica };
   });
 
-  app.patch<{ Params: { id: string } }>('/pratiche/:id', adminOnly, async (req) => {
+  app.patch<{ Params: { id: string } }>('/pratiche/:id', richiedeVista, async (req) => {
     const parsed = UpdatePraticaRequestSchema.safeParse(req.body);
     if (!parsed.success) throw new ApiError(400, 'errors.common.validation');
     // Read before writing so the notification can name what actually changed;
@@ -67,7 +70,7 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
     return { pratica };
   });
 
-  app.delete<{ Params: { id: string } }>('/pratiche/:id', adminOnly, async (req, reply) => {
+  app.delete<{ Params: { id: string } }>('/pratiche/:id', richiedeVista, async (req, reply) => {
     const removed = await praticheRepo.remove(db, req.params.id);
     if (!removed) throw new ApiError(404, 'errors.common.notFound');
     return reply.code(204).send();

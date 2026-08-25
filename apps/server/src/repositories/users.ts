@@ -5,7 +5,7 @@
 // (TESTING.md §3: "username uniqueness under concurrent creates").
 import { randomUUID } from 'node:crypto';
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
-import { UserSchema, type User, type Role } from '@pvp/shared';
+import { UserSchema, type User, type Role, type Vista } from '@pvp/shared';
 import { firestoreToPlain } from './convert.js';
 
 const USERS = 'users';
@@ -49,6 +49,9 @@ export async function create(db: Firestore, input: NewUser): Promise<User> {
       role: input.role,
       disabled: false,
       must_change_password: input.mustChangePassword,
+      // No views by default: a new account sees nothing until an admin
+      // grants something, rather than silently inheriting access.
+      viste: [],
       created_at: FieldValue.serverTimestamp(),
       updated_at: FieldValue.serverTimestamp(),
     });
@@ -115,4 +118,14 @@ export async function isLastActiveAdmin(db: Firestore, id: string): Promise<bool
   const all = await listAll(db);
   const activeAdmins = all.filter((u) => u.role === 'admin' && !u.disabled);
   return activeAdmins.length <= 1 && activeAdmins.some((u) => u.id === id);
+}
+
+/** Replaces the granted views wholesale. A set operation, not add/remove:
+ *  the admin screen edits the whole list, and two concurrent partial updates
+ *  would otherwise interleave into a list neither admin chose. */
+export async function setViste(db: Firestore, id: string, viste: Vista[]): Promise<void> {
+  await db.collection(USERS).doc(id).update({
+    viste,
+    updated_at: FieldValue.serverTimestamp(),
+  });
 }

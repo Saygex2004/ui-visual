@@ -8,7 +8,7 @@
 import fastifyCookie from '@fastify/cookie';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import type { Firestore } from 'firebase-admin/firestore';
-import { type Role, type UserPublic } from '@pvp/shared';
+import { hasVista, type Role, type Vista, type UserPublic } from '@pvp/shared';
 import { usersRepo, sessionsRepo } from '../repositories/index.js';
 import { hashSessionToken } from '../lib/sessionToken.js';
 import { ApiError } from './errorEnvelope.js';
@@ -31,6 +31,11 @@ declare module 'fastify' {
       allowMustChange?: boolean;
       /** Minimum role required (checked after the must-change gate). */
       role?: Role;
+      /** View this route belongs to. Passes for an admin, or for an account
+       *  that has been granted it. Admins bypass deliberately: a permission
+       *  list that can lock the last administrator out of the screen which
+       *  edits permission lists is a trap. */
+      vista?: Vista;
     };
   }
 
@@ -91,6 +96,7 @@ export async function registerAuthPlugin(
       username: user.username,
       role: user.role,
       must_change_password: user.must_change_password,
+      viste: user.viste,
     };
     request.sessionHash = hash;
 
@@ -103,6 +109,10 @@ export async function registerAuthPlugin(
     }
 
     if (authConfig?.role && user.role !== authConfig.role) {
+      throw new ApiError(403, 'errors.auth.forbidden');
+    }
+
+    if (authConfig?.vista && !hasVista(request.user, authConfig.vista)) {
       throw new ApiError(403, 'errors.auth.forbidden');
     }
   });

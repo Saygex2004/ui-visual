@@ -6,6 +6,8 @@
 import type { Firestore } from 'firebase-admin/firestore';
 import type { FastifyInstance } from 'fastify';
 import {
+  hasVista,
+  type Vista,
   classifyListing,
   bloccoKey,
   AREA_SLUG_TO_SCOPE,
@@ -31,6 +33,12 @@ export function registerListingsModule(app: FastifyInstance, deps: ListingsModul
     const { area } = req.params;
     if (!VALID_AREA_SLUGS.has(area)) {
       throw new ApiError(404, 'errors.common.notFound');
+    }
+    // Checked here rather than in route config: the area is a path parameter,
+    // so which permission applies is only known per request. An area slug is
+    // also a vista code, by construction (constants/areas.ts).
+    if (!hasVista(req.user!, area as Vista)) {
+      throw new ApiError(403, 'errors.auth.forbidden');
     }
     const scope = AREA_SLUG_TO_SCOPE[area as AreaSlug];
     const snapshot = cache.get(scope);

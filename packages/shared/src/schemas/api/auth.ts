@@ -1,6 +1,6 @@
 // API — auth bodies (API_CONTRACT.md §2).
 import { z } from 'zod';
-import { RoleSchema } from '../partB/accounts.js';
+import { RoleSchema, VistaSchema } from '../partB/accounts.js';
 
 /** The account shape returned to the client — never the password hash. */
 export const UserPublicSchema = z.object({
@@ -8,6 +8,9 @@ export const UserPublicSchema = z.object({
   username: z.string(),
   role: RoleSchema,
   must_change_password: z.boolean(),
+  /** What this account may open. The client uses it to render the landing;
+   *  it is NOT the enforcement point — the server checks every route. */
+  viste: z.array(VistaSchema).default([]),
 });
 
 export const LoginRequestSchema = z.object({

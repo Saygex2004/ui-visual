@@ -24,6 +24,7 @@ export const ADMIN_EVENT_TYPES = [
   'account_disabled',
   'account_enabled',
   'categories_changed',
+  'viste_changed',
 ] as const;
 
 export type AdminEventType = (typeof ADMIN_EVENT_TYPES)[number];
