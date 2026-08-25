@@ -55,6 +55,24 @@ test.describe('admin: pratiche', () => {
     await expect(window.getByText('12')).toBeVisible();
     await window.getByRole('button', { name: 'Chiudi' }).click();
 
+    // The deep link the Slack notification carries: landing on that address
+    // must open this pratica's window, not just the list.
+    const id = new URL(page.url()).searchParams.get('pratica');
+    expect(id).toBeNull(); // closing cleared it
+    await page.getByRole('button', { name: NDG_A }).click();
+    const linked = new URL(page.url()).searchParams.get('pratica');
+    expect(linked).toBeTruthy();
+    await page.goto('/pratiche');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await page.goto(`/pratiche?pratica=${linked}`);
+    await expect(page.getByRole('heading', { name: 'Pratica 163354' })).toBeVisible();
+    await page.getByRole('button', { name: 'Chiudi' }).click();
+
+    // A stale id must land on the list, never on an error screen.
+    await page.goto('/pratiche?pratica=non-esiste-piu');
+    await expect(page.getByRole('heading', { name: 'Pratiche cartacee' })).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+
     // Filter down to one portfolio, then export: the file must contain exactly
     // the row on screen.
     await page.getByLabel('Filtra per portafoglio').selectOption('Augusto');

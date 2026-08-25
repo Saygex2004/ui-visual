@@ -118,82 +118,87 @@ export function WorkspacePanel() {
           if (!open) handleClose();
         }}
       >
-      <DialogPortal>
-        <DialogOverlay className="workspace-drawer-backdrop" />
-        <DialogContent
-          className="workspace-drawer-popup"
-          onEscapeKeyDown={(event) => {
-            // The chat tab's @-mention popup owns this Escape first — see
-            // activeMentionRegistry.ts for why the drawer can't just let its
-            // own Esc-close and the popup's Esc-close both run off the same
-            // event. If a mention was open, this closes it and keeps the
-            // drawer open; otherwise the drawer closes as normal.
-            if (closeActiveMention()) event.preventDefault();
-          }}
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            opener?.focus({ preventScroll: true });
-          }}
-        >
-          <div className="workspace-drawer-header">
-            <div className="workspace-drawer-heading">
-              {detail ? (
-                <span className="workspace-drawer-kicker">
-                  <RatingDot value={rating} />
-                  <span className="ui-micro-label">
-                    {formatText(detail.tipo_bene)}
-                    {' · '}
-                    {formatNumeroAnno(detail.numero, detail.anno)}
+        <DialogPortal>
+          <DialogOverlay className="workspace-drawer-backdrop" />
+          <DialogContent
+            className="workspace-drawer-popup"
+            onEscapeKeyDown={(event) => {
+              // The chat tab's @-mention popup owns this Escape first — see
+              // activeMentionRegistry.ts for why the drawer can't just let its
+              // own Esc-close and the popup's Esc-close both run off the same
+              // event. If a mention was open, this closes it and keeps the
+              // drawer open; otherwise the drawer closes as normal.
+              if (closeActiveMention()) event.preventDefault();
+            }}
+            onCloseAutoFocus={(event) => {
+              event.preventDefault();
+              opener?.focus({ preventScroll: true });
+            }}
+          >
+            <div className="workspace-drawer-header">
+              <div className="workspace-drawer-heading">
+                {detail ? (
+                  <span className="workspace-drawer-kicker">
+                    <RatingDot value={rating} />
+                    <span className="ui-micro-label">
+                      {formatText(detail.tipo_bene)}
+                      {' · '}
+                      {formatNumeroAnno(detail.numero, detail.anno)}
+                    </span>
                   </span>
-                </span>
-              ) : null}
-              <DialogTitle className="workspace-drawer-title">{title}</DialogTitle>
+                ) : null}
+                <DialogTitle className="workspace-drawer-title">{title}</DialogTitle>
+              </div>
+              <DialogClose className="workspace-drawer-close" aria-label={t('close')}>
+                <X aria-hidden="true" size={18} />
+              </DialogClose>
             </div>
-            <DialogClose className="workspace-drawer-close" aria-label={t('close')}>
-              <X aria-hidden="true" size={18} />
-            </DialogClose>
-          </div>
-          <div className="workspace-drawer-content">
-            {isLoading ? <StatusDisplay variant="loading" message={t('loading')} /> : null}
-            {isError ? (
-              <StatusDisplay variant="error" message={translateLoadError(t, error, 'loadError')} />
-            ) : null}
-            {detail ? (
-              <TabsRoot
-                className="workspace-tabs-root"
-                value={search.pannello}
-                onValueChange={(value) =>
-                  void navigate({ search: (prev) => ({ ...prev, pannello: value as PanelTab }) })
-                }
-              >
-                <TabsList className="ui-tabs-list workspace-tabs">
-                  <TabsTab value="dettagli" className="ui-tab">
-                    {t('tabs.dettagli')}
-                  </TabsTab>
-                  <TabsTab value="storico" className="ui-tab">
-                    {t('tabs.storico')}
-                  </TabsTab>
-                  <TabsTab value="chat" className="ui-tab">
-                    {t('tabs.chat')}
-                    {unread > 0 ? (
-                      <span className="ui-badge ui-badge-accent">{unread > 9 ? '9+' : unread}</span>
-                    ) : null}
-                  </TabsTab>
-                </TabsList>
-                <TabsPanel value="dettagli">
-                  <DettagliTab detail={detail} area={area as AreaSlug} search={search} />
-                </TabsPanel>
-                <TabsPanel value="storico">
-                  <ActivityTimeline listingId={id} />
-                </TabsPanel>
-                <TabsPanel value="chat">
-                  <ThreadView listingId={id} embedded />
-                </TabsPanel>
-              </TabsRoot>
-            ) : null}
-          </div>
-        </DialogContent>
-      </DialogPortal>
+            <div className="workspace-drawer-content">
+              {isLoading ? <StatusDisplay variant="loading" message={t('loading')} /> : null}
+              {isError ? (
+                <StatusDisplay
+                  variant="error"
+                  message={translateLoadError(t, error, 'loadError')}
+                />
+              ) : null}
+              {detail ? (
+                <TabsRoot
+                  className="workspace-tabs-root"
+                  value={search.pannello}
+                  onValueChange={(value) =>
+                    void navigate({ search: (prev) => ({ ...prev, pannello: value as PanelTab }) })
+                  }
+                >
+                  <TabsList className="ui-tabs-list workspace-tabs">
+                    <TabsTab value="dettagli" className="ui-tab">
+                      {t('tabs.dettagli')}
+                    </TabsTab>
+                    <TabsTab value="storico" className="ui-tab">
+                      {t('tabs.storico')}
+                    </TabsTab>
+                    <TabsTab value="chat" className="ui-tab">
+                      {t('tabs.chat')}
+                      {unread > 0 ? (
+                        <span className="ui-badge ui-badge-accent">
+                          {unread > 9 ? '9+' : unread}
+                        </span>
+                      ) : null}
+                    </TabsTab>
+                  </TabsList>
+                  <TabsPanel value="dettagli">
+                    <DettagliTab detail={detail} area={area as AreaSlug} search={search} />
+                  </TabsPanel>
+                  <TabsPanel value="storico">
+                    <ActivityTimeline listingId={id} />
+                  </TabsPanel>
+                  <TabsPanel value="chat">
+                    <ThreadView listingId={id} embedded />
+                  </TabsPanel>
+                </TabsRoot>
+              ) : null}
+            </div>
+          </DialogContent>
+        </DialogPortal>
       </DialogRoot>
     </>
   );

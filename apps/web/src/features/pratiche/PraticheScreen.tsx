@@ -3,6 +3,7 @@
 // serializes the same array — the export therefore always means "what I am
 // looking at", which is the whole point of having filters next to it.
 import { useMemo, useState } from 'react';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Download, Plus, Search } from 'lucide-react';
 import { STATI_PRATICA, type Pratica, type PraticaInput, type StatoPratica } from '@pvp/shared';
@@ -52,7 +53,12 @@ export function PraticheScreen() {
   const { data, isLoading, isError, error } = usePratiche();
   const create = useCreatePratica();
   const [filters, setFilters] = useState<PraticheFilters>(EMPTY_FILTERS);
-  const [aperta, setAperta] = useState<string | null>(null);
+  // Which window is open lives in the URL, not in component state: that is
+  // what gives a single pratica an address a Slack message can link to.
+  const { pratica: aperta } = useSearch({ from: '/protected-layout/pratiche' });
+  const navigate = useNavigate();
+  const setAperta = (id: string | undefined) =>
+    void navigate({ to: '/pratiche', search: id ? { pratica: id } : {}, replace: true });
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
@@ -237,7 +243,7 @@ export function PraticheScreen() {
           utenti={utenti}
           portafogliNoti={portafogli}
           nomeUtente={nomeUtente}
-          onClose={() => setAperta(null)}
+          onClose={() => setAperta(undefined)}
         />
       ) : null}
 

@@ -102,6 +102,7 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
           slack: {
             webhookUrl: config.PVPDASH_SLACK_WEBHOOK_URL,
             mentionId: config.PVPDASH_SLACK_MENTION_ID,
+            baseUrl: config.PVPDASH_PUBLIC_BASE_URL,
           },
         });
         registerRatingsModule(instance, { db });

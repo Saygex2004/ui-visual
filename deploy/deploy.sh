@@ -31,6 +31,10 @@ RUNTIME_SA="${PVPDASH_RUNTIME_SA:-}"
 # a deploy that forgot it would silently switch the notifications off, with no
 # error anywhere. The webhook itself is a secret and lives in Secret Manager.
 SLACK_MENTION_ID="${PVPDASH_SLACK_MENTION_ID:-U07JR3ASBDJ}"
+# Public origin, for the deep link inside Slack notifications. Defaulted for
+# the same reason as the mention: --set-env-vars replaces the whole set, so a
+# forgotten value silently strips the link.
+PUBLIC_BASE_URL="${PVPDASH_PUBLIC_BASE_URL:-https://pvp-aste.web.app}"
 # The real default Storage bucket name — read it from the Firebase console
 # (e.g. pvp-aste.appspot.com or pvp-aste.firebasestorage.app). REQUIRED for
 # `server` so attachments resolve to the correct bucket rather than the
@@ -95,7 +99,7 @@ deploy_server() {
     --max-instances 1 \
     --min-instances "${MIN_INSTANCES}" \
     --allow-unauthenticated \
-    --set-env-vars "PVPDASH_ENV=production,PVPDASH_FIRESTORE_PROJECT_ID=${PROJECT},PVPDASH_STORAGE_BUCKET=${STORAGE_BUCKET},PVPDASH_SLACK_MENTION_ID=${SLACK_MENTION_ID}" \
+    --set-env-vars "PVPDASH_ENV=production,PVPDASH_FIRESTORE_PROJECT_ID=${PROJECT},PVPDASH_STORAGE_BUCKET=${STORAGE_BUCKET},PVPDASH_SLACK_MENTION_ID=${SLACK_MENTION_ID},PVPDASH_PUBLIC_BASE_URL=${PUBLIC_BASE_URL}" \
     --set-secrets "${secrets}"
   echo "→ Verify now: curl \$(gcloud run services describe ${SERVICE} --region ${REGION} --project ${PROJECT} --format='value(status.url)')/readyz  → 200"
   echo "→ After the production bootstrap (first admin created + password changed), remove the bootstrap secret:"

@@ -19,6 +19,7 @@ import { LoginScreen } from '../features/auth/LoginScreen.js';
 import { AccountsScreen } from '../features/admin/AccountsScreen.js';
 import { CategoriesScreen } from '../features/admin/CategoriesScreen.js';
 import { PraticheScreen } from '../features/pratiche/PraticheScreen.js';
+import { praticheSearchSchema } from '../features/pratiche/praticheUrlState.js';
 import { AdminActivityScreen } from '../features/admin/AdminActivityScreen.js';
 import { CalendarAssignmentScreen } from '../features/admin/CalendarAssignmentScreen.js';
 import { LandingScreen } from '../features/dashboard/LandingScreen.js';
@@ -140,6 +141,7 @@ const adminRoute = createRoute({
 const praticheRoute = createRoute({
   getParentRoute: () => protectedRoute,
   path: '/pratiche',
+  validateSearch: praticheSearchSchema,
   beforeLoad: requireAdmin,
   component: PraticheScreen,
 });

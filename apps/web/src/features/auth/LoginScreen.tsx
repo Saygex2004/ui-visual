@@ -46,31 +46,31 @@ export function LoginScreen({ redirectTo }: { redirectTo?: string }) {
         <form className="auth-card" onSubmit={handleSubmit}>
           <h1 className="auth-title">{t('login.title')}</h1>
           <div className="auth-field">
-          <label htmlFor="login-username">{t('login.usernameLabel')}</label>
-          <TextInput
-            id="login-username"
-            name="username"
-            autoComplete="username"
-            required
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div className="auth-field">
-          <label htmlFor="login-password">{t('login.passwordLabel')}</label>
-          <PasswordInput
-            id="login-password"
-            name="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={setPassword}
-          />
-        </div>
-        {errorMessage ? <StatusDisplay variant="error" message={errorMessage} /> : null}
-        <Button type="submit" severity="brand" disabled={login.isPending}>
-          {t('login.submit')}
-        </Button>
+            <label htmlFor="login-username">{t('login.usernameLabel')}</label>
+            <TextInput
+              id="login-username"
+              name="username"
+              autoComplete="username"
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+          <div className="auth-field">
+            <label htmlFor="login-password">{t('login.passwordLabel')}</label>
+            <PasswordInput
+              id="login-password"
+              name="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={setPassword}
+            />
+          </div>
+          {errorMessage ? <StatusDisplay variant="error" message={errorMessage} /> : null}
+          <Button type="submit" severity="brand" disabled={login.isPending}>
+            {t('login.submit')}
+          </Button>
         </form>
       </section>
     </main>

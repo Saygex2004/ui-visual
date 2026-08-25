@@ -81,6 +81,39 @@ describe('buildMessage', () => {
     expect(msg).not.toContain('2026-08-25');
   });
 
+  it('links straight to the pratica, in Slack link syntax', () => {
+    const msg = buildMessage(pratica({ id: 'abc123' }), { kind: 'creata' }, 'U9', 'https://x.test');
+    // <url|label>, not a bare URL — a bare one renders as the raw address.
+    expect(msg).toContain('<https://x.test/pratiche?pratica=abc123|Apri la pratica →>');
+  });
+
+  it('escapes an id that would otherwise break the query string', () => {
+    const msg = buildMessage(
+      pratica({ id: 'a b&c' }),
+      { kind: 'creata' },
+      undefined,
+      'https://x.test',
+    );
+    expect(msg).toContain('pratica=a%20b%26c');
+  });
+
+  it('tolerates a base URL with a trailing slash without doubling it', () => {
+    const msg = buildMessage(
+      pratica({ id: 'z' }),
+      { kind: 'creata' },
+      undefined,
+      'https://x.test/',
+    );
+    expect(msg).toContain('https://x.test/pratiche?pratica=z');
+    expect(msg).not.toContain('x.test//pratiche');
+  });
+
+  it('omits the link entirely when no base URL is configured', () => {
+    // Better no link than a relative one Slack renders as dead text.
+    const msg = buildMessage(pratica(), { kind: 'creata' });
+    expect(msg).not.toContain('Apri la pratica');
+  });
+
   it('formats the cost in euros with an Italian comma', () => {
     expect(buildMessage(pratica({ costo_spedizione_cent: 1250 }), { kind: 'creata' })).toContain(
       '€ 12,50',

@@ -17,6 +17,9 @@ export interface SlackConfig {
    *  work: `@mario` typed into text renders as literal characters and
    *  notifies nobody. */
   mentionId?: string;
+  /** Public origin of the dashboard, used to build the deep link. Absent =
+   *  no link in the message rather than a broken relative one. */
+  baseUrl?: string;
 }
 
 /** Slack mrkdwn reserves exactly these three; everything else is literal.
@@ -55,10 +58,15 @@ function riga(label: string, value: string | null): string | null {
 export type Evento = { kind: 'creata' } | { kind: 'stato'; precedente: StatoPratica };
 
 /**
- * The message text for one event. Pure: no network, no config lookup beyond
- * the mention, so what Slack will receive is assertable in a unit test.
+ * The message text for one event. Pure: no network, no config lookup, so what
+ * Slack will receive is assertable in a unit test.
  */
-export function buildMessage(pratica: Pratica, evento: Evento, mentionId?: string): string {
+export function buildMessage(
+  pratica: Pratica,
+  evento: Evento,
+  mentionId?: string,
+  baseUrl?: string,
+): string {
   const mention = mentionId ? `<@${mentionId}> ` : '';
   const titolo =
     evento.kind === 'creata'
@@ -80,7 +88,14 @@ export function buildMessage(pratica: Pratica, evento: Evento, mentionId?: strin
     riga('Note', pratica.note),
   ].filter((r): r is string => r !== null);
 
-  return [titolo, ...dettagli].join('\n');
+  // `<url|text>` is Slack's link syntax; a bare URL would render as the raw
+  // address. Points at the pratica itself, not the list — the window has its
+  // own address precisely so this link can exist.
+  const link = baseUrl
+    ? `<${baseUrl.replace(/\/$/, '')}/pratiche?pratica=${encodeURIComponent(pratica.id)}|Apri la pratica →>`
+    : null;
+
+  return [titolo, ...dettagli, ...(link ? ['', link] : [])].join('\n');
 }
 
 interface Logger {
@@ -103,7 +118,9 @@ export async function notify(
     const res = await fetch(config.webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: buildMessage(pratica, evento, config.mentionId) }),
+      body: JSON.stringify({
+        text: buildMessage(pratica, evento, config.mentionId, config.baseUrl),
+      }),
       // Slack is not on the critical path; a hung webhook must not hold a
       // request open behind it.
       signal: AbortSignal.timeout(5_000),

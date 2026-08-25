@@ -39,6 +39,9 @@ const ConfigSchema = z.object({
   // display name — "@mario" in message text notifies nobody.
   PVPDASH_SLACK_WEBHOOK_URL: z.string().url().optional(),
   PVPDASH_SLACK_MENTION_ID: z.string().min(1).optional(),
+  // Public origin of the dashboard, for the deep link in notifications.
+  // Absent = the message carries no link, rather than a broken relative one.
+  PVPDASH_PUBLIC_BASE_URL: z.string().url().optional(),
 
   PVPDASH_LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
