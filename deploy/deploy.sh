@@ -25,6 +25,12 @@ SERVICE="${PVPDASH_SERVICE:-pvp-dashboard-api}"
 # service runs AS this identity (datastore.user + storage.objectAdmin on the
 # attachments bucket + token creator on itself). REQUIRED for `server`.
 RUNTIME_SA="${PVPDASH_RUNTIME_SA:-}"
+# Slack member ID mentioned by the pratiche notifications (CONFIGURATION.md).
+# Not a secret — a member ID identifies, it does not authorize. Defaulted here
+# rather than left to the caller because --set-env-vars REPLACES the whole set:
+# a deploy that forgot it would silently switch the notifications off, with no
+# error anywhere. The webhook itself is a secret and lives in Secret Manager.
+SLACK_MENTION_ID="${PVPDASH_SLACK_MENTION_ID:-U07JR3ASBDJ}"
 # The real default Storage bucket name — read it from the Firebase console
 # (e.g. pvp-aste.appspot.com or pvp-aste.firebasestorage.app). REQUIRED for
 # `server` so attachments resolve to the correct bucket rather than the
@@ -77,6 +83,7 @@ deploy_server() {
   #   /api/** rewrite forwards public traffic here. --max-instances 1 is the
   #   in-process snapshot cache's correctness setting (SPECIFICATIONS.md §8).
   local secrets="PVPDASH_SESSION_SECRET=PVPDASH_SESSION_SECRET:latest"
+  secrets="${secrets},PVPDASH_SLACK_WEBHOOK_URL=PVPDASH_SLACK_WEBHOOK_URL:latest"
   if [ "${WITH_BOOTSTRAP}" = "1" ]; then
     secrets="${secrets},PVPDASH_BOOTSTRAP_ADMIN_PASSWORD=PVPDASH_BOOTSTRAP_ADMIN_PASSWORD:latest"
   fi
@@ -88,7 +95,7 @@ deploy_server() {
     --max-instances 1 \
     --min-instances "${MIN_INSTANCES}" \
     --allow-unauthenticated \
-    --set-env-vars "PVPDASH_ENV=production,PVPDASH_FIRESTORE_PROJECT_ID=${PROJECT},PVPDASH_STORAGE_BUCKET=${STORAGE_BUCKET}" \
+    --set-env-vars "PVPDASH_ENV=production,PVPDASH_FIRESTORE_PROJECT_ID=${PROJECT},PVPDASH_STORAGE_BUCKET=${STORAGE_BUCKET},PVPDASH_SLACK_MENTION_ID=${SLACK_MENTION_ID}" \
     --set-secrets "${secrets}"
   echo "→ Verify now: curl \$(gcloud run services describe ${SERVICE} --region ${REGION} --project ${PROJECT} --format='value(status.url)')/readyz  → 200"
   echo "→ After the production bootstrap (first admin created + password changed), remove the bootstrap secret:"
