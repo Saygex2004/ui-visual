@@ -41,10 +41,14 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
     const parsed = CreatePraticaRequestSchema.safeParse(req.body);
     if (!parsed.success) throw new ApiError(400, 'errors.common.validation');
     const pratica = await praticheRepo.create(db, parsed.data, req.user!.id);
-    // Deliberately not awaited: the pratica is already saved, and the caller
-    // should not wait on Slack — nor fail if it is down. `notify` never
-    // throws, so there is no unhandled rejection to leak here.
-    void notify(slack, pratica, { kind: 'creata' }, req.log);
+    // AWAITED, not fire-and-forget. Cloud Run throttles a container's CPU to
+    // near zero the moment the response is sent, so a promise left running
+    // after `return` is simply cut off — sometimes it wins the race, usually
+    // not. That shipped as "some notifications arrive, some don't", with no
+    // error logged anywhere because the fetch never got far enough to fail.
+    // `notify` never throws and carries its own 5s timeout, so awaiting it
+    // bounds the request instead of risking it.
+    await notify(slack, pratica, { kind: 'creata' }, req.log);
     reply.code(201);
     return { pratica };
   });
@@ -58,7 +62,7 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
     const pratica = await praticheRepo.patch(db, req.params.id, parsed.data, req.user!.id);
     if (!pratica) throw new ApiError(404, 'errors.common.notFound');
     if (prima && prima.stato !== pratica.stato) {
-      void notify(slack, pratica, { kind: 'stato', precedente: prima.stato }, req.log);
+      await notify(slack, pratica, { kind: 'stato', precedente: prima.stato }, req.log);
     }
     return { pratica };
   });

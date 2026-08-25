@@ -224,6 +224,46 @@ describe('pratiche module (HTTP, over the emulator)', () => {
     }
   });
 
+  it('waits for the notification before answering — Cloud Run kills what it does not wait for', async () => {
+    // The regression this pins: with `void notify(...)` the response returned
+    // first, Cloud Run throttled the container's CPU, and the in-flight fetch
+    // was cut off. Some notifications arrived, most did not, and nothing was
+    // logged because the request never got far enough to fail.
+    //
+    // Asserting "fetch was called" would NOT catch that — it is called either
+    // way. So: hold the fetch open and prove the HTTP response is still
+    // pending, which is only true if the handler awaits it.
+    let release!: () => void;
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(async () => {
+        await gate;
+        return { ok: true, status: 200 };
+      }),
+    );
+    try {
+      let risposto = false;
+      const inFlight = create(NUOVA).then((r) => {
+        risposto = true;
+        return r;
+      });
+      // A generous wait, not one tick: app.inject() takes several turns of the
+      // loop to settle, so a single setImmediate leaves `risposto` false even
+      // in the broken version — the first draft of this test passed against
+      // the very bug it was meant to pin.
+      await new Promise((r) => setTimeout(r, 100));
+      expect(risposto).toBe(false); // still waiting on Slack
+
+      release();
+      expect((await inFlight).statusCode).toBe(201);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('still creates the pratica when Slack is unreachable', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')));
     try {
