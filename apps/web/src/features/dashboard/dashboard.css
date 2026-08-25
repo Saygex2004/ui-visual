@@ -114,9 +114,13 @@
   color: var(--color-success-strong);
 }
 
+/* A soft/strong pair like the other two cards, NOT brand-fill/brand-strong:
+   in light mode both of those resolve to the same dark navy, so the icon was
+   navy on navy and effectively invisible. Only dark mode happened to work,
+   where the pair inverts. Amber also keeps the three cards distinguishable. */
 .landing-option-icon-pratiche {
-  background: var(--color-brand-fill);
-  color: var(--color-brand-strong);
+  background: var(--color-warning-soft);
+  color: var(--color-warning-strong);
 }
 
 .landing-option-title {

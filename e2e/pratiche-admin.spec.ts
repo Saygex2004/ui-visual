@@ -1,6 +1,6 @@
-// The pratiche view end to end: the landing card is admin-only, the full
-// create → open window → edit → export round-trip works, and the CSV that
-// comes down is the FILTERED set, not the whole register. That last point is
+// The pratiche view end to end: the full create → open window → edit →
+// export round-trip, and the workbook that comes down carrying the FILTERED
+// set, not the whole register. That last point is
 // the one worth an e2e test: the table and the export are wired to the same
 // function precisely so they cannot diverge, and this is what proves it in a
 // real browser rather than in a unit test of that function.
@@ -36,9 +36,9 @@ test.describe('admin: pratiche', () => {
   test('create, open the window, edit, and export only the filtered rows', async ({ page }) => {
     await loginAsAdmin(page);
 
-    await page.getByRole('link', { name: /Pratiche/ }).click();
+    await page.getByRole('link', { name: /Pratiche cartacee/ }).click();
     await expect(page).toHaveURL(/\/pratiche/);
-    await expect(page.getByRole('heading', { name: 'Pratiche' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Pratiche cartacee' })).toBeVisible();
 
     await creaPratica(page, { ndg: NDG_A, numero: '163354', portafoglio: 'Augusto', scatole: '3' });
     await creaPratica(page, { ndg: NDG_B, numero: '888111', portafoglio: 'Diocleziano' });
@@ -55,7 +55,7 @@ test.describe('admin: pratiche', () => {
     await expect(window.getByText('12')).toBeVisible();
     await window.getByRole('button', { name: 'Chiudi' }).click();
 
-    // Filter down to one vehicle, then export: the file must contain exactly
+    // Filter down to one portfolio, then export: the file must contain exactly
     // the row on screen.
     await page.getByLabel('Filtra per portafoglio').selectOption('Augusto');
     await expect(page.getByRole('button', { name: NDG_A })).toBeVisible();

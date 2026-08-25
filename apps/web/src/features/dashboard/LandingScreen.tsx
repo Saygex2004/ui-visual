@@ -6,7 +6,7 @@
 // "coming soon" placeholders); the grid is ready for future cards.
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
-import { ArrowRight, Building2, Coins, FolderArchive } from 'lucide-react';
+import { ArrowRight, Building2, Coins, FileBox } from 'lucide-react';
 import type { AreaSlug } from '@pvp/shared';
 import { Badge } from '../../components/Badge.js';
 import { useMe } from '../auth/hooks.js';
@@ -105,7 +105,7 @@ export function LandingScreen() {
           <Link to="/pratiche" className="landing-option">
             <span className="landing-option-top">
               <span className="landing-option-icon landing-option-icon-pratiche">
-                <FolderArchive aria-hidden="true" size={22} />
+                <FileBox aria-hidden="true" size={22} />
               </span>
               <Badge variant="accent">{t('landing.adminBadge')}</Badge>
             </span>
