@@ -97,7 +97,13 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
         registerAdminCalendarModule(instance, { db });
         registerCalendarModule(instance, { db });
         registerSettingsModule(instance, { db, cache: primedCache });
-        registerPraticheModule(instance, { db });
+        registerPraticheModule(instance, {
+          db,
+          slack: {
+            webhookUrl: config.PVPDASH_SLACK_WEBHOOK_URL,
+            mentionId: config.PVPDASH_SLACK_MENTION_ID,
+          },
+        });
         registerRatingsModule(instance, { db });
         registerActivityModule(instance, { db });
         registerListingsModule(instance, { cache: primedCache, db });

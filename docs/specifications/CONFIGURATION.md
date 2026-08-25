@@ -56,3 +56,14 @@ Deliberately **not** environment variables (changing them is a reviewed code cha
 ## 6. `.env.example`
 
 Phase 0 creates `.env.example` at the repo root listing every variable above with its default or a `<placeholder>`, and a `.gitignore` covering `.env`, `*.local`, and any service-account JSON. The example file is documentation; it never contains real values.
+
+## Slack (registro pratiche cartacee)
+
+| Variabile | Obbligatoria | Significato |
+|---|---|---|
+| `PVPDASH_SLACK_WEBHOOK_URL` | no | Incoming Webhook di Slack. **Assente = notifiche spente**, che è lo stato giusto in sviluppo e sull'emulatore. È un segreto: va in Secret Manager, mai in un file del repository. |
+| `PVPDASH_SLACK_MENTION_ID` | no | Slack **member ID** da menzionare (es. `U01234ABC`). Non è il nome utente: `@mario` scritto nel testo compare come caratteri letterali e non notifica nessuno. |
+
+Le notifiche partono dal server Cloud Run, non da una Cloud Function — nessuna Function in questo progetto è un vincolo di costo permanente. Nulla a che vedere con l'integrazione Slack della console Firebase, che riporta eventi di piattaforma (budget, crash, rilasci) e non conosce i dati dell'applicazione.
+
+Un invio fallito viene registrato e ignorato: una pratica salvata resta salvata anche se Slack è irraggiungibile.

@@ -3,7 +3,7 @@
 // → delete, and the shapes the schema is there to enforce (trimming to null,
 // exact cents, valid stage, ISO dates). Fixture accounts: admin/AdminPass123! is an admin,
 // mrossi/UserPass123! is not (seed/fixtures/users.json).
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { loadConfig } from '../../config.js';
 import { buildApp } from '../../app.js';
@@ -18,6 +18,8 @@ const TEST_ENV = {
   PVPDASH_LOG_LEVEL: 'silent',
   PVPDASH_META_POLL_SECONDS: '3600',
   PVPDASH_SESSION_TTL_DAYS: '30',
+  PVPDASH_SLACK_WEBHOOK_URL: 'https://hooks.slack.test/x',
+  PVPDASH_SLACK_MENTION_ID: 'U01234ABC',
 } satisfies NodeJS.ProcessEnv;
 
 const NUOVA = {
@@ -189,6 +191,48 @@ describe('pratiche module (HTTP, over the emulator)', () => {
         })
       ).statusCode,
     ).toBe(404);
+  });
+
+  it('notifies Slack on creation and on a stage change, but not otherwise', async () => {
+    // The wiring, not the message: a patch that leaves `stato` alone must stay
+    // silent, or every edited note would ping someone.
+    const fetchSpy = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+    vi.stubGlobal('fetch', fetchSpy);
+    try {
+      const id = (await create(NUOVA)).json().pratica.id;
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(fetchSpy.mock.calls[0]![1].body).text).toContain('<@U01234ABC>');
+
+      await app.inject({
+        method: 'PATCH',
+        url: `/api/pratiche/${id}`,
+        headers: { cookie: adminCookie },
+        payload: { note: 'solo una nota' },
+      });
+      expect(fetchSpy).toHaveBeenCalledTimes(1); // unchanged: no transition
+
+      await app.inject({
+        method: 'PATCH',
+        url: `/api/pratiche/${id}`,
+        headers: { cookie: adminCookie },
+        payload: { stato: 'consegnato' },
+      });
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(JSON.parse(fetchSpy.mock.calls[1]![1].body).text).toContain('Consegnato');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('still creates the pratica when Slack is unreachable', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')));
+    try {
+      const res = await create({ ...NUOVA, ndg: 'SENZA-SLACK' });
+      expect(res.statusCode).toBe(201);
+      expect(res.json().pratica.ndg).toBe('SENZA-SLACK');
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('deletes, and the pratica stops being listed', async () => {

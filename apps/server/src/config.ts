@@ -33,6 +33,13 @@ const ConfigSchema = z.object({
   PVPDASH_SIGNED_URL_TTL_MINUTES: z.coerce.number().int().positive().default(15),
   PVPDASH_MESSAGE_MAX_CHARS: z.coerce.number().int().positive().default(4000),
   PVPDASH_CALENDAR_DAILY_TARGET: z.coerce.number().int().positive().default(18),
+  // Slack Incoming Webhook for the pratiche register. Both optional: absent
+  // means notifications are simply off, which is what local development and
+  // the emulator want. The mention is a Slack MEMBER ID (U01234ABC), not a
+  // display name — "@mario" in message text notifies nobody.
+  PVPDASH_SLACK_WEBHOOK_URL: z.string().url().optional(),
+  PVPDASH_SLACK_MENTION_ID: z.string().min(1).optional(),
+
   PVPDASH_LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
     .default('info'),

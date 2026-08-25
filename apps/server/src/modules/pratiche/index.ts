@@ -10,13 +10,16 @@ import type { FastifyInstance } from 'fastify';
 import { CreatePraticaRequestSchema, UpdatePraticaRequestSchema } from '@pvp/shared';
 import { praticheRepo, usersRepo } from '../../repositories/index.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
+import { notify, type SlackConfig } from './slack.js';
 
 export interface PraticheModuleDeps {
   db: Firestore;
+  /** Absent or unconfigured = notifications off. */
+  slack?: SlackConfig;
 }
 
 export function registerPraticheModule(app: FastifyInstance, deps: PraticheModuleDeps): void {
-  const { db } = deps;
+  const { db, slack = {} } = deps;
   const adminOnly = { config: { auth: { role: 'admin' as const } } };
 
   app.get('/pratiche', adminOnly, async () => {
@@ -38,6 +41,10 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
     const parsed = CreatePraticaRequestSchema.safeParse(req.body);
     if (!parsed.success) throw new ApiError(400, 'errors.common.validation');
     const pratica = await praticheRepo.create(db, parsed.data, req.user!.id);
+    // Deliberately not awaited: the pratica is already saved, and the caller
+    // should not wait on Slack — nor fail if it is down. `notify` never
+    // throws, so there is no unhandled rejection to leak here.
+    void notify(slack, pratica, { kind: 'creata' }, req.log);
     reply.code(201);
     return { pratica };
   });
@@ -45,8 +52,14 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
   app.patch<{ Params: { id: string } }>('/pratiche/:id', adminOnly, async (req) => {
     const parsed = UpdatePraticaRequestSchema.safeParse(req.body);
     if (!parsed.success) throw new ApiError(400, 'errors.common.validation');
+    // Read before writing so the notification can name what actually changed;
+    // a patch that leaves `stato` alone must not announce a transition.
+    const prima = await praticheRepo.getById(db, req.params.id);
     const pratica = await praticheRepo.patch(db, req.params.id, parsed.data, req.user!.id);
     if (!pratica) throw new ApiError(404, 'errors.common.notFound');
+    if (prima && prima.stato !== pratica.stato) {
+      void notify(slack, pratica, { kind: 'stato', precedente: prima.stato }, req.log);
+    }
     return { pratica };
   });
 
