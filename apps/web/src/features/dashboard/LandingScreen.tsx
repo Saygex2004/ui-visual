@@ -45,8 +45,11 @@ export function LandingScreen() {
   // "nothing" while `me` loads avoids flashing cards the account cannot open.
   const conto = me?.user ?? { role: 'user' as const, viste: [] };
   const vedePratiche = hasVista(conto, 'pratiche');
-  const immobili = useAreaSnapshot('immobili');
-  const crediti = useAreaSnapshot('crediti');
+  // Only fetched where the account may actually open the area: an unpermitted
+  // request is refused anyway, and it would still cost the auth path's reads
+  // — once a minute, forever, thanks to the poll.
+  const immobili = useAreaSnapshot('immobili', hasVista(conto, 'immobili'));
+  const crediti = useAreaSnapshot('crediti', hasVista(conto, 'crediti'));
   const snapshots = { immobili, crediti } as const;
 
   const lastSuccess = [immobili.data?.meta.last_success_at, crediti.data?.meta.last_success_at]

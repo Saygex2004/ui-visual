@@ -3,6 +3,7 @@
 // beforeLoad), so both are constructed together.
 // i18n is initialized as a side effect of importing ../i18n.
 import { StrictMode, useState } from 'react';
+import { shouldRetry } from '../lib/retryPolicy.js';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
 import { createAppRouter } from './router.js';
@@ -13,7 +14,11 @@ export function AppProviders() {
     () =>
       new QueryClient({
         defaultOptions: {
-          queries: { refetchOnWindowFocus: false, staleTime: 30_000 },
+          queries: {
+            refetchOnWindowFocus: false,
+            staleTime: 30_000,
+            retry: shouldRetry,
+          },
         },
       }),
   );
