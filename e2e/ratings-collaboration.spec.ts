@@ -17,7 +17,7 @@
 // `data-rating` marking, which is what this test actually observes for
 // cross-actor propagation, is unchanged.
 import { expect, test, type Page } from '@playwright/test';
-import { loginAsAdmin, openUserMenuItem } from './helpers.js';
+import { grantVista, loginAsAdmin, openUserMenuItem } from './helpers.js';
 
 const NEW_USERNAME = `collaboratore-${Date.now()}`;
 const NEW_TEMP_PASSWORD = 'TempCollab123!';
@@ -51,6 +51,9 @@ test.describe('ratings collaboration', () => {
     await page.getByLabel('Password', { exact: true }).fill(NEW_TEMP_PASSWORD);
     await page.getByRole('button', { name: 'Crea account' }).click();
     await expect(page.getByText(`Account "${NEW_USERNAME}" creato.`)).toBeVisible();
+    // Born blind: since the viste permissions, a new account sees no view at
+    // all until an admin grants one. B is about to watch the immobili table.
+    await grantVista(page, NEW_USERNAME, 'Cluster Immobiliari');
 
     // Actor B: own browser context (own cookie jar), signs in, completes the
     // forced password change, then watches the same table A will act on.

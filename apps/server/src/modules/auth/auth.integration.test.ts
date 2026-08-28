@@ -66,7 +66,16 @@ describe('auth module (HTTP, over the emulator)', () => {
     });
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({
-      user: { id: 'user-admin-1', username: 'admin', role: 'admin', must_change_password: false },
+      user: {
+        id: 'user-admin-1',
+        username: 'admin',
+        role: 'admin',
+        must_change_password: false,
+        // Empty, not populated: admins bypass the vista checks entirely, so
+        // there is nothing to grant them. The field ships anyway because the
+        // public user shape is one shape for every role.
+        viste: [],
+      },
     });
     const cookie = extractCookie(res);
     expect(cookie.httpOnly).toBe(true);

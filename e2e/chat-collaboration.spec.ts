@@ -19,7 +19,13 @@
 // (dashboard/menu badges), openThread ~7.5s (an already-open thread picking
 // up a peer's message or a close/reopen).
 import { test, expect } from '@playwright/test';
-import { clickExpectingConfirm, loginAsAdmin, openRowChat, openUserMenuItem } from './helpers.js';
+import {
+  grantVista,
+  clickExpectingConfirm,
+  loginAsAdmin,
+  openRowChat,
+  openUserMenuItem,
+} from './helpers.js';
 
 const RUN_ID = Date.now();
 const USERNAME_B = `collega-b-${RUN_ID}`;
@@ -79,6 +85,10 @@ test.describe('chat collaboration', () => {
     await openUserMenuItem(page, 'admin', 'Amministrazione');
     await createAccount(page, USERNAME_B);
     await createAccount(page, USERNAME_C);
+    // Same reason as in ratings-collaboration: a new account holds no vista,
+    // and both colleagues are about to open the immobili listing.
+    await grantVista(page, USERNAME_B, 'Cluster Immobiliari');
+    await grantVista(page, USERNAME_C, 'Cluster Immobiliari');
 
     // B and C each get their own browser context (own cookie jar) and land
     // on the same table admin will act on, watching for the badge to appear.

@@ -110,3 +110,24 @@ export async function loginAsAdmin(page: Page): Promise<void> {
   }
   await expect(page.getByRole('button', { name: 'admin' })).toBeVisible();
 }
+
+// Grants one vista to an account through the admin panel, as an administrator
+// would. Since the viste permissions landed, a freshly created account sees
+// NOTHING until an admin ticks something — so every e2e actor born inside a
+// test has to pass through here before it can reach a listing. That is not a
+// workaround: it is the product's own onboarding path, exercised for real.
+export async function grantVista(page: Page, username: string, vistaLabel: string): Promise<void> {
+  // goto, not the user menu: two grants in a row would otherwise reopen the
+  // menu on /admin and click the already-active item, which Radix animates
+  // forever ("element is not stable"). A direct goto is stable from anywhere.
+  await page.goto('/admin');
+  const row = page.locator('tr', { hasText: username });
+  await expect(row).toHaveCount(1);
+  const box = row.getByRole('checkbox', { name: vistaLabel });
+  // click(), not check(): the box is a controlled input whose checked state
+  // only flips after the PATCH round-trips and the accounts query refetches,
+  // and check() refuses a click that does not change the DOM synchronously.
+  await box.click();
+  // ...and this wait is what makes the grant safe to navigate away from.
+  await expect(box).toBeChecked();
+}

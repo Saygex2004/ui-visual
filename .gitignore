@@ -37,3 +37,6 @@ e2e/.auth/
 .DS_Store
 *.log
 .vite/
+
+# Screenshot di lavoro (verifiche visive locali), non fanno parte del progetto
+*-shots/

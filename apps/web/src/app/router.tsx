@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react';
 // TanStack Router — typed routes (FRONTEND.md §2). Phase 3 adds the auth
 // guard: `/login` is the only public route; everything else lives under a
 // pathless `protectedRoute` layout whose `beforeLoad` ensures a session
@@ -21,7 +22,21 @@ import { CategoriesScreen } from '../features/admin/CategoriesScreen.js';
 import { CartaTemplatesScreen } from '../features/admin/CartaTemplatesScreen.js';
 import { PraticheScreen } from '../features/pratiche/PraticheScreen.js';
 import { praticheSearchSchema } from '../features/pratiche/praticheUrlState.js';
-import { CartaScreen } from '../features/carta/CartaScreen.js';
+// Loaded on demand, not with the app: the letterhead view pulls in the Word
+// generation library, and that is dead weight in the first download for
+// everyone who does not hold the `carta` view — which, by design, is most
+// people. It arrives when the route is opened.
+const CartaScreen = lazy(() =>
+  import('../features/carta/CartaScreen.js').then((m) => ({ default: m.CartaScreen })),
+);
+
+function CartaLazy() {
+  return (
+    <Suspense fallback={null}>
+      <CartaScreen />
+    </Suspense>
+  );
+}
 import { AdminActivityScreen } from '../features/admin/AdminActivityScreen.js';
 import { CalendarAssignmentScreen } from '../features/admin/CalendarAssignmentScreen.js';
 import { LandingScreen } from '../features/dashboard/LandingScreen.js';
@@ -164,7 +179,7 @@ const cartaRoute = createRoute({
   getParentRoute: () => protectedRoute,
   path: '/carta',
   beforeLoad: requireVista('carta'),
-  component: CartaScreen,
+  component: CartaLazy,
 });
 
 const adminCategoriesRoute = createRoute({
