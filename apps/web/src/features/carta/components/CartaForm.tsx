@@ -5,7 +5,8 @@
 import { useTranslation } from 'react-i18next';
 import { Section } from './Section.js';
 import { CorpoEditor } from './CorpoEditor.js';
-import { Campo, Scelte } from './Campo.js';
+import { CitazioneProposta } from './CitazioneProposta.js';
+import { Campo, ImportoLettere, Scelte } from './Campo.js';
 import { Field } from '../../../components/Field.js';
 import {
   AZIENDE,
@@ -15,6 +16,7 @@ import {
   type Azienda,
 } from '../data/aziende.js';
 import { importoInLettere } from '../utils/numeroInLettere.js';
+import { COPPIE_LETTERE as COPPIE, type CampoImporto } from '../utils/lettere.js';
 import {
   missingAccettazione,
   missingAcquisto,
@@ -33,6 +35,9 @@ export interface CartaFormProps {
   set: <K extends keyof CartaFormData>(campo: K, valore: CartaFormData[K]) => void;
   /** Fills the recipient block from a company already on file. */
   compilaDestinatario: (az: Azienda) => void;
+  /** Which amounts the user is spelling out by hand. */
+  lettereManuali: Partial<Record<CampoImporto, boolean>>;
+  cambiaModoLettere: (campo: CampoImporto) => void;
 }
 
 const ASSUNTO_EXTRA: { id: AssuntoExtra; chiave: string }[] = [
@@ -42,11 +47,34 @@ const ASSUNTO_EXTRA: { id: AssuntoExtra; chiave: string }[] = [
   { id: 'libero', chiave: 'scelte.assuntoLibero' },
 ];
 
-export function CartaForm({ azienda, tipo, formData, set, compilaDestinatario }: CartaFormProps) {
+export function CartaForm({
+  azienda,
+  tipo,
+  formData,
+  set,
+  compilaDestinatario,
+  lettereManuali,
+  cambiaModoLettere,
+}: CartaFormProps) {
   const { t } = useTranslation('carta');
   const f = formData;
-  /** The amount spelled out, shown under the figure so a typo is visible. */
+  /** The amount spelled out, shown under the figure so a typo is visible.
+   *  Used for the amounts the document computes inline; the five that carry a
+   *  stored companion get the editable field below instead. */
   const inLettere = (v: string) => (v ? importoInLettere(v) : '');
+
+  const campoLettere = (campo: CampoImporto, valore: string, id: string) => (
+    <ImportoLettere
+      id={id}
+      label={t('fields.inLettere')}
+      value={valore}
+      manuale={lettereManuali[campo] ?? false}
+      onToggle={() => cambiaModoLettere(campo)}
+      onChange={(v) => set(COPPIE[campo], v)}
+      autoLabel={t('actions.lettereAuto')}
+      manualeLabel={t('actions.lettereManuale')}
+    />
+  );
 
   return (
     <>
@@ -148,8 +176,8 @@ export function CartaForm({ azienda, tipo, formData, set, compilaDestinatario }:
               label={t('fields.importo')}
               value={f.importo}
               onChange={(v) => set('importo', v)}
-              hint={inLettere(f.importo)}
             />
+            {campoLettere('importo', f.importoLettere, 'c-importo-lettere')}
             <Campo
               id="c-scadenza"
               label={t('fields.scadenza')}
@@ -274,8 +302,8 @@ export function CartaForm({ azienda, tipo, formData, set, compilaDestinatario }:
             label={t('fields.importoCrediti')}
             value={f.importoCrediti}
             onChange={(v) => set('importoCrediti', v)}
-            hint={inLettere(f.importoCrediti)}
           />
+          {campoLettere('importoCrediti', f.importoCreditiLettere, 'c-crediti-lettere')}
           <Scelte
             id="c-corrisp-tipo"
             label={t('fields.corrispettivoTipo')}
@@ -290,8 +318,8 @@ export function CartaForm({ azienda, tipo, formData, set, compilaDestinatario }:
             label={t('fields.corrispettivo')}
             value={f.corrispettivo}
             onChange={(v) => set('corrispettivo', v)}
-            hint={inLettere(f.corrispettivo)}
           />
+          {campoLettere('corrispettivo', f.corrispettivoLettere, 'c-corrisp-lettere')}
           {f.corrispettivoTipo === 'earnout' ? (
             <>
               <Campo
@@ -299,8 +327,8 @@ export function CartaForm({ azienda, tipo, formData, set, compilaDestinatario }:
                 label={t('fields.earnoutSoglia')}
                 value={f.earnoutSoglia}
                 onChange={(v) => set('earnoutSoglia', v)}
-                hint={inLettere(f.earnoutSoglia)}
               />
+              {campoLettere('earnoutSoglia', f.earnoutSogliaLettere, 'c-eo-soglia-lettere')}
               <Campo
                 id="c-eo-scadenza"
                 label={t('fields.earnoutScadenza')}
@@ -313,8 +341,8 @@ export function CartaForm({ azienda, tipo, formData, set, compilaDestinatario }:
                 label={t('fields.earnoutImporto')}
                 value={f.earnoutImporto}
                 onChange={(v) => set('earnoutImporto', v)}
-                hint={inLettere(f.earnoutImporto)}
               />
+              {campoLettere('earnoutImporto', f.earnoutImportoLettere, 'c-eo-importo-lettere')}
             </>
           ) : null}
           <Campo
@@ -383,15 +411,10 @@ export function CartaForm({ azienda, tipo, formData, set, compilaDestinatario }:
 
       {tipo === 'accettazione' ? (
         <Section title={t('sezioni.accettazione')} missing={missingAccettazione(f)}>
-          <Field label={t('fields.propostaOriginale')} htmlFor="c-proposta-orig">
-            <textarea
-              id="c-proposta-orig"
-              className="carta-textarea"
-              rows={8}
-              value={f.testoPropostaOriginale}
-              onChange={(e) => set('testoPropostaOriginale', e.target.value)}
-            />
-          </Field>
+          <CitazioneProposta
+            value={f.testoPropostaOriginale}
+            onChange={(html) => set('testoPropostaOriginale', html)}
+          />
         </Section>
       ) : null}
 

@@ -13,6 +13,8 @@ import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { AZIENDE, TIPI_DOCUMENTO, type Azienda } from './data/aziende.js';
 import { DocumentPreview } from './components/DocumentPreview.js';
 import { CartaForm } from './components/CartaForm.js';
+import { COPPIE_LETTERE, haLettere, type CampoImporto } from './utils/lettere.js';
+import { importoInLettere } from './utils/numeroInLettere.js';
 import { generateDocx } from './utils/docxGenerator.js';
 import { missingTutto } from './utils/validazione.js';
 import { datiIniziali } from './formState.js';
@@ -39,8 +41,37 @@ export function CartaScreen() {
   const azienda = useMemo(() => AZIENDE.find((a) => a.id === azId) ?? AZIENDE[0]!, [azId]);
   const mancanti = useMemo(() => missingTutto(tipo, azienda, formData), [tipo, azienda, formData]);
 
+  // Which amounts the user has taken over by hand. Everything else keeps its
+  // words in step with the figure automatically.
+  const [lettereManuali, setLettereManuali] = useState<Partial<Record<CampoImporto, boolean>>>({});
+
   const set = <K extends keyof CartaFormData>(campo: K, valore: CartaFormData[K]) =>
-    setFormData((f) => ({ ...f, [campo]: valore }));
+    setFormData((f) => {
+      const next = { ...f, [campo]: valore };
+      // Typing a figure rewrites its companion in words, in the same update:
+      // the document quotes both, and a figure that has moved on while its
+      // words have not is exactly the discrepancy that makes the words
+      // authoritative in the first place. Unless the user is writing them.
+      if (haLettere(campo) && !lettereManuali[campo]) {
+        const parola = typeof valore === 'string' && valore ? importoInLettere(valore) : '';
+        next[COPPIE_LETTERE[campo]] = parola;
+      }
+      return next;
+    });
+
+  // Handing the words back to the machine recomputes them at once, so the
+  // field cannot sit there stale and grey after the switch.
+  const cambiaModoLettere = (campo: CampoImporto) =>
+    setLettereManuali((m) => {
+      const eraManuale = m[campo] ?? false;
+      if (eraManuale) {
+        setFormData((f) => ({
+          ...f,
+          [COPPIE_LETTERE[campo]]: f[campo] ? importoInLettere(f[campo]) : '',
+        }));
+      }
+      return { ...m, [campo]: !eraManuale };
+    });
 
   // Fills the recipient block from a company already on file. One state
   // update, not six calls to `set`: the six fields belong to a single act,
@@ -137,6 +168,8 @@ export function CartaScreen() {
             formData={formData}
             set={set}
             compilaDestinatario={compilaDestinatario}
+            lettereManuali={lettereManuali}
+            cambiaModoLettere={cambiaModoLettere}
           />
 
           {mancanti.length > 0 ? (

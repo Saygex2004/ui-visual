@@ -54,21 +54,28 @@
     "firmatarioCarica": "Qualifica",
     "firmatario2Nome": "Nome (secondo firmatario)",
     "firmatario2Carica": "Qualifica (secondo firmatario)",
-    "destinatarioDaAzienda": "Compila da azienda"
+    "destinatarioDaAzienda": "Compila da azienda",
+    "inLettere": "Importo in lettere"
   },
   "actions": {
     "download": "Scarica Word",
     "generating": "Generazione…",
     "zoomIn": "Ingrandisci anteprima",
     "zoomOut": "Riduci anteprima",
-    "zoomValue": "{{pct}}%"
+    "zoomValue": "{{pct}}%",
+    "lettereAuto": "↺ automatico",
+    "lettereManuale": "✎ scrivi a mano",
+    "fileCarica": "Carica .docx o .txt",
+    "fileCambia": "File caricato — clicca per cambiare",
+    "fileInLettura": "Lettura del file…"
   },
   "states": {
     "missing": "Da completare: {{campi}}",
     "sectionMissing": "Da compilare: {{campi}}."
   },
   "errors": {
-    "generateFailed": "Non è stato possibile generare il documento."
+    "generateFailed": "Non è stato possibile generare il documento.",
+    "fileNonLetto": "Non è stato possibile leggere il file. Controlla che si apra in Word, oppure incolla il testo qui sotto."
   },
   "sezioni": {
     "mittente": "Mittente",

@@ -54,3 +54,54 @@ export function Scelte({ id, label, value, onChange, children }: ScelteProps) {
     </SelectField>
   );
 }
+
+export interface ImportoLettereProps {
+  id: string;
+  label: string;
+  value: string;
+  manuale: boolean;
+  onToggle: () => void;
+  onChange: (v: string) => void;
+  autoLabel: string;
+  manualeLabel: string;
+}
+
+/** The amount written out, shown as its own field rather than as a hint under
+ *  the figure: it is text that will appear in the letter, so it has to be
+ *  visible before it is signed — and correctable, because spelling out an
+ *  amount is a judgement the machine can get wrong on an unusual figure. */
+export function ImportoLettere({
+  id,
+  label,
+  value,
+  manuale,
+  onToggle,
+  onChange,
+  autoLabel,
+  manualeLabel,
+}: ImportoLettereProps) {
+  return (
+    <div className="carta-lettere">
+      <div className="carta-lettere-head">
+        <label className="ui-micro-label" htmlFor={id}>
+          {label}
+        </label>
+        <button
+          type="button"
+          className="carta-lettere-toggle"
+          onClick={onToggle}
+          aria-pressed={manuale}
+        >
+          {manuale ? autoLabel : manualeLabel}
+        </button>
+      </div>
+      <TextInput
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        readOnly={!manuale}
+        aria-readonly={!manuale}
+      />
+    </div>
+  );
+}
