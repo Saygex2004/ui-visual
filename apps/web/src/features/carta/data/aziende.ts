@@ -246,15 +246,20 @@ export const AZIENDE: Azienda[] = [
   },
 ];
 
-// Firmatari più frequenti nelle dichiarazioni (rinuncia a crediti, ecc.)
-export const FIRMATARI_FREQUENTI = [
+// Firmatari più frequenti nelle dichiarazioni (rinuncia a crediti, ecc.).
+// Questi sono i nomi *di fabbrica*: un amministratore può sostituirli dal
+// pannello, e in quel caso valgono i suoi (vedi utils/anagrafica.ts).
+export const FIRMATARI_FREQUENTI: Firmatario[] = [
   { nome: 'Silvia Caviglia', carica: 'Amministratore Unico', genere: 'F' },
   { nome: 'Santo Logoteta', carica: 'legale rappresentante', genere: 'M' },
   { nome: 'Nicolò Maria Ravizza', carica: 'legale rappresentante', genere: 'M' },
 ];
 
 // Qualifiche selezionabili per il firmatario nella dichiarazione sostitutiva (rinuncia a crediti)
-export const QUALIFICHE_RINUNCIA = ['legale rappresentante', 'Amministratore Unico'];
+export const QUALIFICHE_RINUNCIA: readonly string[] = [
+  'legale rappresentante',
+  'Amministratore Unico',
+];
 
 // Veicoli di cartolarizzazione (Cessionari) nell'interesse dei quali Duepuntozero NPL
 // formula le offerte di acquisto crediti — dati da Centri_di_costo.xlsx.

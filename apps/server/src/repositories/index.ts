@@ -23,3 +23,4 @@ export * as attachmentsRepo from './attachments.js';
 export * as calendarRepo from './calendar.js';
 export * as praticheRepo from './pratiche.js';
 export * as cartaTemplateRepo from './cartaTemplate.js';
+export * as cartaFirmatariRepo from './cartaFirmatari.js';

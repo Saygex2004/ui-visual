@@ -13,12 +13,15 @@ import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { AZIENDE, TIPI_DOCUMENTO, type Azienda } from './data/aziende.js';
 import { DocumentPreview } from './components/DocumentPreview.js';
 import { CartaForm } from './components/CartaForm.js';
+import { Section } from './components/Section.js';
 import { COPPIE_LETTERE, haLettere, type CampoImporto } from './utils/lettere.js';
+import { anagraficaEffettiva } from './utils/anagrafica.js';
 import { importoInLettere } from './utils/numeroInLettere.js';
+import { oggettoPerTipo } from './utils/oggetto.js';
 import { generateDocx } from './utils/docxGenerator.js';
 import { missingTutto } from './utils/validazione.js';
 import { datiIniziali } from './formState.js';
-import { useCartaTemplates } from './hooks.js';
+import { useCartaTemplates, useCartaFirmatari } from './hooks.js';
 import { testiEffettivi } from './utils/testiEffettivi.js';
 import type { CartaFormData, TipoLettera } from './types.js';
 import './carta.css';
@@ -34,6 +37,9 @@ export function CartaScreen() {
   // The admin's overrides, where any exist; the shipped text otherwise.
   const { data: templates } = useCartaTemplates();
   const overrides = useMemo(() => templates?.templates ?? [], [templates]);
+  // Same contract for who may sign: the admin's list where one exists.
+  const { data: firmatariData } = useCartaFirmatari();
+  const anagrafica = useMemo(() => anagraficaEffettiva(firmatariData?.anagrafica), [firmatariData]);
   const [zoom, setZoom] = useState(0.9);
   const [generando, setGenerando] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
@@ -101,6 +107,9 @@ export function CartaScreen() {
     const testi = testiEffettivi(nuovo, overrides);
     setFormData((f) => ({
       ...f,
+      // The subject names the instrument, so it follows the type — unless the
+      // user has written their own, which survives the switch untouched.
+      oggetto: oggettoPerTipo(nuovo, f.oggetto),
       apertura: testi.apertura,
       testo: testi.corpo,
       chiusura: testi.chiusura,
@@ -136,31 +145,36 @@ export function CartaScreen() {
 
       <div className="carta-layout">
         <div className="carta-form">
-          <SelectField
-            label={t('fields.azienda')}
-            id="carta-azienda"
-            value={azId}
-            onChange={(e) => setAzId(e.target.value)}
-          >
-            {AZIENDE.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.nome ?? a.id}
-              </option>
-            ))}
-          </SelectField>
+          {/* The two choices everything else depends on, in their own block:
+              which company is writing, and what kind of document it is. They
+              decide which of the blocks below even appear. */}
+          <Section title={t('sezioni.documento')}>
+            <SelectField
+              label={t('fields.azienda')}
+              id="carta-azienda"
+              value={azId}
+              onChange={(e) => setAzId(e.target.value)}
+            >
+              {AZIENDE.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.nome ?? a.id}
+                </option>
+              ))}
+            </SelectField>
 
-          <SelectField
-            label={t('fields.tipo')}
-            id="carta-tipo"
-            value={tipo}
-            onChange={(e) => cambiaTipo(e.target.value as TipoLettera)}
-          >
-            {TIPI_DOCUMENTO.map((td) => (
-              <option key={td.id} value={td.id}>
-                {td.label}
-              </option>
-            ))}
-          </SelectField>
+            <SelectField
+              label={t('fields.tipo')}
+              id="carta-tipo"
+              value={tipo}
+              onChange={(e) => cambiaTipo(e.target.value as TipoLettera)}
+            >
+              {TIPI_DOCUMENTO.map((td) => (
+                <option key={td.id} value={td.id}>
+                  {td.label}
+                </option>
+              ))}
+            </SelectField>
+          </Section>
 
           <CartaForm
             azienda={azienda}
@@ -170,6 +184,7 @@ export function CartaScreen() {
             compilaDestinatario={compilaDestinatario}
             lettereManuali={lettereManuali}
             cambiaModoLettere={cambiaModoLettere}
+            anagrafica={anagrafica}
           />
 
           {mancanti.length > 0 ? (

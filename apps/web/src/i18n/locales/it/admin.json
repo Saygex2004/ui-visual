@@ -43,7 +43,8 @@
     "linkCalendarAssignment": "Assegnazione calendario",
     "linkCategories": "Categorie di estrazione",
     "linkActivity": "Attività amministrativa",
-    "linkCartaTemplates": "Testi della carta intestata"
+    "linkCartaTemplates": "Testi della carta intestata",
+    "linkCartaFirmatari": "Firmatari della carta intestata"
   },
   "calendarAssignment": {
     "title": "Amministrazione — Assegnazione calendario",
@@ -202,5 +203,36 @@
     "loadError": "Non è stato possibile caricare i testi.",
     "confirmTitle": "Salvare comunque?",
     "confirmSave": "Salva comunque"
+  },
+  "firmatari": {
+    "titolo": "Firmatari della carta intestata",
+    "sottotitolo": "Chi può firmare i documenti, con quale qualifica. Il sesso decide fra «Il sottoscritto» e «La sottoscritta» nella dichiarazione della rinuncia a crediti.",
+    "diFabbrica": "Elenco di fabbrica",
+    "persone": "Persone",
+    "nome": "Nome e cognome",
+    "carica": "Carica",
+    "genere": "Sesso",
+    "generi": {
+      "M": "Maschile",
+      "F": "Femminile"
+    },
+    "rimuovi": "Togli dalla lista",
+    "aggiungiPersona": "Aggiungi persona",
+    "qualifiche": "Qualifiche",
+    "qualificheAiuto": "Proposte come «in qualità di…» nella dichiarazione della rinuncia a crediti.",
+    "qualifica": "Qualifica",
+    "aggiungiQualifica": "Aggiungi qualifica",
+    "righeVuote": "Completa o togli le righe rimaste vuote prima di salvare.",
+    "salva": "Salva",
+    "salvataggio": "Salvataggio…",
+    "salvato": "Elenco aggiornato.",
+    "annulla": "Annulla le modifiche",
+    "ripristina": "Ripristina elenco di fabbrica",
+    "ripristinaTitolo": "Ripristinare l'elenco di fabbrica?",
+    "ripristinaCorpo": "Le persone e le qualifiche aggiunte verranno eliminate e torneranno quelle previste dall'applicazione.",
+    "ripristinato": "Ripristinato l'elenco di fabbrica.",
+    "caricamento": "Caricamento dei firmatari…",
+    "erroreCaricamento": "Non è stato possibile caricare i firmatari.",
+    "erroreSalvataggio": "Non è stato possibile salvare i firmatari."
   }
 }

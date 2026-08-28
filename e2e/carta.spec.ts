@@ -146,4 +146,104 @@ ${paragrafo('Mario Bianchi, amministratore')}
     await expect(anteprima).not.toContainText('Mario Bianchi');
     await expect(anteprima).not.toContainText('______');
   });
+
+  test('the subject follows the document type, but never overwrites one written by hand', async ({
+    page,
+  }) => {
+    await loginAsAdmin(page);
+    await page.goto('/carta');
+
+    // exact: the rinuncia has an "Importo oggetto di rinuncia" field, which a
+    // substring match would pick up as well.
+    const oggetto = page.getByLabel('Oggetto', { exact: true });
+    await expect(oggetto).toHaveValue('Proposta di finanziamento');
+
+    // The subject names the instrument, so it follows the type.
+    await page.getByLabel('Tipo di documento').selectOption('acquisto');
+    await expect(oggetto).toHaveValue('Offerta vincolante di acquisto di crediti pecuniari');
+    await page.getByLabel('Tipo di documento').selectOption('rinuncia');
+    await expect(oggetto).toHaveValue('Rinuncia a crediti');
+
+    // Written by hand, it survives a change of type: the automatic subject is
+    // a starting point, not something that reclaims the field.
+    await oggetto.fill('Rinuncia parziale — pratica 4731512');
+    await page.getByLabel('Tipo di documento').selectOption('proposta');
+    await expect(oggetto).toHaveValue('Rinuncia parziale — pratica 4731512');
+    await expect(page.locator('.printable')).toContainText('Rinuncia parziale — pratica 4731512');
+  });
+
+  test('the master servicer is picked from the list rather than typed', async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto('/carta');
+    await page.getByLabel('Tipo di documento').selectOption('acquisto');
+
+    const servicer = page.getByLabel('Master servicer');
+    await expect(servicer).toHaveValue('');
+    await servicer.selectOption('Zenith Service S.p.A.');
+    // It reaches the offer's own sentence about the securitisation.
+    await expect(page.locator('.printable')).toContainText(
+      'Zenith Service S.p.A. assumerà il ruolo di "master servicer"',
+    );
+  });
+
+  test('the rinuncia can be signed by one person and declared by another', async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto('/carta');
+    await page.getByLabel('Tipo di documento').selectOption('rinuncia');
+
+    // The letter above is signed by one person...
+    await page.getByLabel('Nome firmatario').fill('Santo Logoteta');
+    await page.getByLabel('Carica firmatario').fill('legale rappresentante');
+
+    // ...and the declaration under art. 47 is made, and signed, by another.
+    // Choosing them carries their gender, which decides the opening words.
+    await page.getByLabel('Scegli chi dichiara').selectOption('Silvia Caviglia');
+    await expect(page.getByLabel('Nome di chi dichiara')).toHaveValue('Silvia Caviglia');
+
+    const foglio = page.locator('.printable');
+    await expect(foglio).toContainText('Santo Logoteta');
+    await expect(foglio).toContainText('La sottoscritta Silvia Caviglia');
+    // The declaration's own signature block names her too, rather than
+    // leaving an unattributed line under the company.
+    await expect(foglio).toContainText('Amministratore Unico');
+
+    // A man declaring it changes the opening, and nothing else.
+    await page.getByLabel('Scegli chi dichiara').selectOption('Santo Logoteta');
+    await expect(foglio).toContainText('Il sottoscritto Santo Logoteta');
+  });
+
+  test('an admin changes who may sign, and the drafting form follows', async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto('/admin/firmatari');
+
+    // A woman, so the declaration's opening words have to change with her.
+    await page.getByRole('button', { name: 'Aggiungi persona' }).click();
+    const righe = page.locator('.admin-firmatario');
+    const ultima = righe.last();
+    await ultima.getByPlaceholder('Nome e cognome').fill('Giulia Neri');
+    await ultima.getByPlaceholder('Carica').fill('Direttore generale');
+    await ultima.getByRole('combobox').selectOption('F');
+
+    await page.getByRole('button', { name: 'Aggiungi qualifica' }).click();
+    await page.locator('.admin-qualifica input').last().fill('Direttore generale');
+    await page.getByRole('button', { name: 'Salva', exact: true }).click();
+    await expect(page.getByText('Elenco aggiornato.')).toBeVisible();
+
+    // The drafting form offers her, and choosing her sets the gendered
+    // opening of the declaration — the reason the field exists at all.
+    await page.goto('/carta');
+    await page.getByLabel('Tipo di documento').selectOption('rinuncia');
+    await page.getByLabel('Scegli chi dichiara').selectOption('Giulia Neri');
+    await expect(page.getByLabel('Qualifica di chi dichiara')).toHaveValue('Direttore generale');
+    await expect(page.locator('.printable')).toContainText('La sottoscritta Giulia Neri');
+
+    // Put back, so this test does not decide who may sign for the next one.
+    await page.goto('/admin/firmatari');
+    await page.getByRole('button', { name: /Ripristina/ }).click();
+    await page
+      .getByRole('button', { name: /Ripristina/ })
+      .last()
+      .click();
+    await expect(page.getByText('Ripristinato')).toBeVisible();
+  });
 });

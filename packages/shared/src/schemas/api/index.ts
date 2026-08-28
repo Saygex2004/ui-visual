@@ -9,3 +9,4 @@ export * from './calendar.js';
 export * from './admin.js';
 export * from './pratiche.js';
 export * from './cartaTemplate.js';
+export * from './cartaFirmatari.js';

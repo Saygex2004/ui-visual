@@ -39,6 +39,8 @@ describe('carta templates (HTTP, over the emulator)', () => {
     // a template an earlier one had left behind.
     const rimasti = await testDb().collection('carta_template').get();
     await Promise.all(rimasti.docs.map((d) => d.ref.delete()));
+    const anagrafiche = await testDb().collection('carta_anagrafica').get();
+    await Promise.all(anagrafiche.docs.map((d) => d.ref.delete()));
 
     ({ app, cache } = await buildApp(loadConfig(TEST_ENV), testDb()));
     adminCookie = await loginAs(app, 'admin', 'AdminPass123!');
@@ -142,5 +144,93 @@ describe('carta templates (HTTP, over the emulator)', () => {
       headers: { cookie: adminCookie },
     });
     expect(lista.json().templates).toEqual([]);
+  });
+
+  // ── Signatories ──
+  //
+  // Same asymmetry as the templates, and for the same reason: the drafting
+  // form has to read the list, but who may sign for the company is a
+  // statement only an administrator gets to make.
+  const ANAGRAFICA = {
+    firmatari: [{ nome: 'Anna Bianchi', carica: 'Amministratore Unico', genere: 'F' }],
+    qualifiche: ['Amministratore Unico'],
+  };
+
+  const putFirmatari = (body: unknown, cookie = adminCookie) =>
+    app.inject({
+      method: 'PUT',
+      url: '/api/carta/firmatari',
+      headers: { cookie },
+      payload: body as object,
+    });
+
+  it('firmatari: absent until an admin customises the list', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/carta/firmatari',
+      headers: { cookie: adminCookie },
+    });
+    expect(res.statusCode).toBe(200);
+    // Null, not an echo of the shipped names: nothing is pre-seeded, so the
+    // list in code and the one in the database cannot drift apart.
+    expect(res.json().anagrafica).toBeNull();
+  });
+
+  it('firmatari: an admin sets the list, and the view reads it back', async () => {
+    const res = await putFirmatari(ANAGRAFICA);
+    expect(res.statusCode).toBe(200);
+    expect(res.json().anagrafica.firmatari[0]).toMatchObject({
+      nome: 'Anna Bianchi',
+      genere: 'F',
+    });
+
+    const cookie = await utenteConCarta();
+    const letto = await app.inject({
+      method: 'GET',
+      url: '/api/carta/firmatari',
+      headers: { cookie },
+    });
+    expect(letto.statusCode).toBe(200);
+    expect(letto.json().anagrafica.qualifiche).toEqual(['Amministratore Unico']);
+  });
+
+  it('firmatari: a non-admin holding the view cannot change who may sign', async () => {
+    const cookie = await utenteConCarta();
+    const res = await putFirmatari(ANAGRAFICA, cookie);
+    expect(res.statusCode).toBe(403);
+
+    const del = await app.inject({
+      method: 'DELETE',
+      url: '/api/carta/firmatari',
+      headers: { cookie },
+    });
+    expect(del.statusCode).toBe(403);
+  });
+
+  it('firmatari: an unknown gender is refused rather than stored', async () => {
+    // It decides between "Il sottoscritto" and "La sottoscritta" in a legal
+    // declaration; a value the document cannot render must not reach it.
+    const res = await putFirmatari({
+      firmatari: [{ nome: 'X', carica: 'Y', genere: 'Z' }],
+      qualifiche: [],
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('firmatari: reset drops the customisation', async () => {
+    await putFirmatari(ANAGRAFICA);
+    const del = await app.inject({
+      method: 'DELETE',
+      url: '/api/carta/firmatari',
+      headers: { cookie: adminCookie },
+    });
+    expect(del.statusCode).toBe(204);
+
+    const dopo = await app.inject({
+      method: 'GET',
+      url: '/api/carta/firmatari',
+      headers: { cookie: adminCookie },
+    });
+    expect(dopo.json().anagrafica).toBeNull();
   });
 });

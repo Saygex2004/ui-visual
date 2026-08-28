@@ -20,6 +20,7 @@ import { LoginScreen } from '../features/auth/LoginScreen.js';
 import { AccountsScreen } from '../features/admin/AccountsScreen.js';
 import { CategoriesScreen } from '../features/admin/CategoriesScreen.js';
 import { CartaTemplatesScreen } from '../features/admin/CartaTemplatesScreen.js';
+import { CartaFirmatariScreen } from '../features/admin/CartaFirmatariScreen.js';
 import { PraticheScreen } from '../features/pratiche/PraticheScreen.js';
 import { praticheSearchSchema } from '../features/pratiche/praticheUrlState.js';
 // Loaded on demand, not with the app: the letterhead view pulls in the Word
@@ -196,6 +197,13 @@ const adminCartaRoute = createRoute({
   component: CartaTemplatesScreen,
 });
 
+const adminFirmatariRoute = createRoute({
+  getParentRoute: () => protectedRoute,
+  path: '/admin/firmatari',
+  beforeLoad: requireAdmin,
+  component: CartaFirmatariScreen,
+});
+
 const adminActivityRoute = createRoute({
   getParentRoute: () => protectedRoute,
   path: '/admin/attivita',
@@ -246,6 +254,7 @@ const routeTree = rootRoute.addChildren([
     cartaRoute,
     adminCategoriesRoute,
     adminCartaRoute,
+    adminFirmatariRoute,
     adminActivityRoute,
     adminCalendarRoute,
     calendarRoute,

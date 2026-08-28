@@ -953,7 +953,15 @@ export async function buildDocument(azienda: Azienda, formData: DocumentoInput) 
         alignment: AlignmentType.JUSTIFIED,
         spacing: { after: 0 },
       }),
-      ...buildSignatureBlock(azienda.nome ?? '', undefined),
+      // Named, not a bare line over the company: the declaration is a personal
+      // statement under art. 47 D.P.R. 445/2000 ("Il sottoscritto ... dichiara")
+      // and the person making it is not necessarily the one who signed the
+      // letter above — that is exactly why the two blocks are kept apart.
+      ...buildSignatureBlock(azienda.nome ?? '', {
+        nome: formData.legaleNome,
+        carica: formData.legaleCarica,
+        genere: formData.legaleGenere,
+      }),
     );
   }
 

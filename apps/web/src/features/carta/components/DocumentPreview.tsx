@@ -502,6 +502,9 @@ export function DocumentPreview({
                 {formData.destinatarioCF || '___'}), oggetto di rinuncia come da dichiarazione sopra
                 riportata, è pari a € {formatEuro(formData.valoreFiscale)}.
               </div>
+              {/* The declaration is signed by whoever makes it, who need not
+                  be the person who signed the letter above — the two blocks
+                  are deliberately independent. */}
               <div style={{ paddingLeft: '55%' }}>
                 <div style={{ fontWeight: 700, marginBottom: 40 }}>{azienda.nome}</div>
                 <div
@@ -515,6 +518,14 @@ export function DocumentPreview({
                 >
                   _________________________
                 </div>
+                {formData.legaleNome ? (
+                  <div style={{ width: 180 }}>
+                    <div>{formData.legaleNome}</div>
+                    {formData.legaleCarica ? (
+                      <div style={{ fontSize: '9pt' }}>{formData.legaleCarica}</div>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </div>
           )}

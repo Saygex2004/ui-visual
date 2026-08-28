@@ -308,3 +308,57 @@
   padding: 0;
   list-style: none;
 }
+
+/* ---- carta: signatories ---- */
+
+.admin-sub-title {
+  margin: var(--space-4) 0 var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.admin-firmatari {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+/* Name, role, gender, remove — the gender column is narrow because it holds
+   one of two words, and the remove button only its icon. */
+.admin-firmatario {
+  display: grid;
+  grid-template-columns: 1.6fr 1.4fr 8rem auto;
+  align-items: end;
+  gap: var(--space-2);
+}
+
+.admin-qualifica {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2);
+}
+
+@media (max-width: 48rem) {
+  .admin-firmatario {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.admin-tag {
+  align-self: start;
+  padding: 2px var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* A column heading for the rows below, so each row is not labelled again. */
+.admin-firmatari-head {
+  display: grid;
+  grid-template-columns: 1.6fr 1.4fr 8rem auto;
+  gap: var(--space-2);
+  padding-right: 2.75rem;
+}

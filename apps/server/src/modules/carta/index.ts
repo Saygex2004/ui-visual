@@ -6,8 +6,16 @@
 // editing it is an administrative act, not part of drafting one letter.
 import type { Firestore } from 'firebase-admin/firestore';
 import type { FastifyInstance } from 'fastify';
-import { SetCartaTemplateRequestSchema, TipoTemplateSchema } from '@pvp/shared';
-import { cartaTemplateRepo, adminEventsRepo } from '../../repositories/index.js';
+import {
+  SetCartaFirmatariRequestSchema,
+  SetCartaTemplateRequestSchema,
+  TipoTemplateSchema,
+} from '@pvp/shared';
+import {
+  cartaTemplateRepo,
+  cartaFirmatariRepo,
+  adminEventsRepo,
+} from '../../repositories/index.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
 
 export interface CartaModuleDeps {
@@ -57,4 +65,37 @@ export function registerCartaModule(app: FastifyInstance, deps: CartaModuleDeps)
       return reply.code(204).send();
     },
   );
+
+  // ── Who may sign ──
+  //
+  // Read with the view (the drafting form offers these names), written by an
+  // administrator: a signatory list is a statement about who can bind the
+  // company, not a drafting convenience.
+  app.get('/carta/firmatari', richiedeVista, async () => ({
+    anagrafica: await cartaFirmatariRepo.get(db),
+  }));
+
+  app.put('/carta/firmatari', adminOnly, async (req) => {
+    const body = SetCartaFirmatariRequestSchema.safeParse(req.body);
+    if (!body.success) throw new ApiError(400, 'errors.common.validation');
+    const anagrafica = await cartaFirmatariRepo.set(db, body.data, req.user!.id);
+    await adminEventsRepo.append(db, {
+      type: 'carta_firmatari_changed',
+      actor_id: req.user!.id,
+      subject: 'carta_anagrafica/firmatari',
+      details: { firmatari: body.data.firmatari.length, qualifiche: body.data.qualifiche.length },
+    });
+    return { anagrafica };
+  });
+
+  app.delete('/carta/firmatari', adminOnly, async (req, reply) => {
+    await cartaFirmatariRepo.reset(db);
+    await adminEventsRepo.append(db, {
+      type: 'carta_firmatari_changed',
+      actor_id: req.user!.id,
+      subject: 'carta_anagrafica/firmatari',
+      details: { reset: true },
+    });
+    return reply.code(204).send();
+  });
 }

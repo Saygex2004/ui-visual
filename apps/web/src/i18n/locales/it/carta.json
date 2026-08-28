@@ -22,9 +22,9 @@
     "importoRinunciato": "Importo oggetto di rinuncia (€)",
     "dataSituazione": "Data della situazione",
     "valoreFiscale": "Valore fiscale del credito (€)",
-    "legaleNome": "Firmatario",
-    "legaleCarica": "Qualifica",
-    "legaleGenere": "Genere del firmatario",
+    "legaleNome": "Nome di chi dichiara",
+    "legaleCarica": "Qualifica di chi dichiara",
+    "legaleGenere": "Sesso di chi dichiara",
     "cessionario": "Cessionario",
     "masterServicer": "Master servicer",
     "debitore": "Debitore",
@@ -46,16 +46,17 @@
     "apertura": "Formula di apertura",
     "corpo": "Corpo",
     "chiusura": "Formula di chiusura",
-    "firmaSenza": "Senza blocco firma",
+    "firmaSenza": "Nessun blocco firma",
     "firmaIntestazione": "Intestazione della firma",
-    "numFirmatari": "Firmatari",
-    "firmatarioFrequente": "Firmatario frequente",
-    "firmatarioNome": "Nome",
-    "firmatarioCarica": "Qualifica",
-    "firmatario2Nome": "Nome (secondo firmatario)",
-    "firmatario2Carica": "Qualifica (secondo firmatario)",
+    "numFirmatari": "Quante firme",
+    "firmatarioFrequente": "Scegli dall’elenco",
+    "firmatarioNome": "Nome firmatario",
+    "firmatarioCarica": "Carica firmatario",
+    "firmatario2Nome": "Nome secondo firmatario",
+    "firmatario2Carica": "Carica secondo firmatario",
     "destinatarioDaAzienda": "Compila da azienda",
-    "inLettere": "Importo in lettere"
+    "inLettere": "Importo in lettere",
+    "dichiaranteFrequente": "Scegli chi dichiara"
   },
   "actions": {
     "download": "Scarica Word",
@@ -78,12 +79,13 @@
     "fileNonLetto": "Non è stato possibile leggere il file. Controlla che si apra in Word, oppure incolla il testo qui sotto."
   },
   "sezioni": {
+    "documento": "Documento",
     "mittente": "Mittente",
     "destinatario": "Destinatario",
     "lettera": "Lettera",
     "rinuncia": "Rinuncia a crediti",
     "acquisto": "Acquisto crediti pecuniari",
-    "accettazione": "Proposta originale da citare",
+    "accettazione": "Proposta da citare",
     "testo": "Testo lettera",
     "firma": "Firma"
   },
@@ -99,7 +101,8 @@
     "assuntoConcordato": "Concordato preventivo",
     "assuntoIpotecario": "Garanzie ipotecarie",
     "assuntoLibero": "Testo libero",
-    "destinatarioScegli": "Scegli un'azienda per compilare i campi…"
+    "destinatarioScegli": "Scegli un'azienda per compilare i campi…",
+    "servicerScegli": "Scegli il master servicer…"
   },
   "editor": {
     "toolbar": "Formattazione",

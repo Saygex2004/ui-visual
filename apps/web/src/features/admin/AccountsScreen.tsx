@@ -73,6 +73,9 @@ export function AccountsScreen() {
         <Link to="/admin/testi-carta" className="admin-onward-link">
           {t('accounts.linkCartaTemplates')}
         </Link>
+        <Link to="/admin/firmatari" className="admin-onward-link">
+          {t('accounts.linkCartaFirmatari')}
+        </Link>
         <Link to="/admin/attivita" className="admin-onward-link">
           {t('accounts.linkActivity')}
         </Link>

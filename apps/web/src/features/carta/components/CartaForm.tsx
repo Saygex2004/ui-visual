@@ -11,12 +11,12 @@ import { Field } from '../../../components/Field.js';
 import {
   AZIENDE,
   CESSIONARI_POSSIBILI,
-  FIRMATARI_FREQUENTI,
-  QUALIFICHE_RINUNCIA,
+  MASTER_SERVICER_POSSIBILI,
   type Azienda,
 } from '../data/aziende.js';
 import { importoInLettere } from '../utils/numeroInLettere.js';
 import { COPPIE_LETTERE as COPPIE, type CampoImporto } from '../utils/lettere.js';
+import type { Anagrafica } from '../utils/anagrafica.js';
 import {
   missingAccettazione,
   missingAcquisto,
@@ -38,6 +38,8 @@ export interface CartaFormProps {
   /** Which amounts the user is spelling out by hand. */
   lettereManuali: Partial<Record<CampoImporto, boolean>>;
   cambiaModoLettere: (campo: CampoImporto) => void;
+  /** Who may sign, and under what title — an admin's list, or the shipped one. */
+  anagrafica: Anagrafica;
 }
 
 const ASSUNTO_EXTRA: { id: AssuntoExtra; chiave: string }[] = [
@@ -55,6 +57,7 @@ export function CartaForm({
   compilaDestinatario,
   lettereManuali,
   cambiaModoLettere,
+  anagrafica,
 }: CartaFormProps) {
   const { t } = useTranslation('carta');
   const f = formData;
@@ -238,6 +241,31 @@ export function CartaForm({
             value={f.valoreFiscale}
             onChange={(v) => set('valoreFiscale', v)}
           />
+          {/* Choosing the person carries their title and gender with them:
+              the gender is not cosmetic here — it decides between "Il
+              sottoscritto" and "La sottoscritta" in a declaration made under
+              art. 47 D.P.R. 445/2000, and getting it wrong is the kind of
+              slip nobody notices until it is signed. Still editable below,
+              because a declaration can be made by someone not on the list. */}
+          <Scelte
+            id="c-legale-rapido"
+            label={t('fields.dichiaranteFrequente')}
+            value=""
+            onChange={(v) => {
+              const scelto = anagrafica.firmatari.find((x) => x.nome === v);
+              if (!scelto) return;
+              set('legaleNome', scelto.nome);
+              set('legaleCarica', scelto.carica);
+              set('legaleGenere', scelto.genere);
+            }}
+          >
+            <option value="">{t('scelte.nessuno')}</option>
+            {anagrafica.firmatari.map((x) => (
+              <option key={x.nome} value={x.nome}>
+                {x.nome}
+              </option>
+            ))}
+          </Scelte>
           <Campo
             id="c-legale"
             label={t('fields.legaleNome')}
@@ -246,11 +274,11 @@ export function CartaForm({
           />
           <Scelte
             id="c-legale-carica"
-            label={t('fields.firmatarioCarica')}
+            label={t('fields.legaleCarica')}
             value={f.legaleCarica}
             onChange={(v) => set('legaleCarica', v)}
           >
-            {QUALIFICHE_RINUNCIA.map((q) => (
+            {anagrafica.qualifiche.map((q) => (
               <option key={q} value={q}>
                 {q}
               </option>
@@ -284,12 +312,19 @@ export function CartaForm({
               </option>
             ))}
           </Scelte>
-          <Campo
+          <Scelte
             id="c-servicer"
             label={t('fields.masterServicer')}
             value={f.masterServicer}
             onChange={(v) => set('masterServicer', v)}
-          />
+          >
+            <option value="">{t('scelte.servicerScegli')}</option>
+            {MASTER_SERVICER_POSSIBILI.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </Scelte>
           <Campo
             id="c-debitore"
             label={t('fields.debitore')}
@@ -473,7 +508,7 @@ export function CartaForm({
               label={t('fields.firmatarioFrequente')}
               value=""
               onChange={(v) => {
-                const scelto = FIRMATARI_FREQUENTI.find((x) => x.nome === v);
+                const scelto = anagrafica.firmatari.find((x) => x.nome === v);
                 if (scelto) {
                   set('firmatario1Nome', scelto.nome);
                   set('firmatario1Carica', scelto.carica);
@@ -481,7 +516,7 @@ export function CartaForm({
               }}
             >
               <option value="">{t('scelte.nessuno')}</option>
-              {FIRMATARI_FREQUENTI.map((x) => (
+              {anagrafica.firmatari.map((x) => (
                 <option key={x.nome} value={x.nome}>
                   {x.nome}
                 </option>
@@ -501,6 +536,24 @@ export function CartaForm({
             />
             {f.numFirmatari === 2 ? (
               <>
+                <Scelte
+                  id="c-firm2-rapido"
+                  label={t('fields.firmatarioFrequente')}
+                  value=""
+                  onChange={(v) => {
+                    const scelto = anagrafica.firmatari.find((x) => x.nome === v);
+                    if (!scelto) return;
+                    set('firmatario2Nome', scelto.nome);
+                    set('firmatario2Carica', scelto.carica);
+                  }}
+                >
+                  <option value="">{t('scelte.nessuno')}</option>
+                  {anagrafica.firmatari.map((x) => (
+                    <option key={x.nome} value={x.nome}>
+                      {x.nome}
+                    </option>
+                  ))}
+                </Scelte>
                 <Campo
                   id="c-firm2-nome"
                   label={t('fields.firmatario2Nome')}
