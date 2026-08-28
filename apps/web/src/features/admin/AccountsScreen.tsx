@@ -70,6 +70,9 @@ export function AccountsScreen() {
         <Link to="/admin/categorie" className="admin-onward-link">
           {t('accounts.linkCategories')}
         </Link>
+        <Link to="/admin/testi-carta" className="admin-onward-link">
+          {t('accounts.linkCartaTemplates')}
+        </Link>
         <Link to="/admin/attivita" className="admin-onward-link">
           {t('accounts.linkActivity')}
         </Link>

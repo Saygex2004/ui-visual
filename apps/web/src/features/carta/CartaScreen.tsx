@@ -10,12 +10,14 @@ import { Download, Minus, Plus } from 'lucide-react';
 import { Button } from '../../components/Button.js';
 import { SelectField } from '../../components/SelectField.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
-import { AZIENDE, TIPI_DOCUMENTO, TESTI_DEFAULT } from './data/aziende.js';
+import { AZIENDE, TIPI_DOCUMENTO } from './data/aziende.js';
 import { DocumentPreview } from './components/DocumentPreview.js';
 import { CartaForm } from './components/CartaForm.js';
 import { generateDocx } from './utils/docxGenerator.js';
 import { missingTutto } from './utils/validazione.js';
 import { datiIniziali } from './formState.js';
+import { useCartaTemplates } from './hooks.js';
+import { testiEffettivi } from './utils/testiEffettivi.js';
 import type { CartaFormData, TipoLettera } from './types.js';
 import './carta.css';
 
@@ -27,6 +29,9 @@ export function CartaScreen() {
   // The page is 794px wide (A4 at 96dpi). 0.9 fits comfortably beside the
   // form on a laptop; the control exists because the right size depends on
   // the screen, and reading a dense legal body at 0.72 is a squint.
+  // The admin's overrides, where any exist; the shipped text otherwise.
+  const { data: templates } = useCartaTemplates();
+  const overrides = useMemo(() => templates?.templates ?? [], [templates]);
   const [zoom, setZoom] = useState(0.9);
   const [generando, setGenerando] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
@@ -39,17 +44,16 @@ export function CartaScreen() {
 
   function cambiaTipo(nuovo: TipoLettera) {
     setTipo(nuovo);
-    // Each document type brings its own default wording; switching type
-    // replaces the boilerplate but leaves what the operator typed.
-    const testi = TESTI_DEFAULT[nuovo];
-    if (testi) {
-      setFormData((f) => ({
-        ...f,
-        apertura: testi.apertura ?? f.apertura,
-        testo: testi.corpo ?? f.testo,
-        chiusura: testi.chiusura ?? f.chiusura,
-      }));
-    }
+    // Each document type brings its own boilerplate — an admin's override
+    // where one exists, the shipped text otherwise. Switching type replaces
+    // the boilerplate but leaves the recipient and figures already typed.
+    const testi = testiEffettivi(nuovo, overrides);
+    setFormData((f) => ({
+      ...f,
+      apertura: testi.apertura,
+      testo: testi.corpo,
+      chiusura: testi.chiusura,
+    }));
   }
 
   async function scarica() {

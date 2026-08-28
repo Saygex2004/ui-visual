@@ -18,6 +18,7 @@ import { AREA_SLUGS, hasVista, type AreaSlug, type MeResponse, type Vista } from
 import { LoginScreen } from '../features/auth/LoginScreen.js';
 import { AccountsScreen } from '../features/admin/AccountsScreen.js';
 import { CategoriesScreen } from '../features/admin/CategoriesScreen.js';
+import { CartaTemplatesScreen } from '../features/admin/CartaTemplatesScreen.js';
 import { PraticheScreen } from '../features/pratiche/PraticheScreen.js';
 import { praticheSearchSchema } from '../features/pratiche/praticheUrlState.js';
 import { CartaScreen } from '../features/carta/CartaScreen.js';
@@ -173,6 +174,13 @@ const adminCategoriesRoute = createRoute({
   component: CategoriesScreen,
 });
 
+const adminCartaRoute = createRoute({
+  getParentRoute: () => protectedRoute,
+  path: '/admin/testi-carta',
+  beforeLoad: requireAdmin,
+  component: CartaTemplatesScreen,
+});
+
 const adminActivityRoute = createRoute({
   getParentRoute: () => protectedRoute,
   path: '/admin/attivita',
@@ -222,6 +230,7 @@ const routeTree = rootRoute.addChildren([
     praticheRoute,
     cartaRoute,
     adminCategoriesRoute,
+    adminCartaRoute,
     adminActivityRoute,
     adminCalendarRoute,
     calendarRoute,

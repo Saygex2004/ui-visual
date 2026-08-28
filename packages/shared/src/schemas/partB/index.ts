@@ -6,3 +6,4 @@ export * from './chat.js';
 export * from './attachments.js';
 export * from './adminEvents.js';
 export * from './pratiche.js';
+export * from './cartaTemplate.js';

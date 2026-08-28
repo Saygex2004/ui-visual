@@ -42,7 +42,8 @@
     "stateDisabled": "Disabilitato",
     "linkCalendarAssignment": "Assegnazione calendario",
     "linkCategories": "Categorie di estrazione",
-    "linkActivity": "Attività amministrativa"
+    "linkActivity": "Attività amministrativa",
+    "linkCartaTemplates": "Testi della carta intestata"
   },
   "calendarAssignment": {
     "title": "Amministrazione — Assegnazione calendario",
@@ -169,5 +170,37 @@
     "nessuna": "Nessuna vista assegnata: questo account non vede nulla.",
     "adminVedeTutto": "Gli amministratori vedono tutte le viste.",
     "saveError": "Non è stato possibile salvare le viste."
+  },
+  "cartaTemplate": {
+    "title": "Amministrazione — Testi della carta intestata",
+    "intro": "Modifica il testo standard che finisce nei documenti. I segnaposto fra doppie graffe vengono sostituiti al momento della generazione: se ne togli uno, quell’informazione sparisce dal documento.",
+    "tipo": "Tipo di documento",
+    "tipi": {
+      "proposta": "Proposta di finanziamento",
+      "accettazione": "Accettazione proposta",
+      "rinuncia": "Rinuncia a crediti",
+      "lettera": "Lettera",
+      "acquisto": "Acquisto crediti pecuniari"
+    },
+    "isDefault": "Questo tipo usa il testo predefinito dell’applicazione.",
+    "isOverridden": "Questo tipo usa un testo personalizzato.",
+    "apertura": "Formula di apertura",
+    "corpo": "Corpo",
+    "chiusura": "Formula di chiusura",
+    "available": "Segnaposto disponibili",
+    "removed": "Attenzione: questa modifica elimina {{campi}}. Quell’informazione non comparirà più nei documenti.",
+    "unknown": "Segnaposto sconosciuti: {{campi}}. Compariranno nel documento con le graffe, non sostituiti.",
+    "added": "Segnaposto aggiunti: {{campi}}.",
+    "save": "Salva",
+    "saving": "Salvataggio…",
+    "discard": "Annulla modifiche",
+    "resetAction": "Ripristina il testo predefinito",
+    "reset": "Testo predefinito ripristinato.",
+    "saved": "Testo salvato.",
+    "saveError": "Non è stato possibile salvare il testo.",
+    "loading": "Caricamento dei testi…",
+    "loadError": "Non è stato possibile caricare i testi.",
+    "confirmTitle": "Salvare comunque?",
+    "confirmSave": "Salva comunque"
   }
 }

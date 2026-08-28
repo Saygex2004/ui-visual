@@ -267,3 +267,44 @@
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
+
+/* ---- letterhead template editor ---- */
+
+.admin-textarea {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-paper);
+  color: var(--color-text-body);
+  font: inherit;
+  font-size: var(--text-sm);
+  resize: vertical;
+}
+
+/* The body is edited as raw text with its {{TOKENS}} showing: a monospace
+   face makes a mistyped brace visible instead of hiding it in prose. */
+.admin-textarea-mono {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+}
+
+.admin-textarea:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.admin-segnaposto {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.admin-segnaposto ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
