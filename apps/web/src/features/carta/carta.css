@@ -59,3 +59,98 @@
      themes. */
   background: var(--color-surface-2);
 }
+
+/* ---- form sections ---- */
+
+.carta-section {
+  border-bottom: 1px solid var(--color-border-soft);
+  padding-bottom: var(--space-4);
+}
+
+.carta-section-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.carta-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.carta-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.carta-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-3);
+}
+
+/* The count of still-empty required fields: amber while there are any, a
+   tick once the group is done. */
+.carta-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.carta-badge.is-missing {
+  background: var(--color-warning-soft);
+  color: var(--color-warning-strong);
+}
+
+.carta-badge.is-complete {
+  background: var(--color-success-soft);
+  color: var(--color-success-strong);
+}
+
+.carta-missing {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-warning-strong);
+}
+
+/* The amount spelled out under the figure, so a typo in the digits is
+   visible before the document is generated. */
+.carta-hint {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.carta-textarea {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-paper);
+  color: var(--color-text-body);
+  font: inherit;
+  font-size: var(--text-sm);
+  resize: vertical;
+}
+
+.carta-textarea:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}

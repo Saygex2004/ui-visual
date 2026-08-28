@@ -12,6 +12,7 @@ import { SelectField } from '../../components/SelectField.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { AZIENDE, TIPI_DOCUMENTO, TESTI_DEFAULT } from './data/aziende.js';
 import { DocumentPreview } from './components/DocumentPreview.js';
+import { CartaForm } from './components/CartaForm.js';
 import { generateDocx } from './utils/docxGenerator.js';
 import { missingTutto } from './utils/validazione.js';
 import { datiIniziali } from './formState.js';
@@ -101,6 +102,8 @@ export function CartaScreen() {
               </option>
             ))}
           </SelectField>
+
+          <CartaForm azienda={azienda} tipo={tipo} formData={formData} set={set} />
 
           {mancanti.length > 0 ? (
             <StatusDisplay
