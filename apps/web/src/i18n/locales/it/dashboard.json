@@ -15,7 +15,15 @@
     "praticheDescription": "Richiesta, spedizione e tracciamento dei fascicoli cartacei.",
     "adminBadge": "Solo admin",
     "cartaTitle": "Carta intestata",
-    "cartaDescription": "Lettere, proposte e accettazioni sulla carta intestata del gruppo."
+    "cartaDescription": "Lettere, proposte e accettazioni sulla carta intestata del gruppo.",
+    "lavoriBadge": "In lavorazione",
+    "lavoriDescrizione": "Temporaneamente non disponibile: ci stiamo lavorando. Riprova più tardi.",
+    "nomeVista": {
+      "immobili": "Cluster Immobiliari",
+      "crediti": "Cluster Crediti",
+      "pratiche": "Pratiche cartacee",
+      "carta": "Carta intestata"
+    }
   },
   "area": {
     "title": {

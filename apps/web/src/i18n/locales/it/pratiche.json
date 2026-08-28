@@ -24,7 +24,10 @@
     "portafoglioLabel": "Filtra per portafoglio",
     "allPortafogli": "Tutti i portafogli",
     "statoLabel": "Filtra per stato",
-    "allStati": "Tutti gli stati"
+    "allStati": "Tutti gli stati",
+    "campoDataLabel": "Filtra per data",
+    "meseLabel": "Filtra per mese",
+    "allMesi": "Tutti i mesi"
   },
   "actions": {
     "new": "Nuova pratica",

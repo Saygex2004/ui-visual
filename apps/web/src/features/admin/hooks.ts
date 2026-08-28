@@ -1,12 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   CreateUserRequest,
+  SetVisteStatiRequest,
   Role,
   Vista,
   RandomAssignRequest,
   ByIdAssignRequest,
 } from '@pvp/shared';
 import * as adminApi from './api.js';
+import { meQueryKey } from '../auth/hooks.js';
 
 export const adminUsersQueryKey = ['admin', 'users'] as const;
 
@@ -123,5 +125,25 @@ export function useSetViste() {
     mutationFn: ({ userId, viste }: { userId: string; viste: Vista[] }) =>
       adminApi.setViste(userId, viste),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: adminUsersQueryKey }),
+  });
+}
+
+export const visteStatiQueryKey = ['admin', 'viste-stati'] as const;
+
+export function useVisteStati() {
+  return useQuery({ queryKey: visteStatiQueryKey, queryFn: adminApi.fetchVisteStati });
+}
+
+export function useSetVisteStati() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: SetVisteStatiRequest) => adminApi.setVisteStati(body),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: visteStatiQueryKey });
+      // The landing screen and the route guards read the switches from
+      // /auth/me, so that has to be refetched or the admin would keep seeing
+      // the previous answer on the very screen they just changed.
+      void qc.invalidateQueries({ queryKey: meQueryKey });
+    },
   });
 }

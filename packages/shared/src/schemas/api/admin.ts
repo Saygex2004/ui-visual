@@ -2,6 +2,7 @@
 import { z } from 'zod';
 import { instant } from '../common.js';
 import { RoleSchema, VistaSchema } from '../partB/accounts.js';
+import { StatiVisteSchema, VisteStatiInputSchema } from '../partB/visteStati.js';
 import { UserPublicSchema } from './auth.js';
 import { AdminEventTypeSchema } from '../partB/adminEvents.js';
 import { RunSchema } from '../partA/run.js';
@@ -89,3 +90,11 @@ export const SetVisteResponseSchema = z.object({ user: AdminUserSchema });
 
 export type SetVisteRequest = z.infer<typeof SetVisteRequestSchema>;
 export type SetVisteResponse = z.infer<typeof SetVisteResponseSchema>;
+
+/** The view switches: which views are open, reserved to admins, or closed
+ *  for work. Absent entries are open. */
+export const VisteStatiResponseSchema = z.object({ stati: StatiVisteSchema });
+export const SetVisteStatiRequestSchema = VisteStatiInputSchema;
+
+export type VisteStatiResponse = z.infer<typeof VisteStatiResponseSchema>;
+export type SetVisteStatiRequest = z.infer<typeof SetVisteStatiRequestSchema>;

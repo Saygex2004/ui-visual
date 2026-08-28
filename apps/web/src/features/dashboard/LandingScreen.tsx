@@ -6,8 +6,8 @@
 // "coming soon" placeholders); the grid is ready for future cards.
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
-import { ArrowRight, Building2, Coins, FileBox, FileSignature } from 'lucide-react';
-import { hasVista, type AreaSlug } from '@pvp/shared';
+import { ArrowRight, Building2, Coins, FileBox, FileSignature, Wrench } from 'lucide-react';
+import { hasVista, inLavorazionePer, type AreaSlug } from '@pvp/shared';
 import { Badge } from '../../components/Badge.js';
 import { useMe } from '../auth/hooks.js';
 import { useAreaSnapshot } from './hooks.js';
@@ -44,13 +44,18 @@ export function LandingScreen() {
   // Rendering only; the server checks every route regardless. Falling back to
   // "nothing" while `me` loads avoids flashing cards the account cannot open.
   const conto = me?.user ?? { role: 'user' as const, viste: [] };
-  const vedePratiche = hasVista(conto, 'pratiche');
-  const vedeCarta = hasVista(conto, 'carta');
+  const stati = me?.viste_stati;
+  const vedePratiche = hasVista(conto, 'pratiche', stati);
+  const vedeCarta = hasVista(conto, 'carta', stati);
+  // Views this account holds but cannot open right now because they are
+  // closed for work. Shown, greyed, with a word about why: a card that simply
+  // vanished would read as a permission taken away.
+  const lavori = (v: Parameters<typeof inLavorazionePer>[1]) => inLavorazionePer(conto, v, stati);
   // Only fetched where the account may actually open the area: an unpermitted
   // request is refused anyway, and it would still cost the auth path's reads
   // — once a minute, forever, thanks to the poll.
-  const immobili = useAreaSnapshot('immobili', hasVista(conto, 'immobili'));
-  const crediti = useAreaSnapshot('crediti', hasVista(conto, 'crediti'));
+  const immobili = useAreaSnapshot('immobili', hasVista(conto, 'immobili', stati));
+  const crediti = useAreaSnapshot('crediti', hasVista(conto, 'crediti', stati));
   const snapshots = { immobili, crediti } as const;
 
   const lastSuccess = [immobili.data?.meta.last_success_at, crediti.data?.meta.last_success_at]
@@ -75,7 +80,7 @@ export function LandingScreen() {
         <p className="landing-subtitle">{t('landing.subtitle')}</p>
       </div>
       <div className="landing-options">
-        {AREAS.filter((area) => hasVista(conto, area.slug)).map((area) => {
+        {AREAS.filter((area) => hasVista(conto, area.slug, stati)).map((area) => {
           const Icon = area.icon;
           const totalStored = snapshots[area.slug].data?.meta.total_stored;
           return (
@@ -146,6 +151,18 @@ export function LandingScreen() {
             </span>
           </Link>
         ) : null}
+        {(['immobili', 'crediti', 'pratiche', 'carta'] as const).filter(lavori).map((v) => (
+          <div key={v} className="landing-option landing-option-lavori" aria-disabled="true">
+            <span className="landing-option-top">
+              <span className={`landing-option-icon landing-option-icon-${v}`}>
+                <Wrench aria-hidden="true" size={22} />
+              </span>
+              <Badge variant="warning">{t('landing.lavoriBadge')}</Badge>
+            </span>
+            <span className="landing-option-title">{t(`landing.nomeVista.${v}`)}</span>
+            <span className="landing-option-description">{t('landing.lavoriDescrizione')}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

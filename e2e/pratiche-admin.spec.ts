@@ -102,4 +102,47 @@ test.describe('admin: pratiche', () => {
     expect(sheet).not.toContain(NDG_B); // the filter reached the file
     expect(strFromU8(zip['xl/workbook.xml']!)).toContain('name="Pratiche"');
   });
+
+  test('the month filter narrows by the date the user chooses', async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto('/pratiche');
+
+    await creaPratica(page, { ndg: 'E2E-MESE-1', numero: '500001', portafoglio: 'Traiano' });
+    await creaPratica(page, { ndg: 'E2E-MESE-2', numero: '500002', portafoglio: 'Traiano' });
+
+    // Give the two different request dates, in different months.
+    await page.getByRole('button', { name: 'E2E-MESE-1' }).click();
+    let finestra = page.getByRole('dialog');
+    await finestra.getByRole('button', { name: 'Modifica' }).click();
+    await finestra.getByLabel('Data richiesta').fill('2026-03-04');
+    await finestra.getByRole('button', { name: 'Salva' }).click();
+    await finestra.getByRole('button', { name: 'Chiudi' }).click();
+
+    await page.getByRole('button', { name: 'E2E-MESE-2' }).click();
+    finestra = page.getByRole('dialog');
+    await finestra.getByRole('button', { name: 'Modifica' }).click();
+    await finestra.getByLabel('Data richiesta').fill('2026-05-20');
+    await finestra.getByRole('button', { name: 'Salva' }).click();
+    await finestra.getByRole('button', { name: 'Chiudi' }).click();
+
+    // Only the months actually present are offered — an empty one would look
+    // like something had gone missing.
+    const mese = page.getByLabel('Filtra per mese');
+    await expect(mese.locator('option')).toContainText([
+      'Tutti i mesi',
+      'maggio 2026',
+      'marzo 2026',
+    ]);
+
+    await mese.selectOption({ label: 'marzo 2026' });
+    await expect(page.getByRole('button', { name: 'E2E-MESE-1' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'E2E-MESE-2' })).toHaveCount(0);
+
+    // Switching the date field clears the month, because a month that exists
+    // for one date need not exist for another.
+    await page.getByLabel('Filtra per data').selectOption({ label: 'Data spedizione' });
+    await expect(mese).toHaveValue('');
+    await expect(page.getByRole('button', { name: 'E2E-MESE-1' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'E2E-MESE-2' })).toBeVisible();
+  });
 });

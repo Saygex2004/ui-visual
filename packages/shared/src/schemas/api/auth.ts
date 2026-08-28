@@ -1,6 +1,7 @@
 // API — auth bodies (API_CONTRACT.md §2).
 import { z } from 'zod';
 import { RoleSchema, VistaSchema } from '../partB/accounts.js';
+import { StatiVisteSchema } from '../partB/visteStati.js';
 
 /** The account shape returned to the client — never the password hash. */
 export const UserPublicSchema = z.object({
@@ -20,7 +21,13 @@ export const LoginRequestSchema = z.object({
 
 export const LoginResponseSchema = z.object({ user: UserPublicSchema });
 
-export const MeResponseSchema = z.object({ user: UserPublicSchema });
+export const MeResponseSchema = z.object({
+  user: UserPublicSchema,
+  /** Which views are open, reserved to admins, or closed for work. Absent
+   *  entries are open; the whole field is optional so a client built against
+   *  an older server still parses. */
+  viste_stati: StatiVisteSchema.optional(),
+});
 
 export const PasswordChangeRequestSchema = z.object({
   current_password: z.string().min(1),

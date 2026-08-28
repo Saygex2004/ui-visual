@@ -2,6 +2,8 @@
 // (API_CONTRACT.md §7/§8).
 import { api } from '../../lib/apiClient.js';
 import type {
+  VisteStatiResponse,
+  SetVisteStatiRequest,
   UsersResponse,
   CreateUserRequest,
   CreateUserResponse,
@@ -91,4 +93,12 @@ export function setViste(
   viste: SetVisteRequest['viste'],
 ): Promise<SetVisteResponse> {
   return api.post<SetVisteResponse>(`/admin/users/${userId}/viste`, { viste });
+}
+
+export function fetchVisteStati(): Promise<VisteStatiResponse> {
+  return api.get<VisteStatiResponse>('/admin/viste/stati');
+}
+
+export function setVisteStati(body: SetVisteStatiRequest): Promise<VisteStatiResponse> {
+  return api.put<VisteStatiResponse>('/admin/viste/stati', body);
 }

@@ -4,6 +4,17 @@
 // guarantees that.
 import type { Pratica, StatoPratica } from '@pvp/shared';
 
+/** The dates a pratica carries, and which the month filter can be applied to.
+ *  Four of them, because "what happened in March" means a different thing to
+ *  whoever ordered the file and to whoever is chasing a courier. */
+export const CAMPI_DATA = [
+  'data_richiesta',
+  'data_spedizione',
+  'data_consegna_prevista',
+  'data_consegna_effettiva',
+] as const;
+export type CampoData = (typeof CAMPI_DATA)[number];
+
 export interface PraticheFilters {
   /** Free text, matched across every human-readable field. */
   q: string;
@@ -11,12 +22,18 @@ export interface PraticheFilters {
   portafoglio: string;
   /** A specific stage, or '' for all. */
   stato: StatoPratica | '';
+  /** Which date the month applies to. */
+  campoData: CampoData;
+  /** 'YYYY-MM', or '' for every month. */
+  mese: string;
 }
 
 export const EMPTY_FILTERS: PraticheFilters = {
   q: '',
   portafoglio: '',
   stato: '',
+  campoData: 'data_richiesta',
+  mese: '',
 };
 
 // ---- money ----
@@ -64,6 +81,10 @@ export function filterPratiche(
   return pratiche.filter((p) => {
     if (filters.portafoglio && (p.portafoglio ?? '') !== filters.portafoglio) return false;
     if (filters.stato && p.stato !== filters.stato) return false;
+    // Dates are stored as 'YYYY-MM-DD', so the month is a prefix — no parsing,
+    // no time zone, and a pratica with that date simply absent drops out
+    // rather than being counted into whichever month happens to be selected.
+    if (filters.mese && !(p[filters.campoData] ?? '').startsWith(filters.mese)) return false;
     if (needle && !haystack(p, nomeUtente).includes(needle)) return false;
     return true;
   });
@@ -87,4 +108,26 @@ export function inRitardo(p: Pratica, oggi: string): boolean {
     p.data_consegna_effettiva == null &&
     p.data_consegna_prevista < oggi
   );
+}
+
+/** The months present in the data for one date field, newest first — the
+ *  filter's options. Derived rather than a calendar of every month since the
+ *  epoch: offering a month with nothing in it is an invitation to conclude,
+ *  wrongly, that something was lost. */
+export function mesiPresenti(pratiche: Pratica[], campo: CampoData): string[] {
+  const mesi = pratiche
+    .map((p) => p[campo])
+    .filter((d): d is string => Boolean(d))
+    .map((d) => d.slice(0, 7));
+  return [...new Set(mesi)].sort().reverse();
+}
+
+/** '2026-03' → 'marzo 2026'. Built from the first of the month, which always
+ *  exists — 'YYYY-MM' alone parses as UTC and can slip to the month before in
+ *  a negative offset. */
+export function etichettaMese(mese: string): string {
+  const [anno, m] = mese.split('-');
+  if (!anno || !m) return mese;
+  const d = new Date(Number(anno), Number(m) - 1, 1);
+  return d.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
 }

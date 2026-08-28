@@ -6,6 +6,7 @@ import { Link } from '@tanstack/react-router';
 import type { AdminUser } from '@pvp/shared';
 import { useAdminUsers } from './hooks.js';
 import { CreateUserForm } from './CreateUserForm.js';
+import { StatiVisteBox } from './StatiVisteBox.js';
 import { AccountRow } from './AccountRow.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { translateLoadError } from '../../lib/translateApiError.js';
@@ -24,6 +25,8 @@ export function AccountsScreen() {
   return (
     <div className="admin-screen">
       <h1>{t('accounts.title')}</h1>
+
+      <StatiVisteBox />
 
       <CreateUserForm />
 

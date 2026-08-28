@@ -362,3 +362,16 @@
   gap: var(--space-2);
   padding-right: 2.75rem;
 }
+
+/* ---- view switches ---- */
+
+.admin-stati-viste {
+  margin-bottom: var(--space-5);
+}
+
+.admin-stati-viste-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+}

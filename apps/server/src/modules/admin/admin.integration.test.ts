@@ -7,6 +7,7 @@ import { buildApp } from '../../app.js';
 import type { SnapshotCache } from '../../cache/index.js';
 import { reseed, testDb } from '../../testSupport/emulator.js';
 import { loginAs } from '../../testSupport/auth.js';
+import { usersRepo } from '../../repositories/index.js';
 
 const TEST_ENV = {
   PVPDASH_FIRESTORE_PROJECT_ID: 'demo-pvp-dashboard',
@@ -29,6 +30,10 @@ describe('admin module (HTTP, over the emulator)', () => {
 
   beforeEach(async () => {
     await reseed();
+    // `reseed` does not know viste_config, so a switch left closed by one
+    // test would shut the next one out of a view it expects to be open.
+    const stati = await testDb().collection('viste_config').get();
+    await Promise.all(stati.docs.map((d) => d.ref.delete()));
     ({ app, cache } = await buildApp(loadConfig(TEST_ENV), testDb()));
   }, 30_000);
 
@@ -204,5 +209,122 @@ describe('admin module (HTTP, over the emulator)', () => {
     const events = res.json().events as Array<{ type: string; at: string }>;
     expect(events[0]!.type).toBe('account_created'); // the one just created, newest first
     expect(events.length).toBeGreaterThanOrEqual(3); // + the 2 seeded fixture events
+  });
+
+  // ── The view switches ──
+  //
+  // These are enforced by the server, not merely reflected in the UI: a user
+  // whose view is closed must be refused even if they kept the page open or
+  // typed the address, which is the whole difference between a switch and a
+  // suggestion.
+  describe('stato delle viste', () => {
+    async function utenteConPratiche(): Promise<string> {
+      await clearMustChange('user-1');
+      const u = await usersRepo.getByUsername(testDb(), 'mrossi');
+      await usersRepo.setViste(testDb(), u!.id, ['pratiche']);
+      return loginAs(app, 'mrossi', 'UserPass123!');
+    }
+
+    const chiudi = async (stato: string, cookie: string) =>
+      app.inject({
+        method: 'PUT',
+        url: '/api/admin/viste/stati',
+        headers: { cookie },
+        payload: { stati: { pratiche: stato } },
+      });
+
+    it('starts with every view open and nothing stored', async () => {
+      const cookie = await loginAs(app, 'admin', 'AdminPass123!');
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/admin/viste/stati',
+        headers: { cookie },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.json().stati).toEqual({});
+    });
+
+    it('closing a view refuses the granted user at the API, not just in the UI', async () => {
+      const userCookie = await utenteConPratiche();
+      const prima = await app.inject({
+        method: 'GET',
+        url: '/api/pratiche',
+        headers: { cookie: userCookie },
+      });
+      expect(prima.statusCode).toBe(200);
+
+      const adminCookie = await loginAs(app, 'admin', 'AdminPass123!');
+      expect((await chiudi('lavori', adminCookie)).statusCode).toBe(200);
+
+      // Same session, same grant — refused now because the view is shut.
+      const dopo = await app.inject({
+        method: 'GET',
+        url: '/api/pratiche',
+        headers: { cookie: userCookie },
+      });
+      expect(dopo.statusCode).toBe(403);
+    });
+
+    it('an admin still gets in — including to the switch itself', async () => {
+      const cookie = await loginAs(app, 'admin', 'AdminPass123!');
+      await chiudi('lavori', cookie);
+      const vista = await app.inject({
+        method: 'GET',
+        url: '/api/pratiche',
+        headers: { cookie },
+      });
+      expect(vista.statusCode).toBe(200);
+      const pannello = await app.inject({
+        method: 'GET',
+        url: '/api/admin/viste/stati',
+        headers: { cookie },
+      });
+      expect(pannello.statusCode).toBe(200);
+    });
+
+    it('reopening restores the grant exactly, without touching permissions', async () => {
+      const userCookie = await utenteConPratiche();
+      const adminCookie = await loginAs(app, 'admin', 'AdminPass123!');
+      await chiudi('solo_admin', adminCookie);
+      await chiudi('attivo', adminCookie);
+
+      const dopo = await app.inject({
+        method: 'GET',
+        url: '/api/pratiche',
+        headers: { cookie: userCookie },
+      });
+      expect(dopo.statusCode).toBe(200);
+      // The grant was never the thing being changed.
+      const u = await usersRepo.getByUsername(testDb(), 'mrossi');
+      expect(u!.viste).toEqual(['pratiche']);
+    });
+
+    it('/auth/me carries the switches, so the client draws the same answer', async () => {
+      const adminCookie = await loginAs(app, 'admin', 'AdminPass123!');
+      await chiudi('lavori', adminCookie);
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/auth/me',
+        headers: { cookie: adminCookie },
+      });
+      expect(res.json().viste_stati).toEqual({ pratiche: 'lavori' });
+    });
+
+    it('refuses an unknown state and an unknown view rather than storing them', async () => {
+      const cookie = await loginAs(app, 'admin', 'AdminPass123!');
+      expect((await chiudi('sospesa', cookie)).statusCode).toBe(400);
+      const vistaIgnota = await app.inject({
+        method: 'PUT',
+        url: '/api/admin/viste/stati',
+        headers: { cookie },
+        payload: { stati: { inesistente: 'attivo' } },
+      });
+      expect(vistaIgnota.statusCode).toBe(400);
+    });
+
+    it('a non-admin cannot flip a switch', async () => {
+      const cookie = await utenteConPratiche();
+      expect((await chiudi('lavori', cookie)).statusCode).toBe(403);
+    });
   });
 });

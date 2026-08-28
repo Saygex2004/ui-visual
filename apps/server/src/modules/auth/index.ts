@@ -11,6 +11,7 @@ import { usersRepo, sessionsRepo } from '../../repositories/index.js';
 import { hashPassword, verifyPassword, verifyDummyPassword } from '../../lib/passwords.js';
 import { setSessionCookie, clearSessionCookie } from '../../plugins/auth.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
+import type { VisteStatiCache } from '../../plugins/visteStatiCache.js';
 
 function toPublic(user: {
   id: string;
@@ -32,6 +33,9 @@ export interface AuthModuleDeps {
   db: Firestore;
   sessionTtlDays: number;
   isProduction: boolean;
+  /** The view switches, so the client can render the landing correctly.
+   *  Absent = every view open. */
+  visteStati?: VisteStatiCache;
 }
 
 export function registerAuthModule(app: FastifyInstance, deps: AuthModuleDeps): void {
@@ -71,8 +75,14 @@ export function registerAuthModule(app: FastifyInstance, deps: AuthModuleDeps): 
   });
 
   app.get('/auth/me', { config: { auth: { allowMustChange: true } } }, async (req) => {
+    // The switches ride along with the account rather than on an endpoint of
+    // their own: the client needs both together to decide what to draw, this
+    // is the one call every session already makes, and the value is cached —
+    // so it costs nothing per session.
+    // They are NOT the permission boundary and are not treated as one here:
+    // the server checks them again on every route that names a view.
     // req.user is always set here — the route requires a session.
-    return { user: req.user! };
+    return { user: req.user!, viste_stati: (await deps.visteStati?.stati()) ?? {} };
   });
 
   app.post(

@@ -12,6 +12,7 @@ import { hasVista, type Role, type Vista, type UserPublic } from '@pvp/shared';
 import { usersRepo, sessionsRepo } from '../repositories/index.js';
 import { hashSessionToken } from '../lib/sessionToken.js';
 import { ApiError } from './errorEnvelope.js';
+import type { VisteStatiCache } from './visteStatiCache.js';
 
 // `__session` is the ONLY cookie name Firebase Hosting's CDN forwards to the
 // Cloud Run backend behind the /api/** rewrite — every other cookie is
@@ -54,6 +55,9 @@ export interface AuthPluginDeps {
   cookieSecret: string;
   sessionTtlDays: number;
   isProduction: boolean;
+  /** The view switches. Absent = every view open, which is what the tests
+   *  that predate them assume and what a fresh installation does. */
+  visteStati?: VisteStatiCache;
 }
 
 export async function registerAuthPlugin(
@@ -112,8 +116,13 @@ export async function registerAuthPlugin(
       throw new ApiError(403, 'errors.auth.forbidden');
     }
 
-    if (authConfig?.vista && !hasVista(request.user, authConfig.vista)) {
-      throw new ApiError(403, 'errors.auth.forbidden');
+    if (authConfig?.vista) {
+      // Only consulted for routes that name a view, and cached: an ordinary
+      // request pays nothing for these switches existing.
+      const stati = (await deps.visteStati?.stati()) ?? {};
+      if (!hasVista(request.user, authConfig.vista, stati)) {
+        throw new ApiError(403, 'errors.auth.forbidden');
+      }
     }
   });
 }

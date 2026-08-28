@@ -7,6 +7,8 @@ import {
   inRitardo,
   parseEuro,
   portafogliPresenti,
+  mesiPresenti,
+  etichettaMese,
 } from './praticheData.js';
 
 function pratica(over: Partial<Pratica> = {}): Pratica {
@@ -161,7 +163,12 @@ describe('filterPratiche', () => {
       pratica({ id: 'a', portafoglio: 'Augusto', stato: 'spedito', ndg: 'X1' }),
       pratica({ id: 'b', portafoglio: 'Augusto', stato: 'richiesto', ndg: 'X1' }),
     ];
-    const got = filterPratiche(all, { q: 'X1', portafoglio: 'Augusto', stato: 'spedito' });
+    const got = filterPratiche(all, {
+      ...EMPTY_FILTERS,
+      q: 'X1',
+      portafoglio: 'Augusto',
+      stato: 'spedito',
+    });
     expect(got.map((p) => p.id)).toEqual(['a']);
   });
 });
@@ -175,5 +182,81 @@ describe('portafogliPresenti', () => {
       pratica({ portafoglio: null }),
     ];
     expect(portafogliPresenti(all)).toEqual(['Augusto', 'Diocleziano']);
+  });
+});
+
+describe('filtro per mese', () => {
+  const marzo = pratica({ id: 'a', data_richiesta: '2026-03-04', data_spedizione: '2026-04-01' });
+  const aprile = pratica({ id: 'b', data_richiesta: '2026-04-28', data_spedizione: null });
+  const senzaData = pratica({ id: 'c', data_richiesta: null });
+  const tutte = [marzo, aprile, senzaData];
+
+  it('keeps only the pratiche whose chosen date falls in that month', () => {
+    const res = filterPratiche(tutte, {
+      ...EMPTY_FILTERS,
+      campoData: 'data_richiesta',
+      mese: '2026-03',
+    });
+    expect(res.map((p) => p.id)).toEqual(['a']);
+  });
+
+  it('asks the month of the date the user picked, not always the same one', () => {
+    // The same pratica is a March one by request and an April one by
+    // shipping: "what happened in March" is a different set depending on
+    // which date you mean, which is why the field is a choice.
+    const perSpedizione = filterPratiche(tutte, {
+      ...EMPTY_FILTERS,
+      campoData: 'data_spedizione',
+      mese: '2026-04',
+    });
+    expect(perSpedizione.map((p) => p.id)).toEqual(['a']);
+  });
+
+  it('drops a pratica missing that date rather than counting it in', () => {
+    const res = filterPratiche(tutte, {
+      ...EMPTY_FILTERS,
+      campoData: 'data_spedizione',
+      mese: '2026-03',
+    });
+    expect(res).toEqual([]);
+  });
+
+  it('leaves everything alone when no month is chosen', () => {
+    expect(filterPratiche(tutte, EMPTY_FILTERS)).toHaveLength(3);
+  });
+
+  it('combines with the other filters rather than replacing them', () => {
+    const res = filterPratiche(
+      [marzo, pratica({ id: 'd', data_richiesta: '2026-03-09', portafoglio: 'Diocleziano' })],
+      { ...EMPTY_FILTERS, campoData: 'data_richiesta', mese: '2026-03', portafoglio: 'Augusto' },
+    );
+    expect(res.map((p) => p.id)).toEqual(['a']);
+  });
+});
+
+describe('mesiPresenti', () => {
+  it('lists the months actually present, newest first and without repeats', () => {
+    // Only months with something in them: offering an empty month invites the
+    // conclusion that something was lost.
+    const dati = [
+      pratica({ id: 'a', data_richiesta: '2026-03-04' }),
+      pratica({ id: 'b', data_richiesta: '2026-03-28' }),
+      pratica({ id: 'c', data_richiesta: '2026-01-02' }),
+      pratica({ id: 'd', data_richiesta: null }),
+    ];
+    expect(mesiPresenti(dati, 'data_richiesta')).toEqual(['2026-03', '2026-01']);
+    expect(mesiPresenti(dati, 'data_spedizione')).toEqual([]);
+  });
+});
+
+describe('etichettaMese', () => {
+  it('reads as a month, in Italian', () => {
+    expect(etichettaMese('2026-03')).toBe('marzo 2026');
+  });
+
+  it('does not slip to the month before in a negative time zone', () => {
+    // 'YYYY-MM' alone parses as UTC midnight, which is the previous month
+    // west of Greenwich; building from the first of the month avoids it.
+    expect(etichettaMese('2026-01')).toBe('gennaio 2026');
   });
 });

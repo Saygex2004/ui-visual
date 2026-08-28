@@ -25,15 +25,31 @@ import { usePratiche, useCreatePratica } from './hooks.js';
 import { PraticaForm } from './PraticaForm.js';
 import { PraticaWindow } from './PraticaWindow.js';
 import {
+  CAMPI_DATA,
   EMPTY_FILTERS,
+  etichettaMese,
   filterPratiche,
   formatEuro,
   inRitardo,
+  mesiPresenti,
   portafogliPresenti,
+  type CampoData,
   type PraticheFilters,
 } from './praticheData.js';
 import { praticheToXlsx, xlsxFilename } from './praticheXlsx.js';
 import './pratiche.css';
+
+/** Each date's label key. Spelled out rather than derived from the field
+ *  name: the existing keys are not consistent with each other
+ *  ("dataRichiesta" but "consegnaPrevista"), so a transform would silently
+ *  produce a missing key for half of them. The filter names each date exactly
+ *  as its column does. */
+const ETICHETTA_DATA: Record<CampoData, string> = {
+  data_richiesta: 'dataRichiesta',
+  data_spedizione: 'dataSpedizione',
+  data_consegna_prevista: 'consegnaPrevista',
+  data_consegna_effettiva: 'consegnaEffettiva',
+};
 
 function scarica(contenuto: Uint8Array, filename: string, type: string): void {
   // Cast because TypeScript's `BlobPart` does not accept the generic
@@ -71,6 +87,13 @@ export function PraticheScreen() {
   }, [utenti]);
 
   const portafogli = useMemo(() => portafogliPresenti(pratiche), [pratiche]);
+  // Recomputed when the date field changes: the months with a shipping date
+  // are not the months with a request date, and offering the wrong ones would
+  // leave the user picking a month that can only come back empty.
+  const mesi = useMemo(
+    () => mesiPresenti(pratiche, filters.campoData),
+    [pratiche, filters.campoData],
+  );
   // One "today" for the whole render, so every row's late badge agrees.
   const oggi = new Date().toISOString().slice(0, 10);
   const statoLabel = (st: StatoPratica) => t(`stati.${st}`);
@@ -147,6 +170,37 @@ export function PraticheScreen() {
           {portafogli.map((v) => (
             <option key={v} value={v}>
               {v}
+            </option>
+          ))}
+        </SelectField>
+        <SelectField
+          label={t('filters.campoDataLabel')}
+          id="filtro-campo-data"
+          value={filters.campoData}
+          onChange={(e) =>
+            // The month is cleared with the field: a month that existed for
+            // request dates may not exist for shipping ones, and leaving it
+            // set would show an empty table with no clue why.
+            setFilters((f) => ({ ...f, campoData: e.target.value as CampoData, mese: '' }))
+          }
+        >
+          {CAMPI_DATA.map((c) => (
+            <option key={c} value={c}>
+              {t(`fields.${ETICHETTA_DATA[c]}`)}
+            </option>
+          ))}
+        </SelectField>
+        <SelectField
+          label={t('filters.meseLabel')}
+          id="filtro-mese"
+          value={filters.mese}
+          onChange={(e) => setFilters((f) => ({ ...f, mese: e.target.value }))}
+          disabled={mesi.length === 0}
+        >
+          <option value="">{t('filters.allMesi')}</option>
+          {mesi.map((m) => (
+            <option key={m} value={m}>
+              {etichettaMese(m)}
             </option>
           ))}
         </SelectField>

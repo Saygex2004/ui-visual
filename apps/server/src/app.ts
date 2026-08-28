@@ -12,6 +12,7 @@ import { registerErrorEnvelope } from './plugins/errorEnvelope.js';
 import { registerHealthModule } from './modules/health/index.js';
 import { registerListingsModule } from './modules/listings/index.js';
 import { registerAuthPlugin } from './plugins/auth.js';
+import { VisteStatiCache } from './plugins/visteStatiCache.js';
 import { registerAuthModule } from './modules/auth/index.js';
 import { registerAdminModule } from './modules/admin/index.js';
 import { registerSettingsModule } from './modules/settings/index.js';
@@ -81,6 +82,10 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
     }
 
     const primedCache = cache;
+    // Shared between the guard that reads the switches and the route that
+    // writes them, so a change is visible to this instance immediately
+    // instead of waiting out the cache window.
+    const visteStati = new VisteStatiCache(db);
     await app.register(
       async (instance) => {
         await registerAuthPlugin(instance, {
@@ -88,13 +93,15 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
           cookieSecret: config.PVPDASH_SESSION_SECRET,
           sessionTtlDays: config.PVPDASH_SESSION_TTL_DAYS,
           isProduction: config.isProduction,
+          visteStati,
         });
         registerAuthModule(instance, {
           db,
           sessionTtlDays: config.PVPDASH_SESSION_TTL_DAYS,
           isProduction: config.isProduction,
+          visteStati,
         });
-        registerAdminModule(instance, { db });
+        registerAdminModule(instance, { db, visteStati });
         registerAdminCalendarModule(instance, { db });
         registerCalendarModule(instance, { db });
         registerSettingsModule(instance, { db, cache: primedCache });

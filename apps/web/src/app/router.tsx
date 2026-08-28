@@ -164,7 +164,7 @@ const adminRoute = createRoute({
 function requireVista(vista: Vista) {
   return ({ context }: { context: RouterContext }) => {
     const me = context.queryClient.getQueryData<MeResponse>(meQueryKey);
-    if (me && !hasVista(me.user, vista)) throw redirect({ to: '/' });
+    if (me && !hasVista(me.user, vista, me.viste_stati)) throw redirect({ to: '/' });
   };
 }
 

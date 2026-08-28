@@ -765,3 +765,17 @@
   background: var(--color-success-soft);
   color: var(--color-success-strong);
 }
+
+/* A view the account holds but cannot open while it is closed for work.
+   Deliberately still a card and still legible: it says "not now", not "not
+   yours", which a missing card would have implied. Not a link, so there is
+   nothing to click and nothing to focus. */
+.landing-option-lavori {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.landing-option-lavori:hover {
+  transform: none;
+  box-shadow: none;
+}

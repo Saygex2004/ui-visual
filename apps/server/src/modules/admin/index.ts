@@ -9,14 +9,22 @@ import {
   SetPasswordRequestSchema,
   SetRoleRequestSchema,
   SetVisteRequestSchema,
+  SetVisteStatiRequestSchema,
   type AdminUser,
   type UserPublic,
   type Vista,
 } from '@pvp/shared';
-import { usersRepo, sessionsRepo, adminEventsRepo, runsRepo } from '../../repositories/index.js';
+import {
+  usersRepo,
+  sessionsRepo,
+  adminEventsRepo,
+  runsRepo,
+  visteStatiRepo,
+} from '../../repositories/index.js';
 import { hashPassword } from '../../lib/passwords.js';
 import { UsernameTakenError } from '../../repositories/users.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
+import type { VisteStatiCache } from '../../plugins/visteStatiCache.js';
 
 function toAdminView(user: {
   id: string;
@@ -56,6 +64,9 @@ function toPublic(user: {
 
 export interface AdminModuleDeps {
   db: Firestore;
+  /** Kept in step on write, so the instance that flips a switch does not
+   *  keep serving its own previous answer for the rest of the window. */
+  visteStati?: VisteStatiCache;
 }
 
 export function registerAdminModule(app: FastifyInstance, deps: AdminModuleDeps): void {
@@ -207,5 +218,28 @@ export function registerAdminModule(app: FastifyInstance, deps: AdminModuleDeps)
   app.get('/admin/runs', adminOnly, async () => {
     const runs = await runsRepo.getRecent(db);
     return { runs };
+  });
+
+  // ── The view switches ──
+  //
+  // Distinct from the per-account grants, which say who MAY open a view:
+  // this says whether the view is open at all. Closing one for work therefore
+  // touches nobody's permissions, and reopening it restores them exactly.
+  app.get('/admin/viste/stati', adminOnly, async () => ({
+    stati: (await visteStatiRepo.get(db))?.stati ?? {},
+  }));
+
+  app.put('/admin/viste/stati', adminOnly, async (req) => {
+    const body = SetVisteStatiRequestSchema.safeParse(req.body);
+    if (!body.success) throw new ApiError(400, 'errors.common.validation');
+    const salvato = await visteStatiRepo.set(db, body.data, req.user!.id);
+    deps.visteStati?.invalidate(salvato.stati);
+    await adminEventsRepo.append(db, {
+      type: 'viste_stati_changed',
+      actor_id: req.user!.id,
+      subject: 'viste_config/stati',
+      details: body.data.stati,
+    });
+    return { stati: salvato.stati };
   });
 }

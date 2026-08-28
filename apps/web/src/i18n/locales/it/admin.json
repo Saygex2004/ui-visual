@@ -234,5 +234,18 @@
     "caricamento": "Caricamento dei firmatari…",
     "erroreCaricamento": "Non è stato possibile caricare i firmatari.",
     "erroreSalvataggio": "Non è stato possibile salvare i firmatari."
+  },
+  "statiViste": {
+    "title": "Stato delle viste",
+    "intro": "Se una vista è aperta, riservata agli amministratori o chiusa per lavori. È diverso dai permessi qui sotto: questi dicono chi può aprire una vista, questo se la vista è aperta. Chiudere una vista non tocca i permessi di nessuno, e riaprendola tornano com'erano.",
+    "notaAdmin": "Gli amministratori entrano comunque, anche in una vista chiusa: altrimenti chiudendo l'ultima resterebbero fuori dallo stesso pannello che la riapre.",
+    "stati": {
+      "attivo": "Attivo",
+      "solo_admin": "Solo admin",
+      "lavori": "In lavorazione"
+    },
+    "loading": "Caricamento degli stati…",
+    "loadError": "Non è stato possibile caricare lo stato delle viste.",
+    "saveError": "Non è stato possibile salvare lo stato della vista."
   }
 }
