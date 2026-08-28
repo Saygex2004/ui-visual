@@ -3,8 +3,11 @@
 // every field it carried survives the port; the three that are not strings
 // are typed as what they are rather than coerced.
 
-/** Which letter is being produced. */
-export type TipoLettera = 'proposta' | 'rinuncia' | 'accettazione' | 'acquisto';
+/** Which document is being produced. Mirrors TIPI_DOCUMENTO in the data file
+ *  — read from there, not inferred: a first pass at this union guessed four
+ *  and missed 'lettera' (the free-form one), which the generator branches on
+ *  in six places. TypeScript caught the impossible comparison. */
+export type TipoLettera = 'proposta' | 'accettazione' | 'rinuncia' | 'lettera' | 'acquisto';
 
 /** The extra clause an "acquisto" letter can carry in its recitals. */
 export type AssuntoExtra = '' | 'concordato' | 'ipotecario' | 'libero';
@@ -83,4 +86,16 @@ export interface CartaFormData {
   earnoutImporto: string;
   earnoutImportoLettere: string;
   scadenzaOfferta: string;
+}
+
+/**
+ * What the Word generator receives: the form plus the kind of letter.
+ *
+ * `tipo` is deliberately NOT a form field — the app keeps it as separate
+ * state and merges it at the call site. Modelling that here makes the
+ * generator's real input explicit instead of leaving it an undeclared extra
+ * property nobody typed.
+ */
+export interface DocumentoInput extends CartaFormData {
+  tipo: TipoLettera;
 }
