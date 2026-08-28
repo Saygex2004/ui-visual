@@ -69,11 +69,26 @@ describe('importoInLettere', () => {
     expect(importoInLettere(undefined)).toBe('');
   });
 
-  // Documents the CURRENT behaviour, which is almost certainly not intended:
-  // the cents are appended to the integer words and the suffix stays "/00",
-  // so the amount reads as a different, much larger number. Pinned here so a
-  // future fix is a deliberate change with a visible diff, not a surprise.
-  it('appends cents to the words and still ends in /00 (known oddity)', () => {
-    expect(importoInLettere(1234.56)).toBe('milleduecentotrentaquattrocinquantasei/00');
+  it('puts the cents after the slash, not into the words', () => {
+    // The defect this replaced: the cents were appended to the integer's
+    // words and the suffix stayed "/00", so this amount read as 123456 euros
+    // — a hundredfold error on a signed instrument.
+    expect(importoInLettere(1234.56)).toBe('milleduecentotrentaquattro/56');
+    expect(importoInLettere('1234,56')).toBe('milleduecentotrentaquattro/56');
+  });
+
+  it('pads a single-digit cent, so /5 never appears', () => {
+    expect(importoInLettere(10.05)).toBe('dieci/05');
+    expect(importoInLettere(10.5)).toBe('dieci/50');
+  });
+
+  it('carries into the euros rather than writing an impossible /100', () => {
+    expect(importoInLettere(1234.999)).toBe('milleduecentotrentacinque/00');
+    expect(importoInLettere(0.999)).toBe('uno/00');
+  });
+
+  it('leaves whole amounts exactly as before — the common case', () => {
+    expect(importoInLettere(60000)).toBe('sessantamila/00');
+    expect(importoInLettere(0)).toBe('zero/00');
   });
 });

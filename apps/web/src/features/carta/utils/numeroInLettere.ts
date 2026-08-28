@@ -90,24 +90,31 @@ export function numeroInLettere(num: number | string): string {
 }
 
 /**
- * The amount as it is written into the letter: "sessantamila/00".
+ * The amount as written into the letter: "sessantamila/00", and with cents,
+ * "milleduecentotrentaquattro/56".
  *
- * NOTE — cents are handled oddly and this port keeps the behaviour rather than
- * silently changing what appears in a signed document: a value with cents has
- * them appended as words to the integer part and STILL ends in "/00", so
- * 1234.56 reads "milleduecentotrentaquattrocinquantasei/00". The conventional
- * form would be "milleduecentotrentaquattro/56". Flagged for the owner to
- * decide; changing it alters legal output and is not a silent fix.
+ * The words carry the whole euros and the two digits after the slash carry
+ * the cents — the form used on Italian instruments, where the written amount
+ * exists precisely so a figure cannot be altered.
+ *
+ * Fixed 2026-08-27. The ported version appended the cents to the integer's
+ * WORDS and still ended in "/00", so 1234.56 read
+ * "milleduecentotrentaquattrocinquantasei/00" — which reads as 123456 euros,
+ * a hundredfold error in a signed document. Whole amounts, which is what
+ * these letters normally carry, were unaffected and are unchanged.
+ *
+ * Cents are the unit of arithmetic here rather than a subtraction from the
+ * float, so a value like 1234.999 rounds up into the euros (1235/00) instead
+ * of producing an impossible "/100".
  */
 export function importoInLettere(num: number | string | null | undefined): string {
   if (!num && num !== 0) return '';
   const val = parseFloat(String(num).replace(',', '.'));
   if (Number.isNaN(val) || val < 0) return '';
 
-  const intero = Math.floor(val);
-  const decimali = Math.round((val - intero) * 100);
+  const centesimi = Math.round(val * 100);
+  const euro = Math.floor(centesimi / 100);
+  const resto = centesimi % 100;
 
-  let out = numeroInLettere(intero);
-  if (decimali > 0) out += sottoCento(decimali);
-  return out + '/00';
+  return `${numeroInLettere(euro)}/${String(resto).padStart(2, '0')}`;
 }
