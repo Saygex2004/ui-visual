@@ -163,7 +163,8 @@
     "nomi": {
       "immobili": "Cluster Immobiliari",
       "crediti": "Cluster Crediti",
-      "pratiche": "Pratiche cartacee"
+      "pratiche": "Pratiche cartacee",
+      "carta": "Carta intestata"
     },
     "nessuna": "Nessuna vista assegnata: questo account non vede nulla.",
     "adminVedeTutto": "Gli amministratori vedono tutte le viste.",

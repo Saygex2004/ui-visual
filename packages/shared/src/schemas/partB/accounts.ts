@@ -11,7 +11,7 @@ export const RoleSchema = z.enum(['user', 'admin']);
  *  An admin is not constrained by them — the check is `admin OR granted` —
  *  because a permission list that could lock the last administrator out of
  *  the screen that edits permission lists is a trap, not a safeguard. */
-export const VISTE = ['immobili', 'crediti', 'pratiche'] as const;
+export const VISTE = ['immobili', 'crediti', 'pratiche', 'carta'] as const;
 export type Vista = (typeof VISTE)[number];
 export const VistaSchema = z.enum(VISTE);
 
