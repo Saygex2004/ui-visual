@@ -57,7 +57,10 @@
   },
   "actions": {
     "download": "Scarica Word",
-    "generating": "Generazione…"
+    "generating": "Generazione…",
+    "zoomIn": "Ingrandisci anteprima",
+    "zoomOut": "Riduci anteprima",
+    "zoomValue": "{{pct}}%"
   },
   "states": {
     "missing": "Da completare: {{campi}}",

@@ -6,7 +6,7 @@
 // utils/validazione, generation in utils/docxGenerator.
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download } from 'lucide-react';
+import { Download, Minus, Plus } from 'lucide-react';
 import { Button } from '../../components/Button.js';
 import { SelectField } from '../../components/SelectField.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
@@ -24,6 +24,10 @@ export function CartaScreen() {
   const [azId, setAzId] = useState(AZIENDE[0]!.id);
   const [tipo, setTipo] = useState<TipoLettera>('proposta');
   const [formData, setFormData] = useState<CartaFormData>(() => datiIniziali(AZIENDE[0]!));
+  // The page is 794px wide (A4 at 96dpi). 0.9 fits comfortably beside the
+  // form on a laptop; the control exists because the right size depends on
+  // the screen, and reading a dense legal body at 0.72 is a squint.
+  const [zoom, setZoom] = useState(0.9);
   const [generando, setGenerando] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
 
@@ -114,11 +118,34 @@ export function CartaScreen() {
         </div>
 
         <div className="carta-preview">
+          <div className="carta-zoom">
+            <button
+              type="button"
+              className="carta-zoom-btn"
+              aria-label={t('actions.zoomOut')}
+              onClick={() => setZoom((z) => Math.max(0.5, Math.round((z - 0.1) * 10) / 10))}
+              disabled={zoom <= 0.5}
+            >
+              <Minus aria-hidden="true" size={14} />
+            </button>
+            <span className="carta-zoom-value">
+              {t('actions.zoomValue', { pct: Math.round(zoom * 100) })}
+            </span>
+            <button
+              type="button"
+              className="carta-zoom-btn"
+              aria-label={t('actions.zoomIn')}
+              onClick={() => setZoom((z) => Math.min(1.5, Math.round((z + 0.1) * 10) / 10))}
+              disabled={zoom >= 1.5}
+            >
+              <Plus aria-hidden="true" size={14} />
+            </button>
+          </div>
           <DocumentPreview
             azienda={azienda}
             formData={formData}
             tipo={tipo}
-            scale={0.72}
+            scale={zoom}
             onBodyChange={(html) => set('testo', html)}
           />
         </div>
