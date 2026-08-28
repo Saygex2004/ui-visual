@@ -20,8 +20,10 @@ import {
   UnderlineType,
 } from 'docx';
 import { importoInLettere } from './numeroInLettere.js';
+export { isHtml } from './format.js';
 import { CESSIONARI_POSSIBILI, type Azienda, type Firmatario } from '../data/aziende.js';
 import type { DocumentoInput } from '../types.js';
+import { formatDateItalian, formatEuro, isHtml } from './format.js';
 
 /** Inline formatting carried down the DOM while walking a rich-text body. */
 interface InlineFmt {
@@ -58,35 +60,6 @@ function fitContain(naturalW: number, naturalH: number, maxW: number, maxH: numb
   if (!naturalW || !naturalH) return { width: maxW, height: maxH };
   const scale = Math.min(maxW / naturalW, maxH / naturalH);
   return { width: Math.round(naturalW * scale), height: Math.round(naturalH * scale) };
-}
-
-function formatEuro(val: string | number | null | undefined): string {
-  return val
-    ? parseFloat(String(val)).toLocaleString('it-IT', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-    : '';
-}
-
-function formatDateItalian(dateStr: string): string {
-  if (!dateStr) return '___________';
-  const months = [
-    'gennaio',
-    'febbraio',
-    'marzo',
-    'aprile',
-    'maggio',
-    'giugno',
-    'luglio',
-    'agosto',
-    'settembre',
-    'ottobre',
-    'novembre',
-    'dicembre',
-  ];
-  const d = new Date(dateStr + 'T00:00:00');
-  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 function applyPlaceholders(text: string, vars: Record<string, string>): string {
@@ -196,10 +169,6 @@ const HEX_TO_HIGHLIGHT: Record<string, Highlight> = {
   FF0000: 'red',
   '0000FF': 'blue',
 };
-
-export function isHtml(s: string | null | undefined): boolean {
-  return /<\/?[a-z][\s\S]*>/i.test(s || '');
-}
 
 function rgbToHex(c: string): string | null {
   if (!c) return null;
