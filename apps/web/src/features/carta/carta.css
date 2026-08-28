@@ -60,6 +60,18 @@
   background: var(--color-surface-2);
 }
 
+/* The sheet sits in the middle of its surround rather than against the left
+   edge. This centres the WRAPPER, which reserves the page's real on-screen
+   size (see DocumentPreview) — centring the sheet itself would not survive
+   the zoom, since a transform does not change the space an element occupies.
+   `margin-inline: auto` and not flex centering: auto margins collapse to zero
+   once the page is wider than the panel, leaving the sheet flush left and
+   fully reachable, whereas a centred flex child pushes its own left edge out
+   of the scrollable area. */
+.carta-foglio {
+  margin-inline: auto;
+}
+
 /* ---- form sections ---- */
 
 .carta-section {

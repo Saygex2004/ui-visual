@@ -15,11 +15,10 @@
 // someone could reword.
 /* eslint-disable react/jsx-no-literals, react/no-unescaped-entities */
 
-import type { RefObject } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { formatDateItalian, formatEuro, isHtml } from '../utils/format.js';
 import type { Azienda } from '../data/aziende.js';
 import type { CartaFormData, TipoLettera } from '../types.js';
-import { useState, useEffect } from 'react';
 import { importoInLettere } from '../utils/numeroInLettere.js';
 import { CESSIONARI_POSSIBILI } from '../data/aziende';
 import { EditableHtml } from './EditableHtml.js';
@@ -168,6 +167,23 @@ export function DocumentPreview({
   const PAGE_H = 1123;
   const COL_W = 220;
 
+  // The sheet's unscaled height, watched rather than assumed: the body grows
+  // as the letter is typed, and the wrapper below reserves space from this.
+  const foglioRef = useRef<HTMLDivElement>(null);
+  const [altezzaFoglio, setAltezzaFoglio] = useState(PAGE_H);
+  useEffect(() => {
+    const el = foglioRef.current;
+    if (!el) return;
+    // offsetHeight, not the observer's contentRect: the latter reports the
+    // box AFTER the transform on some engines, which would feed the scale
+    // back into itself and creep on every zoom step.
+    const misura = () => setAltezzaFoglio(el.offsetHeight);
+    misura();
+    const ro = new ResizeObserver(misura);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const renderBlocks = (text: string) =>
     parseBlocks(text).map((block, i) => {
       if (block.type === 'tab') {
@@ -188,22 +204,36 @@ export function DocumentPreview({
       );
     });
 
+  // The zoom is a transform, and a transform changes what you SEE without
+  // changing the space the element reserves. Left to itself that breaks twice:
+  // below 100% the page leaves a gap under it, and above 100% it spills over
+  // the panel's left edge into territory no scrollbar can reach, because
+  // overflow to the left is never scrollable.
+  //
+  // So the sheet is wrapped in a box that reserves the page's REAL on-screen
+  // size, and the sheet scales from its top-left corner inside it. The wrapper
+  // is then an ordinary block of the right width, which `margin-inline: auto`
+  // centres while it fits and leaves flush left once it does not.
+  //
+  // The height is measured rather than assumed: a long letter runs past A4,
+  // and a wrapper fixed at one page would cut the overflow off the bottom.
   return (
-    <div
-      className="printable"
-      style={{
-        width: PAGE_W,
-        minHeight: PAGE_H,
-        background: 'white',
-        boxShadow: '0 4px 32px rgba(0,0,0,0.22)',
-        position: 'relative',
-        overflow: 'hidden',
-        transformOrigin: 'top center',
-        transform: `scale(${scale})`,
-        marginBottom: `${-(PAGE_H * (1 - scale))}px`,
-      }}
-    >
-      <style>{`
+    <div className="carta-foglio" style={{ width: PAGE_W * scale, height: altezzaFoglio * scale }}>
+      <div
+        ref={foglioRef}
+        className="printable"
+        style={{
+          width: PAGE_W,
+          minHeight: PAGE_H,
+          background: 'white',
+          boxShadow: '0 4px 32px rgba(0,0,0,0.22)',
+          position: 'relative',
+          overflow: 'hidden',
+          transformOrigin: 'top left',
+          transform: `scale(${scale})`,
+        }}
+      >
+        <style>{`
         .lettera-corpo-edit p { margin: 0 0 10px; }
         .lettera-corpo-edit ul, .lettera-corpo-edit ol { margin: 0 0 10px; padding-left: 26px; }
         .lettera-corpo-edit h1 { font-size: 16pt; font-weight: 700; margin: 0 0 8px; }
@@ -218,262 +248,217 @@ export function DocumentPreview({
         }
       `}</style>
 
-      {/* HEADER */}
-      {azienda.headerSpeciale ? (
-        <div
-          style={{
-            padding: '14px 56px 10px',
-            borderBottom: '1.5px solid #a0a0a0',
-            fontFamily: "'Calibri', 'Carlito', Arial, sans-serif",
-            fontSize: '8pt',
-          }}
-        >
-          <div style={{ fontSize: '10.5pt', fontWeight: 700 }}>{azienda.nomeHeader}</div>
-          <div style={{ marginBottom: 6 }}>{azienda.headerSpeciale.sottotitolo}</div>
-          {azienda.headerSpeciale.righe.map(([left, right], i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>{left}</span>
-              <span>{right}</span>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div
-          style={{
-            padding: '18px 56px 12px',
-            borderBottom: '1px solid #ddd',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: 80,
-          }}
-        >
-          {azienda.logo && !logoFailed ? (
-            <img
-              src={azienda.logo}
-              alt={azienda.nome}
-              style={{ maxHeight: 95, maxWidth: 220, objectFit: 'contain' }}
-              onError={() => setLogoFailed(true)}
-            />
-          ) : (
-            <span
-              style={{
-                fontFamily: 'Cambria, Georgia, serif',
-                fontSize: `${azienda.headerSize || 14}pt`,
-                color: azienda.headerColor || '#A6A6A6',
-                letterSpacing: '0.1em',
-                fontWeight: 600,
-              }}
-            >
-              {azienda.nomeHeader}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* BODY */}
-      <div style={{ padding: '44px 56px 100px', ...bodyStyle }}>
-        {/* Address block */}
-        <div style={{ marginBottom: 24, paddingLeft: '55%' }}>
-          <div style={{ marginBottom: 2 }}>Spettabile</div>
-          <div style={{ fontWeight: 700, marginBottom: 1 }}>
-            {formData.destinatarioNome || <em style={{ color: '#aaa' }}>Nome azienda</em>}
-          </div>
-          {formData.destinatarioVia && <div>{formData.destinatarioVia}</div>}
-          {(formData.destinatarioCap || formData.destinatarioCitta) && (
-            <div>
-              {[formData.destinatarioCap, formData.destinatarioCitta].filter(Boolean).join(' ')}
-            </div>
-          )}
-          {tipo === 'acquisto' && formData.destinatarioReferente && (
-            <div style={{ marginTop: 4 }}>
-              Alla cortese attenzione di {formData.destinatarioReferente}
-            </div>
-          )}
-          {formData.destinatarioPec && (
-            <div style={{ marginTop: 4 }}>
-              <span>Pec: </span>
-              <span style={{ color: '#1155CC', textDecoration: 'underline' }}>
-                {formData.destinatarioPec}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* City + Date */}
-        <div style={{ marginBottom: 16 }}>
-          {azienda.cittaData || azienda.citta || 'Milano'}, {formatDateItalian(formData.data)}
-        </div>
-
-        {/* Oggetto */}
-        {formData.oggetto && (
-          <div style={{ fontWeight: 700, textDecoration: 'underline', marginBottom: 16 }}>
-            Oggetto: {formData.oggetto}
-          </div>
-        )}
-
-        {/* Apertura */}
-        <div style={{ marginBottom: 12 }}>{formData.apertura || 'Egregi Signori,'}</div>
-
-        {/* Corpo */}
-        <div style={{ marginBottom: 20 }}>
-          {editableBody && onBodyChange ? (
-            <EditableHtml
-              ref={bodyRef}
-              value={formData.testo}
-              onChange={onBodyChange}
-              placeholder="Scrivi qui il corpo della lettera…"
-              className="lettera-corpo-edit"
-              style={{ outline: 'none', minHeight: 140, ...bodyStyle }}
-            />
-          ) : isHtml(preview) ? (
-            <div className="quoted-html-body" dangerouslySetInnerHTML={{ __html: preview }} />
-          ) : (
-            renderBlocks(preview)
-          )}
-        </div>
-
-        {/* ── ACCETTAZIONE: sezione citazione proposta ── */}
-        {tipo === 'accettazione' && formData.testoPropostaOriginale && (
-          <>
-            {/* Separator row of asterisks */}
-            <div
-              style={{
-                textAlign: 'center',
-                marginBottom: 16,
-                letterSpacing: '0.5em',
-                color: '#555',
-              }}
-            >
-              * * *
-            </div>
-
-            {/* Quoted proposal: solo il testo formattato del documento caricato/scritto,
-                senza alcuna intestazione fabbricata — Spettabile/data/Oggetto originali
-                sono già dentro il testo stesso (presi dal documento reale). */}
-            <div
-              className="quoted-html-body"
-              style={{ marginBottom: 16 }}
-              dangerouslySetInnerHTML={{ __html: formData.testoPropostaOriginale }}
-            />
-
-            {/* Second separator */}
-            <div
-              style={{
-                textAlign: 'center',
-                marginBottom: 16,
-                letterSpacing: '0.5em',
-                color: '#555',
-              }}
-            >
-              * * *
-            </div>
-          </>
-        )}
-
-        {/* ── RINUNCIA: dichiarazione di rinuncia al credito ── */}
-        {tipo === 'rinuncia' && (
-          <>
-            <div style={{ marginBottom: 12, textAlign: 'center' }}>dichiaro</div>
-            <div style={{ marginBottom: 20, textAlign: 'justify' }}>
-              di avere irrevocabilmente ed incondizionatamente rinunciato al rimborso del Credito
-              limitatamente all'importo di Euro {formatEuro(formData.importoRinunciato)} (
-              {formData.importoRinunciato ? importoInLettere(formData.importoRinunciato) : '___'}).
-              L'importo del Credito rinunciato è stato conseguentemente acquisito al patrimonio
-              netto della Società quale riserva in conto futuro aumento di capitale sociale per gli
-              utilizzi consentiti dalla legge.
-            </div>
-          </>
-        )}
-
-        {/* Chiusura */}
-        <div style={{ marginBottom: 48 }}>{formData.chiusura}</div>
-
-        {/* Signature — unica logica per tutti i tipi: assente / 1 colonna / 2 colonne */}
-        {formData.firmaSenza ? null : formData.numFirmatari === 2 ? (
-          <div>
-            <div style={{ fontWeight: 700, textAlign: 'center', marginBottom: 40 }}>
-              {firmaHeading}
-            </div>
-            <div style={{ display: 'flex', gap: 40 }}>
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    borderTop: '1px solid #aaa',
-                    paddingTop: 4,
-                    color: '#666',
-                    fontSize: '9pt',
-                  }}
-                >
-                  _________________________
-                </div>
-                <div style={{ marginTop: 4 }}>{formData.firmatario1Nome}</div>
-                <div style={{ fontStyle: 'italic' }}>{formData.firmatario1Carica}</div>
+        {/* HEADER */}
+        {azienda.headerSpeciale ? (
+          <div
+            style={{
+              padding: '14px 56px 10px',
+              borderBottom: '1.5px solid #a0a0a0',
+              fontFamily: "'Calibri', 'Carlito', Arial, sans-serif",
+              fontSize: '8pt',
+            }}
+          >
+            <div style={{ fontSize: '10.5pt', fontWeight: 700 }}>{azienda.nomeHeader}</div>
+            <div style={{ marginBottom: 6 }}>{azienda.headerSpeciale.sottotitolo}</div>
+            {azienda.headerSpeciale.righe.map(([left, right], i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>{left}</span>
+                <span>{right}</span>
               </div>
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    borderTop: '1px solid #aaa',
-                    paddingTop: 4,
-                    color: '#666',
-                    fontSize: '9pt',
-                  }}
-                >
-                  _________________________
-                </div>
-                <div style={{ marginTop: 4 }}>{formData.firmatario2Nome}</div>
-                <div style={{ fontStyle: 'italic' }}>{formData.firmatario2Carica}</div>
-              </div>
-            </div>
+            ))}
           </div>
         ) : (
-          <div style={{ paddingLeft: '55%' }}>
-            <div style={{ fontWeight: 700, marginBottom: 40 }}>{firmaHeading}</div>
-            <div
-              style={{
-                borderTop: '1px solid #aaa',
-                paddingTop: 4,
-                width: 180,
-                color: '#666',
-                fontSize: '9pt',
-              }}
-            >
-              _________________________
-            </div>
-            {formData.firmatario1Nome && (
-              <div style={{ marginTop: 4 }}>{formData.firmatario1Nome}</div>
-            )}
-            {formData.firmatario1Carica && (
-              <div style={{ fontStyle: 'italic' }}>{formData.firmatario1Carica}</div>
+          <div
+            style={{
+              padding: '18px 56px 12px',
+              borderBottom: '1px solid #ddd',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: 80,
+            }}
+          >
+            {azienda.logo && !logoFailed ? (
+              <img
+                src={azienda.logo}
+                alt={azienda.nome}
+                style={{ maxHeight: 95, maxWidth: 220, objectFit: 'contain' }}
+                onError={() => setLogoFailed(true)}
+              />
+            ) : (
+              <span
+                style={{
+                  fontFamily: 'Cambria, Georgia, serif',
+                  fontSize: `${azienda.headerSize || 14}pt`,
+                  color: azienda.headerColor || '#A6A6A6',
+                  letterSpacing: '0.1em',
+                  fontWeight: 600,
+                }}
+              >
+                {azienda.nomeHeader}
+              </span>
             )}
           </div>
         )}
 
-        {/* ── RINUNCIA: dichiarazione sostitutiva di atto notorio ── */}
-        {tipo === 'rinuncia' && (
-          <div style={{ marginTop: 40 }}>
-            <div style={{ fontWeight: 700, textAlign: 'center', marginBottom: 4 }}>
-              DICHIARAZIONE SOSTITUTIVA DI ATTO DI NOTORIETÀ
+        {/* BODY */}
+        <div style={{ padding: '44px 56px 100px', ...bodyStyle }}>
+          {/* Address block */}
+          <div style={{ marginBottom: 24, paddingLeft: '55%' }}>
+            <div style={{ marginBottom: 2 }}>Spettabile</div>
+            <div style={{ fontWeight: 700, marginBottom: 1 }}>
+              {formData.destinatarioNome || <em style={{ color: '#aaa' }}>Nome azienda</em>}
             </div>
-            <div style={{ textAlign: 'center', marginBottom: 16 }}>
-              (ex art. 47 D.P.R. 445/2000)
+            {formData.destinatarioVia && <div>{formData.destinatarioVia}</div>}
+            {(formData.destinatarioCap || formData.destinatarioCitta) && (
+              <div>
+                {[formData.destinatarioCap, formData.destinatarioCitta].filter(Boolean).join(' ')}
+              </div>
+            )}
+            {tipo === 'acquisto' && formData.destinatarioReferente && (
+              <div style={{ marginTop: 4 }}>
+                Alla cortese attenzione di {formData.destinatarioReferente}
+              </div>
+            )}
+            {formData.destinatarioPec && (
+              <div style={{ marginTop: 4 }}>
+                <span>Pec: </span>
+                <span style={{ color: '#1155CC', textDecoration: 'underline' }}>
+                  {formData.destinatarioPec}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* City + Date */}
+          <div style={{ marginBottom: 16 }}>
+            {azienda.cittaData || azienda.citta || 'Milano'}, {formatDateItalian(formData.data)}
+          </div>
+
+          {/* Oggetto */}
+          {formData.oggetto && (
+            <div style={{ fontWeight: 700, textDecoration: 'underline', marginBottom: 16 }}>
+              Oggetto: {formData.oggetto}
             </div>
-            <div style={{ marginBottom: 12, textAlign: 'justify' }}>
-              {sottoscrittoLabel} {formData.legaleNome || '___________'}, in qualità di{' '}
-              {formData.legaleCarica || 'legale rappresentante'} di {azienda.nome}, consapevole
-              delle sanzioni penali in caso di dichiarazioni mendaci, di formazione o uso di atti
-              falsi (art. 76, D.P.R. 445/2000), viste le disposizioni di cui all'art. 88, comma
-              4-bis del D.P.R. 917/1986
+          )}
+
+          {/* Apertura */}
+          <div style={{ marginBottom: 12 }}>{formData.apertura || 'Egregi Signori,'}</div>
+
+          {/* Corpo */}
+          <div style={{ marginBottom: 20 }}>
+            {editableBody && onBodyChange ? (
+              <EditableHtml
+                ref={bodyRef}
+                value={formData.testo}
+                onChange={onBodyChange}
+                placeholder="Scrivi qui il corpo della lettera…"
+                className="lettera-corpo-edit"
+                style={{ outline: 'none', minHeight: 140, ...bodyStyle }}
+              />
+            ) : isHtml(preview) ? (
+              <div className="quoted-html-body" dangerouslySetInnerHTML={{ __html: preview }} />
+            ) : (
+              renderBlocks(preview)
+            )}
+          </div>
+
+          {/* ── ACCETTAZIONE: sezione citazione proposta ── */}
+          {tipo === 'accettazione' && formData.testoPropostaOriginale && (
+            <>
+              {/* Separator row of asterisks */}
+              <div
+                style={{
+                  textAlign: 'center',
+                  marginBottom: 16,
+                  letterSpacing: '0.5em',
+                  color: '#555',
+                }}
+              >
+                * * *
+              </div>
+
+              {/* Quoted proposal: solo il testo formattato del documento caricato/scritto,
+                senza alcuna intestazione fabbricata — Spettabile/data/Oggetto originali
+                sono già dentro il testo stesso (presi dal documento reale). */}
+              <div
+                className="quoted-html-body"
+                style={{ marginBottom: 16 }}
+                dangerouslySetInnerHTML={{ __html: formData.testoPropostaOriginale }}
+              />
+
+              {/* Second separator */}
+              <div
+                style={{
+                  textAlign: 'center',
+                  marginBottom: 16,
+                  letterSpacing: '0.5em',
+                  color: '#555',
+                }}
+              >
+                * * *
+              </div>
+            </>
+          )}
+
+          {/* ── RINUNCIA: dichiarazione di rinuncia al credito ── */}
+          {tipo === 'rinuncia' && (
+            <>
+              <div style={{ marginBottom: 12, textAlign: 'center' }}>dichiaro</div>
+              <div style={{ marginBottom: 20, textAlign: 'justify' }}>
+                di avere irrevocabilmente ed incondizionatamente rinunciato al rimborso del Credito
+                limitatamente all'importo di Euro {formatEuro(formData.importoRinunciato)} (
+                {formData.importoRinunciato ? importoInLettere(formData.importoRinunciato) : '___'}
+                ). L'importo del Credito rinunciato è stato conseguentemente acquisito al patrimonio
+                netto della Società quale riserva in conto futuro aumento di capitale sociale per
+                gli utilizzi consentiti dalla legge.
+              </div>
+            </>
+          )}
+
+          {/* Chiusura */}
+          <div style={{ marginBottom: 48 }}>{formData.chiusura}</div>
+
+          {/* Signature — unica logica per tutti i tipi: assente / 1 colonna / 2 colonne */}
+          {formData.firmaSenza ? null : formData.numFirmatari === 2 ? (
+            <div>
+              <div style={{ fontWeight: 700, textAlign: 'center', marginBottom: 40 }}>
+                {firmaHeading}
+              </div>
+              <div style={{ display: 'flex', gap: 40 }}>
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      borderTop: '1px solid #aaa',
+                      paddingTop: 4,
+                      color: '#666',
+                      fontSize: '9pt',
+                    }}
+                  >
+                    _________________________
+                  </div>
+                  <div style={{ marginTop: 4 }}>{formData.firmatario1Nome}</div>
+                  <div style={{ fontStyle: 'italic' }}>{formData.firmatario1Carica}</div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      borderTop: '1px solid #aaa',
+                      paddingTop: 4,
+                      color: '#666',
+                      fontSize: '9pt',
+                    }}
+                  >
+                    _________________________
+                  </div>
+                  <div style={{ marginTop: 4 }}>{formData.firmatario2Nome}</div>
+                  <div style={{ fontStyle: 'italic' }}>{formData.firmatario2Carica}</div>
+                </div>
+              </div>
             </div>
-            <div style={{ marginBottom: 12, textAlign: 'center' }}>dichiara</div>
-            <div style={{ marginBottom: 40, textAlign: 'justify' }}>
-              che il valore fiscale del credito vantato verso la società{' '}
-              {formData.destinatarioNome || '[destinatario]'} (C.F.{' '}
-              {formData.destinatarioCF || '___'}), oggetto di rinuncia come da dichiarazione sopra
-              riportata, è pari a € {formatEuro(formData.valoreFiscale)}.
-            </div>
+          ) : (
             <div style={{ paddingLeft: '55%' }}>
-              <div style={{ fontWeight: 700, marginBottom: 40 }}>{azienda.nome}</div>
+              <div style={{ fontWeight: 700, marginBottom: 40 }}>{firmaHeading}</div>
               <div
                 style={{
                   borderTop: '1px solid #aaa',
@@ -485,36 +470,82 @@ export function DocumentPreview({
               >
                 _________________________
               </div>
+              {formData.firmatario1Nome && (
+                <div style={{ marginTop: 4 }}>{formData.firmatario1Nome}</div>
+              )}
+              {formData.firmatario1Carica && (
+                <div style={{ fontStyle: 'italic' }}>{formData.firmatario1Carica}</div>
+              )}
+            </div>
+          )}
+
+          {/* ── RINUNCIA: dichiarazione sostitutiva di atto notorio ── */}
+          {tipo === 'rinuncia' && (
+            <div style={{ marginTop: 40 }}>
+              <div style={{ fontWeight: 700, textAlign: 'center', marginBottom: 4 }}>
+                DICHIARAZIONE SOSTITUTIVA DI ATTO DI NOTORIETÀ
+              </div>
+              <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                (ex art. 47 D.P.R. 445/2000)
+              </div>
+              <div style={{ marginBottom: 12, textAlign: 'justify' }}>
+                {sottoscrittoLabel} {formData.legaleNome || '___________'}, in qualità di{' '}
+                {formData.legaleCarica || 'legale rappresentante'} di {azienda.nome}, consapevole
+                delle sanzioni penali in caso di dichiarazioni mendaci, di formazione o uso di atti
+                falsi (art. 76, D.P.R. 445/2000), viste le disposizioni di cui all'art. 88, comma
+                4-bis del D.P.R. 917/1986
+              </div>
+              <div style={{ marginBottom: 12, textAlign: 'center' }}>dichiara</div>
+              <div style={{ marginBottom: 40, textAlign: 'justify' }}>
+                che il valore fiscale del credito vantato verso la società{' '}
+                {formData.destinatarioNome || '[destinatario]'} (C.F.{' '}
+                {formData.destinatarioCF || '___'}), oggetto di rinuncia come da dichiarazione sopra
+                riportata, è pari a € {formatEuro(formData.valoreFiscale)}.
+              </div>
+              <div style={{ paddingLeft: '55%' }}>
+                <div style={{ fontWeight: 700, marginBottom: 40 }}>{azienda.nome}</div>
+                <div
+                  style={{
+                    borderTop: '1px solid #aaa',
+                    paddingTop: 4,
+                    width: 180,
+                    color: '#666',
+                    fontSize: '9pt',
+                  }}
+                >
+                  _________________________
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* FOOTER */}
+        {azienda.footerText && (
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: '0 56px 12px',
+              borderTop: '1px solid #000',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'Garamond, "EB Garamond", Georgia, serif',
+                fontSize: '7.5pt',
+                textAlign: 'center',
+                color: '#000',
+                marginTop: 6,
+              }}
+            >
+              {azienda.footerText}
             </div>
           </div>
         )}
       </div>
-
-      {/* FOOTER */}
-      {azienda.footerText && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            padding: '0 56px 12px',
-            borderTop: '1px solid #000',
-          }}
-        >
-          <div
-            style={{
-              fontFamily: 'Garamond, "EB Garamond", Georgia, serif',
-              fontSize: '7.5pt',
-              textAlign: 'center',
-              color: '#000',
-              marginTop: 6,
-            }}
-          >
-            {azienda.footerText}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

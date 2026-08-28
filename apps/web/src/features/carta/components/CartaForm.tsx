@@ -8,6 +8,7 @@ import { CorpoEditor } from './CorpoEditor.js';
 import { Campo, Scelte } from './Campo.js';
 import { Field } from '../../../components/Field.js';
 import {
+  AZIENDE,
   CESSIONARI_POSSIBILI,
   FIRMATARI_FREQUENTI,
   QUALIFICHE_RINUNCIA,
@@ -30,6 +31,8 @@ export interface CartaFormProps {
   tipo: TipoLettera;
   formData: CartaFormData;
   set: <K extends keyof CartaFormData>(campo: K, valore: CartaFormData[K]) => void;
+  /** Fills the recipient block from a company already on file. */
+  compilaDestinatario: (az: Azienda) => void;
 }
 
 const ASSUNTO_EXTRA: { id: AssuntoExtra; chiave: string }[] = [
@@ -39,7 +42,7 @@ const ASSUNTO_EXTRA: { id: AssuntoExtra; chiave: string }[] = [
   { id: 'libero', chiave: 'scelte.assuntoLibero' },
 ];
 
-export function CartaForm({ azienda, tipo, formData, set }: CartaFormProps) {
+export function CartaForm({ azienda, tipo, formData, set, compilaDestinatario }: CartaFormProps) {
   const { t } = useTranslation('carta');
   const f = formData;
   /** The amount spelled out, shown under the figure so a typo is visible. */
@@ -59,6 +62,29 @@ export function CartaForm({ azienda, tipo, formData, set }: CartaFormProps) {
       ) : null}
 
       <Section title={t('sezioni.destinatario')} missing={missingDestinatario(f)}>
+        {/* A shortcut over the fields below, not a replacement for them: it
+            fills them in and they stay editable, because a letter often goes
+            to a branch or a slightly different name. The value stays "" so
+            the menu reads as an action ("choose to fill") rather than as a
+            record of who the recipient is — that lives in the fields.
+            The sender is excluded (nobody writes to themselves) and so is the
+            blank sheet, which holds no address to copy. */}
+        <Scelte
+          id="c-dest-da-azienda"
+          label={t('fields.destinatarioDaAzienda')}
+          value=""
+          onChange={(id) => {
+            const az = AZIENDE.find((a) => a.id === id);
+            if (az) compilaDestinatario(az);
+          }}
+        >
+          <option value="">{t('scelte.destinatarioScegli')}</option>
+          {AZIENDE.filter((a) => a.id !== azienda.id && a.id !== 'template-vuoto').map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.nome}
+            </option>
+          ))}
+        </Scelte>
         <Campo
           id="c-dest-nome"
           label={t('fields.destinatarioNome')}

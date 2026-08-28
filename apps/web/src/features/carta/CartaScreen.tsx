@@ -10,7 +10,7 @@ import { Download, Minus, Plus } from 'lucide-react';
 import { Button } from '../../components/Button.js';
 import { SelectField } from '../../components/SelectField.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
-import { AZIENDE, TIPI_DOCUMENTO } from './data/aziende.js';
+import { AZIENDE, TIPI_DOCUMENTO, type Azienda } from './data/aziende.js';
 import { DocumentPreview } from './components/DocumentPreview.js';
 import { CartaForm } from './components/CartaForm.js';
 import { generateDocx } from './utils/docxGenerator.js';
@@ -41,6 +41,26 @@ export function CartaScreen() {
 
   const set = <K extends keyof CartaFormData>(campo: K, valore: CartaFormData[K]) =>
     setFormData((f) => ({ ...f, [campo]: valore }));
+
+  // Fills the recipient block from a company already on file. One state
+  // update, not six calls to `set`: the six fields belong to a single act,
+  // and a half-applied recipient must never be a state the form can be in.
+  // `referente` is deliberately left alone — it names a person, not the
+  // company, so it is not something the registry can know.
+  function compilaDestinatario(az: Azienda) {
+    setFormData((f) => ({
+      ...f,
+      // `?? ''` throughout: several entries in the registry carry no PEC or
+      // no tax code, and an absent value has to land in the form as an empty
+      // field the user can fill, never as the string "undefined" in a letter.
+      destinatarioNome: az.nome ?? '',
+      destinatarioVia: az.via ?? '',
+      destinatarioCap: az.cap ?? '',
+      destinatarioCitta: az.citta ?? '',
+      destinatarioPec: az.pec ?? '',
+      destinatarioCF: az.cf ?? '',
+    }));
+  }
 
   function cambiaTipo(nuovo: TipoLettera) {
     setTipo(nuovo);
@@ -111,7 +131,13 @@ export function CartaScreen() {
             ))}
           </SelectField>
 
-          <CartaForm azienda={azienda} tipo={tipo} formData={formData} set={set} />
+          <CartaForm
+            azienda={azienda}
+            tipo={tipo}
+            formData={formData}
+            set={set}
+            compilaDestinatario={compilaDestinatario}
+          />
 
           {mancanti.length > 0 ? (
             <StatusDisplay

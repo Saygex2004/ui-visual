@@ -53,7 +53,8 @@
     "firmatarioNome": "Nome",
     "firmatarioCarica": "Qualifica",
     "firmatario2Nome": "Nome (secondo firmatario)",
-    "firmatario2Carica": "Qualifica (secondo firmatario)"
+    "firmatario2Carica": "Qualifica (secondo firmatario)",
+    "destinatarioDaAzienda": "Compila da azienda"
   },
   "actions": {
     "download": "Scarica Word",
@@ -90,7 +91,8 @@
     "assuntoNessuno": "Nessuno",
     "assuntoConcordato": "Concordato preventivo",
     "assuntoIpotecario": "Garanzie ipotecarie",
-    "assuntoLibero": "Testo libero"
+    "assuntoLibero": "Testo libero",
+    "destinatarioScegli": "Scegli un'azienda per compilare i campi…"
   },
   "editor": {
     "toolbar": "Formattazione",
