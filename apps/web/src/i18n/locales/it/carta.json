@@ -1,0 +1,18 @@
+{
+  "title": "Carta intestata",
+  "subtitle": "Genera lettere, proposte e accettazioni sulla carta intestata del gruppo.",
+  "fields": {
+    "azienda": "Società mittente",
+    "tipo": "Tipo di documento"
+  },
+  "actions": {
+    "download": "Scarica Word",
+    "generating": "Generazione…"
+  },
+  "states": {
+    "missing": "Da completare: {{campi}}"
+  },
+  "errors": {
+    "generateFailed": "Non è stato possibile generare il documento."
+  }
+}

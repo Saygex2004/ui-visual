@@ -20,6 +20,7 @@ import { AccountsScreen } from '../features/admin/AccountsScreen.js';
 import { CategoriesScreen } from '../features/admin/CategoriesScreen.js';
 import { PraticheScreen } from '../features/pratiche/PraticheScreen.js';
 import { praticheSearchSchema } from '../features/pratiche/praticheUrlState.js';
+import { CartaScreen } from '../features/carta/CartaScreen.js';
 import { AdminActivityScreen } from '../features/admin/AdminActivityScreen.js';
 import { CalendarAssignmentScreen } from '../features/admin/CalendarAssignmentScreen.js';
 import { LandingScreen } from '../features/dashboard/LandingScreen.js';
@@ -158,6 +159,13 @@ const praticheRoute = createRoute({
   component: PraticheScreen,
 });
 
+const cartaRoute = createRoute({
+  getParentRoute: () => protectedRoute,
+  path: '/carta',
+  beforeLoad: requireVista('carta'),
+  component: CartaScreen,
+});
+
 const adminCategoriesRoute = createRoute({
   getParentRoute: () => protectedRoute,
   path: '/admin/categorie',
@@ -212,6 +220,7 @@ const routeTree = rootRoute.addChildren([
     areaRoute.addChildren([listingRoute]),
     adminRoute,
     praticheRoute,
+    cartaRoute,
     adminCategoriesRoute,
     adminActivityRoute,
     adminCalendarRoute,

@@ -757,3 +757,11 @@
     width: 100%;
   }
 }
+
+/* A fourth hue, so the cards stay distinguishable at a glance — and a
+   soft/strong pair, never brand-fill on brand-strong, which resolves to
+   navy on navy in light mode. */
+.landing-option-icon-carta {
+  background: var(--color-success-soft);
+  color: var(--color-success-strong);
+}

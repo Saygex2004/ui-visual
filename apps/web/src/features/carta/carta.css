@@ -1,0 +1,61 @@
+/* The letterhead view. The page itself (DocumentPreview) is deliberately NOT
+   themed — it is paper — so only the surrounding chrome uses tokens. */
+
+.carta-screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-6);
+}
+
+.carta-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.carta-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--color-text);
+}
+
+.carta-subtitle {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Form beside the page, stacking under it on narrow screens rather than
+   squeezing an A4 reproduction into half a phone. */
+.carta-layout {
+  display: grid;
+  grid-template-columns: minmax(20rem, 26rem) 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 60rem) {
+  .carta-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.carta-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.carta-preview {
+  overflow: auto;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  /* A neutral surround so the white page reads as a sheet on a desk, in both
+     themes. */
+  background: var(--color-surface-2);
+}

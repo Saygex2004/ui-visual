@@ -6,7 +6,7 @@
 // "coming soon" placeholders); the grid is ready for future cards.
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
-import { ArrowRight, Building2, Coins, FileBox } from 'lucide-react';
+import { ArrowRight, Building2, Coins, FileBox, FileSignature } from 'lucide-react';
 import { hasVista, type AreaSlug } from '@pvp/shared';
 import { Badge } from '../../components/Badge.js';
 import { useMe } from '../auth/hooks.js';
@@ -45,6 +45,7 @@ export function LandingScreen() {
   // "nothing" while `me` loads avoids flashing cards the account cannot open.
   const conto = me?.user ?? { role: 'user' as const, viste: [] };
   const vedePratiche = hasVista(conto, 'pratiche');
+  const vedeCarta = hasVista(conto, 'carta');
   // Only fetched where the account may actually open the area: an unpermitted
   // request is refused anyway, and it would still cost the auth path's reads
   // — once a minute, forever, thanks to the poll.
@@ -117,6 +118,25 @@ export function LandingScreen() {
             </span>
             <span className="landing-option-title">{t('landing.praticheTitle')}</span>
             <span className="landing-option-description">{t('landing.praticheDescription')}</span>
+            <span className="landing-option-footer">
+              <span className="landing-option-stat" />
+              <span className="landing-option-cta">
+                {t('landing.openCta')}
+                <ArrowRight aria-hidden="true" size={14} />
+              </span>
+            </span>
+          </Link>
+        ) : null}
+        {vedeCarta ? (
+          <Link to="/carta" className="landing-option">
+            <span className="landing-option-top">
+              <span className="landing-option-icon landing-option-icon-carta">
+                <FileSignature aria-hidden="true" size={22} />
+              </span>
+              <Badge variant="accent">{t('landing.adminBadge')}</Badge>
+            </span>
+            <span className="landing-option-title">{t('landing.cartaTitle')}</span>
+            <span className="landing-option-description">{t('landing.cartaDescription')}</span>
             <span className="landing-option-footer">
               <span className="landing-option-stat" />
               <span className="landing-option-cta">

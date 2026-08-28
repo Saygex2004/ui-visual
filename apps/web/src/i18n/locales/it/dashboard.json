@@ -13,7 +13,9 @@
     "creditiDescription": "Aste di quote societarie e crediti ceduti da procedure giudiziarie.",
     "praticheTitle": "Pratiche cartacee",
     "praticheDescription": "Richiesta, spedizione e tracciamento dei fascicoli cartacei.",
-    "adminBadge": "Solo admin"
+    "adminBadge": "Solo admin",
+    "cartaTitle": "Carta intestata",
+    "cartaDescription": "Lettere, proposte e accettazioni sulla carta intestata del gruppo."
   },
   "area": {
     "title": {
