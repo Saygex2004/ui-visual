@@ -145,6 +145,69 @@ describe('buildDocument', () => {
     expect(xml).not.toContain('&lt;strong&gt;');
   });
 
+  // Tiptap replaced the original's execCommand toolbar, so the markup feeding
+  // the Word conversion changed shape. These pin what Tiptap actually emits —
+  // <strong>, <em>, <s>, <ul>/<ol> — against what Word must receive.
+  describe('rich text as Tiptap emits it', () => {
+    it('maps bold and italic onto real Word formatting', async () => {
+      const xml = await documentXml('oceania', {
+        tipo: 'lettera',
+        testo: '<p><strong>Grassetto</strong> e <em>corsivo</em>.</p>',
+      });
+      expect(xml).toContain('<w:b/>');
+      expect(xml).toContain('<w:i/>');
+      expect(xml).toContain('Grassetto');
+      expect(xml).toContain('corsivo');
+      // Never the tags themselves.
+      expect(xml).not.toContain('&lt;strong&gt;');
+    });
+
+    it('maps strikethrough, which Tiptap writes as <s>', async () => {
+      // The original toolbar produced <strike>; StarterKit produces <s>. The
+      // walk accepts S, STRIKE and DEL, so both survive — worth pinning,
+      // because the editor swap silently changed which one arrives.
+      const xml = await documentXml('oceania', {
+        tipo: 'lettera',
+        testo: '<p><s>Barrato</s></p>',
+      });
+      expect(xml).toContain('<w:strike/>');
+    });
+
+    it('turns both list kinds into numbered Word paragraphs', async () => {
+      const puntato = await documentXml('oceania', {
+        tipo: 'lettera',
+        testo: '<ul><li>Primo</li><li>Secondo</li></ul>',
+      });
+      expect(puntato).toContain('Primo');
+      expect(puntato).toContain('Secondo');
+
+      const numerato = await documentXml('oceania', {
+        tipo: 'lettera',
+        testo: '<ol><li>Uno</li><li>Due</li></ol>',
+      });
+      expect(numerato).toContain('Uno');
+      expect(numerato).toContain('Due');
+    });
+
+    it('keeps each paragraph separate rather than running them together', async () => {
+      const xml = await documentXml('oceania', {
+        tipo: 'lettera',
+        testo: '<p>Primo.</p><p>Secondo.</p>',
+      });
+      expect(xml).toContain('Primo.');
+      expect(xml).toContain('Secondo.');
+      expect(xml).not.toContain('Primo.Secondo.');
+    });
+
+    it('survives the empty document Tiptap starts from', async () => {
+      // A fresh editor holds <p></p>; that must produce a valid file, not a
+      // crash or a document Word refuses.
+      const azienda = AZIENDE.find((a) => a.id === 'oceania')!;
+      const doc = await buildDocument(azienda, input({ tipo: 'lettera', testo: '<p></p>' }));
+      await expect(Packer.toBuffer(doc)).resolves.toBeDefined();
+    });
+  });
+
   it('signs with the name and role given', async () => {
     const xml = await documentXml('oceania');
     expect(xml).toContain('Silvia Caviglia');

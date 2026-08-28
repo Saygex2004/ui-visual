@@ -4,6 +4,7 @@
 // is never shown the acquisto-crediti fields, which is most of the form.
 import { useTranslation } from 'react-i18next';
 import { Section } from './Section.js';
+import { CorpoEditor } from './CorpoEditor.js';
 import { Campo, Scelte } from './Campo.js';
 import { Field } from '../../../components/Field.js';
 import {
@@ -380,14 +381,8 @@ export function CartaForm({ azienda, tipo, formData, set }: CartaFormProps) {
           value={f.apertura}
           onChange={(v) => set('apertura', v)}
         />
-        <Field label={t('fields.corpo')} htmlFor="c-testo">
-          <textarea
-            id="c-testo"
-            className="carta-textarea"
-            rows={10}
-            value={f.testo}
-            onChange={(e) => set('testo', e.target.value)}
-          />
+        <Field label={t('fields.corpo')}>
+          <CorpoEditor value={f.testo} onChange={(html) => set('testo', html)} />
         </Field>
         <Campo
           id="c-chiusura"

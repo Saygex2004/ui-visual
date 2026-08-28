@@ -18,5 +18,11 @@ for (const theme of ['light', 'dark'] as const) {
     await page.getByLabel('Tipo di documento').selectOption('acquisto');
     await page.getByLabel('Tipo di corrispettivo').selectOption('earnout');
     await page.screenshot({ path: `carta-shots/02-acquisto-${theme}.png`, fullPage: true });
+
+    // The rich-text body, open, with its toolbar.
+    await page.getByLabel('Tipo di documento').selectOption('lettera');
+    await page.getByRole('button', { name: /Testo lettera/ }).click();
+    await page.getByRole('button', { name: 'Grassetto' }).waitFor();
+    await page.screenshot({ path: `carta-shots/03-editor-${theme}.png` });
   });
 }

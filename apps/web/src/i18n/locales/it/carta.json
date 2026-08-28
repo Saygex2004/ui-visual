@@ -88,5 +88,13 @@
     "assuntoConcordato": "Concordato preventivo",
     "assuntoIpotecario": "Garanzie ipotecarie",
     "assuntoLibero": "Testo libero"
+  },
+  "editor": {
+    "toolbar": "Formattazione",
+    "bold": "Grassetto",
+    "italic": "Corsivo",
+    "strike": "Barrato",
+    "bulletList": "Elenco puntato",
+    "orderedList": "Elenco numerato"
   }
 }
