@@ -138,8 +138,11 @@ export function useSetVisteStati() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: SetVisteStatiRequest) => adminApi.setVisteStati(body),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: visteStatiQueryKey });
+    onSuccess: (res) => {
+      // The response IS the new document, so it is written straight into the
+      // cache rather than invalidated: a refetch would leave a window in which
+      // the next change reads the previous answer and writes it back.
+      qc.setQueryData(visteStatiQueryKey, res);
       // The landing screen and the route guards read the switches from
       // /auth/me, so that has to be refetched or the admin would keep seeing
       // the previous answer on the very screen they just changed.

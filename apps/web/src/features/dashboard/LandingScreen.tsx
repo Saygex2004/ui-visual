@@ -7,7 +7,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, Building2, Coins, FileBox, FileSignature, Wrench } from 'lucide-react';
-import { hasVista, inLavorazionePer, type AreaSlug } from '@pvp/shared';
+import { hasVista, inLavorazionePer, statoVista, type AreaSlug, type Vista } from '@pvp/shared';
 import { Badge } from '../../components/Badge.js';
 import { useMe } from '../auth/hooks.js';
 import { useAreaSnapshot } from './hooks.js';
@@ -50,7 +50,23 @@ export function LandingScreen() {
   // Views this account holds but cannot open right now because they are
   // closed for work. Shown, greyed, with a word about why: a card that simply
   // vanished would read as a permission taken away.
-  const lavori = (v: Parameters<typeof inLavorazionePer>[1]) => inLavorazionePer(conto, v, stati);
+  const lavori = (v: Vista) => inLavorazionePer(conto, v, stati);
+
+  // The badge says what the view's state actually IS. It used to be a
+  // constant per card — "Attiva" on the areas, "Solo admin" on the other two
+  // — which was wrong twice over once these became switchable: an admin who
+  // closed a view still read "Attiva" on it, and a colleague granted the
+  // pratiche view read "Solo admin" on a card they could open perfectly well.
+  const badge = (v: Vista): { etichetta: string; variante: 'success' | 'accent' | 'warning' } => {
+    switch (statoVista(v, stati)) {
+      case 'solo_admin':
+        return { etichetta: t('landing.adminBadge'), variante: 'accent' };
+      case 'lavori':
+        return { etichetta: t('landing.lavoriBadge'), variante: 'warning' };
+      default:
+        return { etichetta: t('landing.activeBadge'), variante: 'success' };
+    }
+  };
   // Only fetched where the account may actually open the area: an unpermitted
   // request is refused anyway, and it would still cost the auth path's reads
   // — once a minute, forever, thanks to the poll.
@@ -95,7 +111,7 @@ export function LandingScreen() {
                 <span className={`landing-option-icon landing-option-icon-${area.slug}`}>
                   <Icon aria-hidden="true" size={22} />
                 </span>
-                <Badge variant="success">{t('landing.activeBadge')}</Badge>
+                <Badge variant={badge(area.slug).variante}>{badge(area.slug).etichetta}</Badge>
               </span>
               <span className="landing-option-title">{t(area.titleKey)}</span>
               <span className="landing-option-description">{t(area.descriptionKey)}</span>
@@ -119,7 +135,7 @@ export function LandingScreen() {
               <span className="landing-option-icon landing-option-icon-pratiche">
                 <FileBox aria-hidden="true" size={22} />
               </span>
-              <Badge variant="accent">{t('landing.adminBadge')}</Badge>
+              <Badge variant={badge('pratiche').variante}>{badge('pratiche').etichetta}</Badge>
             </span>
             <span className="landing-option-title">{t('landing.praticheTitle')}</span>
             <span className="landing-option-description">{t('landing.praticheDescription')}</span>
@@ -138,7 +154,7 @@ export function LandingScreen() {
               <span className="landing-option-icon landing-option-icon-carta">
                 <FileSignature aria-hidden="true" size={22} />
               </span>
-              <Badge variant="accent">{t('landing.adminBadge')}</Badge>
+              <Badge variant={badge('carta').variante}>{badge('carta').etichetta}</Badge>
             </span>
             <span className="landing-option-title">{t('landing.cartaTitle')}</span>
             <span className="landing-option-description">{t('landing.cartaDescription')}</span>

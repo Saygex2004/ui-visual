@@ -14,13 +14,13 @@ const USERNAME = `collega-viste-${RUN_ID}`;
 const TEMP_PASSWORD = 'TempViste123!';
 const FINAL_PASSWORD = 'VistePass123!';
 
-async function impostaStato(page: Page, stato: string) {
+async function impostaStato(page: Page, stato: string, vista = 'Pratiche cartacee') {
   await page.goto('/admin');
   // Scoped to the switches: the view's name also labels a checkbox on every
   // account row below, which is exactly the confusion the two blocks are
   // arranged to avoid — a page-wide lookup would walk straight into it.
   const switches = page.locator('.admin-stati-viste');
-  await switches.getByLabel('Pratiche cartacee').selectOption({ label: stato });
+  await switches.getByLabel(vista).selectOption({ label: stato });
 }
 
 test('a view closed for work says so, instead of vanishing', async ({ page, context }) => {
@@ -81,4 +81,31 @@ test('a view closed for work says so, instead of vanishing', async ({ page, cont
   await expect(bPage.getByRole('link', { name: /Pratiche cartacee/ })).toBeVisible();
 
   await bContext.close();
+});
+
+test("the badge on each card says what that view's state actually is", async ({ page }) => {
+  await loginAsAdmin(page);
+
+  const tessera = (nome: string) => page.locator('.landing-option', { hasText: nome }).first();
+  await expect(tessera('Cluster Immobiliari')).toContainText('Attiva');
+
+  // Two switches in a row, deliberately: each change sends the WHOLE map, and
+  // the second used to build its map from a query that had not refetched —
+  // writing the second view's state over a document that no longer mentioned
+  // the first. So the pair is the test, not one switch twice.
+  await impostaStato(page, 'In lavorazione', 'Cluster Immobiliari');
+  await impostaStato(page, 'Solo admin', 'Pratiche cartacee');
+
+  await page.goto('/');
+  await expect(tessera('Cluster Immobiliari')).toContainText('In lavorazione');
+  await expect(tessera('Pratiche cartacee')).toContainText('Solo admin');
+  // The one left alone is untouched — the point of the bug above.
+  await expect(tessera('Cluster Crediti')).toContainText('Attiva');
+
+  // Back to open, and the badges follow.
+  await impostaStato(page, 'Attivo', 'Cluster Immobiliari');
+  await impostaStato(page, 'Attivo', 'Pratiche cartacee');
+  await page.goto('/');
+  await expect(tessera('Cluster Immobiliari')).toContainText('Attiva');
+  await expect(tessera('Pratiche cartacee')).toContainText('Attiva');
 });

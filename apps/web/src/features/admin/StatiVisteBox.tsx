@@ -6,9 +6,9 @@
 // touches nobody's permissions, and reopening it restores them exactly as
 // they were — which is the reason it is a separate switch and not a mass
 // edit of everyone's list.
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { STATI_VISTA, VISTE, type StatoVista, type Vista } from '@pvp/shared';
+import { STATI_VISTA, VISTE, type StatiViste, type StatoVista, type Vista } from '@pvp/shared';
 import { SelectField } from '../../components/SelectField.js';
 import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { translateApiError } from '../../lib/translateApiError.js';
@@ -20,15 +20,39 @@ export function StatiVisteBox() {
   const salva = useSetVisteStati();
   const [errore, setErrore] = useState<string | null>(null);
 
-  const stati = data?.stati ?? {};
+  // What the admin has set, ahead of the server confirming it. Without this,
+  // changing two switches in quick succession lost the first: each change
+  // sends the WHOLE map, and the second one built its map from a query that
+  // had not refetched yet — so it wrote the second view's state over a
+  // document that no longer mentioned the first.
+  const [inCorso, setInCorso] = useState<StatiViste | null>(null);
+  // Which change is the latest, so a slower earlier response cannot clear a
+  // newer local value and reopen the same hole from the other side.
+  const ultima = useRef(0);
+
+  const stati = inCorso ?? data?.stati ?? {};
 
   function cambia(vista: Vista, stato: StatoVista) {
     setErrore(null);
     // The whole map is sent, not one entry: the document IS the answer for
     // every view, and a partial write would leave the others to be inferred.
+    const prossimo = { ...stati, [vista]: stato };
+    setInCorso(prossimo);
+    const mio = ++ultima.current;
     salva.mutate(
-      { stati: { ...stati, [vista]: stato } },
-      { onError: (err) => setErrore(translateApiError(t, err, t('statiViste.saveError'))) },
+      { stati: prossimo },
+      {
+        onSuccess: () => {
+          // Hand display back to the server's answer, which the hook has just
+          // written into the cache — so another admin's concurrent change is
+          // not masked by a local copy that outlives its purpose.
+          if (ultima.current === mio) setInCorso(null);
+        },
+        onError: (err) => {
+          if (ultima.current === mio) setInCorso(null);
+          setErrore(translateApiError(t, err, t('statiViste.saveError')));
+        },
+      },
     );
   }
 
