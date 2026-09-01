@@ -109,6 +109,41 @@ describe('SnapshotCache — snapshot content (hand-counted against the fixture)'
 });
 
 describe('SnapshotCache.poll — meta-driven invalidation and activity diffing', () => {
+  it('rebuilds BOTH scopes when the procedures are re-imported', async () => {
+    // Before this signal existed, an import was invisible to a running
+    // server: the procedures are baked into the snapshot, but nothing the
+    // cache watched had changed — so newly matched procedures appeared only
+    // on the max-age rebuild, up to a day later. The operator's workaround
+    // was to force a new Cloud Run revision by hand.
+    const db = testDb();
+    const cache = makeCache();
+    await cache.init();
+
+    await db
+      .collection('meta')
+      .doc('procedure_concorsuali')
+      .set({ last_import_at: Timestamp.now(), total: 3 });
+
+    const rebuilt = await cache.poll();
+    // Both, not one: a matching procedure is relevant to immobili and
+    // corporate listings alike, unlike OMI which feeds only immobili.
+    expect([...rebuilt].sort()).toEqual(['corporate', 'immobili']);
+  });
+
+  it('does not rebuild when the procedures signal has not moved', async () => {
+    const db = testDb();
+    await db
+      .collection('meta')
+      .doc('procedure_concorsuali')
+      .set({ last_import_at: Timestamp.now(), total: 3 });
+
+    const cache = makeCache();
+    await cache.init();
+    // Primed WITH the signal already present: an existing document must not
+    // read as a change, or every poll would rebuild both scopes forever.
+    expect(await cache.poll()).toEqual([]);
+  });
+
   it('archives an active listing on a meta change and records listing_archived', async () => {
     const db = testDb();
     const cache = makeCache();

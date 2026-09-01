@@ -51,11 +51,18 @@ export class SnapshotCache {
   private readonly pollMs: number;
   private readonly maxAgeMs: number;
   private readonly states = new Map<Scope, ScopeState>();
-  // Last-seen invalidation signals (meta last_success_at / omi fetched_at).
-  private lastSignals: { immobili: string | null; corporate: string | null; omi: string | null } = {
+  // Last-seen invalidation signals (meta last_success_at / omi fetched_at /
+  // procedure last_import_at).
+  private lastSignals: {
+    immobili: string | null;
+    corporate: string | null;
+    omi: string | null;
+    procedure: string | null;
+  } = {
     immobili: null,
     corporate: null,
     omi: null,
+    procedure: null,
   };
   private timer: NodeJS.Timeout | undefined;
 
@@ -193,41 +200,51 @@ export class SnapshotCache {
     }
   }
 
-  /** Read the three meta docs and cache their invalidation signals. */
+  /** Read the four meta docs and cache their invalidation signals. */
   private async refreshSignals(): Promise<void> {
-    const [im, co, omi] = await Promise.all([
+    const [im, co, omi, proc] = await Promise.all([
       metaRepo.getScopeMeta(this.db, 'immobili'),
       metaRepo.getScopeMeta(this.db, 'corporate'),
       metaRepo.getOmiMeta(this.db),
+      metaRepo.getProcedureMeta(this.db),
     ]);
     this.lastSignals = {
       immobili: im?.last_success_at ?? null,
       corporate: co?.last_success_at ?? null,
       omi: omi?.fetched_at ?? null,
+      procedure: proc?.last_import_at ?? null,
     };
   }
 
   /**
    * One poll cycle: rebuild a scope whose `meta.last_success_at` changed (or,
-   * for immobili, whose `omi.fetched_at` changed), plus the max-age safety
-   * rebuild. Returns the scopes rebuilt (for tests).
+   * for immobili, whose `omi.fetched_at` changed; or, for both, whose
+   * procedures were re-imported), plus the max-age safety rebuild. Returns
+   * the scopes rebuilt (for tests).
    */
   async poll(): Promise<Scope[]> {
-    const [im, co, omi] = await Promise.all([
+    const [im, co, omi, proc] = await Promise.all([
       metaRepo.getScopeMeta(this.db, 'immobili'),
       metaRepo.getScopeMeta(this.db, 'corporate'),
       metaRepo.getOmiMeta(this.db),
+      metaRepo.getProcedureMeta(this.db),
     ]);
     const next = {
       immobili: im?.last_success_at ?? null,
       corporate: co?.last_success_at ?? null,
       omi: omi?.fetched_at ?? null,
+      procedure: proc?.last_import_at ?? null,
     };
 
     const toRebuild = new Set<Scope>();
     if (next.immobili !== this.lastSignals.immobili) toRebuild.add('immobili');
     if (next.corporate !== this.lastSignals.corporate) toRebuild.add('corporate');
     if (next.omi !== this.lastSignals.omi) toRebuild.add('immobili'); // OMI feeds immobili
+    // Both scopes: a matching procedure is relevant to immobili and corporate
+    // listings alike (DATA_MODEL.md §17.1), unlike OMI which feeds only one.
+    if (next.procedure !== this.lastSignals.procedure) {
+      for (const scope of SCOPES) toRebuild.add(scope);
+    }
 
     // Max-age safety rebuild.
     const now = Date.now();
