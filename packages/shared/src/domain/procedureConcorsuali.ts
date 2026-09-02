@@ -1,7 +1,15 @@
 // Procedura concorsuale matching (DOMAIN_RULES.md §12, DATA_MODEL.md §17).
 // Joins a listing to at most one `procedure_concorsuali` document by the
-// exact tuple (tribunale key, numero, anno) -- never fuzzy, same "any null
-// field means never matched" discipline as blocco grouping (blocco.ts).
+// exact tuple (tribunale key, numero, anno, KIND) -- never fuzzy, same "any
+// null field means never matched" discipline as blocco grouping (blocco.ts).
+//
+// The kind is part of the key, not a refinement of it: the two registers the
+// source publishes number their procedures INDEPENDENTLY, so
+// "Fallimento 2/2022 Ancona" and "Liquidazione giudiziale 2/2022 Ancona" are
+// two unrelated companies. 271 such collisions exist in the live data
+// (measured 2026-09-02). Without the kind, a concordato preventivo listing
+// matched whichever procedure happened to carry the same number -- which is
+// the bug this key shape exists to prevent.
 // Unlike OMI (omi.ts), there is no two-tier fallback: this is an exact-key
 // lookup only, and it is not scope-restricted (relevant to both immobili
 // and corporate listings).
@@ -40,18 +48,53 @@ export function tribunaleKey(name: string | null | undefined): string {
   return PROCEDURA_TRIBUNALE_OVERRIDES[collapsed] ?? collapsed;
 }
 
+/** The two registers the source publishes, and the only kinds that can ever
+ *  be matched. */
+export const FAMIGLIE_PROCEDURA = ['F', 'LG'] as const;
+export type FamigliaProcedura = (typeof FAMIGLIE_PROCEDURA)[number];
+
 /**
- * The listing-side match key, or `null` (never a partial key) when any of
- * the three inputs is null/empty -- the same "no partial-key matching"
- * discipline `bloccoKey` uses (blocco.ts).
+ * A listing's own `tipo_procedura` mapped to the register it would live in,
+ * or `null` when it has no counterpart in the source at all.
+ *
+ * The source publishes exactly two lists — fallimenti and liquidazioni
+ * giudiziali. A listing that is a concordato preventivo, a liquidazione
+ * coatta, a liquidazione controllata or an esecuzione has NO procedure to
+ * match, and must never borrow one that merely shares a number.
+ *
+ * Prefix matching, not substring: "Liquidazione Volontaria - Giudiziale" is a
+ * voluntary liquidation and contains the word "Giudiziale", but it is not a
+ * liquidazione giudiziale and must not map to one.
+ *
+ * Anything unrecognised returns null — deliberately the safe direction. A
+ * missed match costs a badge that does not appear; a wrong one puts another
+ * company's debtor, tax code and curatore on an auction.
+ */
+export function famigliaProceduraListing(
+  tipoProcedura: string | null | undefined,
+): FamigliaProcedura | null {
+  if (!tipoProcedura) return null;
+  const t = tipoProcedura.trim().toLowerCase();
+  if (t.startsWith('fallimentare') || t.startsWith('fallimento')) return 'F';
+  if (t.startsWith('liquidazione giudiziale')) return 'LG';
+  return null;
+}
+
+/**
+ * The listing-side match key, or `null` (never a partial key) when any input
+ * is null/empty or the listing's kind has no counterpart in the source --
+ * the same "no partial-key matching" discipline `bloccoKey` uses (blocco.ts).
  */
 export function proceduraMatchKey(
   tribunale: string | null | undefined,
   numero: string | null | undefined,
   anno: string | null | undefined,
+  tipoProcedura: string | null | undefined,
 ): string | null {
   if (!tribunale || !numero || !anno) return null;
-  return [tribunaleKey(tribunale), numero, anno].join(KEY_SEP);
+  const famiglia = famigliaProceduraListing(tipoProcedura);
+  if (famiglia === null) return null;
+  return [tribunaleKey(tribunale), numero, anno, famiglia].join(KEY_SEP);
 }
 
 export interface ProceduraConcorsualeDoc {
@@ -85,7 +128,12 @@ export interface ProceduraConcorsualeDoc {
  */
 export function proceduraDocKey(doc: ProceduraConcorsualeDoc): string | null {
   if (doc.rg == null || !doc.tribunale.chiave) return null;
-  return [doc.tribunale.chiave, doc.rg.numero_base, String(doc.rg.anno)].join(KEY_SEP);
+  // A document whose register is unknown yields no key: it cannot be placed
+  // in either list, so matching it would be a guess.
+  if (doc.tipo_code !== 'F' && doc.tipo_code !== 'LG') return null;
+  return [doc.tribunale.chiave, doc.rg.numero_base, String(doc.rg.anno), doc.tipo_code].join(
+    KEY_SEP,
+  );
 }
 
 export interface ProceduraConcorsualeSelection {
@@ -120,6 +168,8 @@ export interface ProceduraMatchParams {
   tribunale: string | null;
   numero: string | null;
   anno: string | null;
+  /** The listing's own kind — decides WHICH register is consulted. */
+  tipo_procedura: string | null;
 }
 
 /**
@@ -131,7 +181,12 @@ export function selectProceduraConcorsuale(
   byKey: Readonly<Record<string, ProceduraConcorsualeDoc>>,
   params: ProceduraMatchParams,
 ): ProceduraConcorsualeSelection | null {
-  const key = proceduraMatchKey(params.tribunale, params.numero, params.anno);
+  const key = proceduraMatchKey(
+    params.tribunale,
+    params.numero,
+    params.anno,
+    params.tipo_procedura,
+  );
   if (key === null) return null;
   const doc = byKey[key];
   return doc ? toSelection(doc) : null;
@@ -147,6 +202,11 @@ export function hasProceduraConcorsuale(
   byKey: Readonly<Record<string, ProceduraConcorsualeDoc>>,
   params: ProceduraMatchParams,
 ): boolean {
-  const key = proceduraMatchKey(params.tribunale, params.numero, params.anno);
+  const key = proceduraMatchKey(
+    params.tribunale,
+    params.numero,
+    params.anno,
+    params.tipo_procedura,
+  );
   return key !== null && key in byKey;
 }

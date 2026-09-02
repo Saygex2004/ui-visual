@@ -62,15 +62,20 @@ describe('toListingRow — has_procedura_concorsuale (DOMAIN_RULES.md section 12
   });
 
   it('true when the listing key matches a procedure in the map, regardless of scheda_letta_il', () => {
-    const listing = baseListing({ tribunale: 'Tribunale di Modena', numero: '76', anno: '2021' });
+    const listing = baseListing({
+      tribunale: 'Tribunale di Modena',
+      numero: '76',
+      anno: '2021',
+      tipo_procedura: 'Fallimentare (nuovo Rito)',
+    });
     const byKey: Record<string, ProceduraConcorsualeDoc> = {
-      'MODENA 76 2021': {
+      'MODENA 76 2021 F': {
         id: 'x',
         nome: 'Test',
         rg: { completo: '76/2021', numero: '76', numero_base: '76', anno: 2021 },
         data_dichiarazione: null,
-        tipo_code: null,
-        tipo_procedura: null,
+        tipo_code: 'F',
+        tipo_procedura: 'Fallimento',
         tribunale: { nome: 'Modena', chiave: 'MODENA' },
         professionista: null,
         giudice_delegato: null,
@@ -81,6 +86,36 @@ describe('toListingRow — has_procedura_concorsuale (DOMAIN_RULES.md section 12
       },
     };
     expect(toListingRow(listing, byKey).has_procedura_concorsuale).toBe(true);
+  });
+
+  it('false for a concordato preventivo that merely shares the number', () => {
+    // The bug this key shape exists to prevent: the two registers number
+    // independently, so a concordato 76/2021 in Modena is not the fallimento
+    // 76/2021 in Modena — it is another company entirely.
+    const concordato = baseListing({
+      tribunale: 'Tribunale di Modena',
+      numero: '76',
+      anno: '2021',
+      tipo_procedura: 'Nuovo Concordato Preventivo',
+    });
+    const byKey: Record<string, ProceduraConcorsualeDoc> = {
+      'MODENA 76 2021 F': {
+        id: 'x',
+        nome: 'Altra Societa Srl',
+        rg: { completo: '76/2021', numero: '76', numero_base: '76', anno: 2021 },
+        data_dichiarazione: null,
+        tipo_code: 'F',
+        tipo_procedura: 'Fallimento',
+        tribunale: { nome: 'Modena', chiave: 'MODENA' },
+        professionista: null,
+        giudice_delegato: null,
+        debitore: null,
+        link: 'https://example.test',
+        estratto_il: '2026-01-01T00:00:00.000Z',
+        scheda_letta_il: null,
+      },
+    };
+    expect(toListingRow(concordato, byKey).has_procedura_concorsuale).toBe(false);
   });
 });
 

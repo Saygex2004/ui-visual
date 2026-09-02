@@ -101,18 +101,24 @@ describe('omiPricesRepo (Part A, read-only)', () => {
 describe('procedureConcorsualiRepo (Part A, read-only — Phase 14)', () => {
   it('reads the full map keyed by the JOIN tuple (not the doc id), incl. the composite-rg case', async () => {
     const map = await procedureConcorsualiRepo.getAllByKey(testDb());
-    // Keys are `${tribunale.chiave} ${rg.numero_base} ${rg.anno}` — note the
-    // Roma fixture's rg is the COMPOSITE `77-1/2022`, so its key carries the
-    // numero_base `77` (what a listing's own `numero` holds), not `77-1`.
-    expect(Object.keys(map).sort()).toEqual(['BARI 55 2023', 'MILANO 99 2020', 'ROMA 77 2022']);
+    // Keys are `${tribunale.chiave} ${rg.numero_base} ${rg.anno} ${tipo_code}`
+    // — note the Roma fixture's rg is the COMPOSITE `77-1/2022`, so its key
+    // carries the numero_base `77` (what a listing's own `numero` holds), not
+    // `77-1`. The register is part of the key because the source's two lists
+    // number independently.
+    expect(Object.keys(map).sort()).toEqual([
+      'BARI 55 2023 F',
+      'MILANO 99 2020 F',
+      'ROMA 77 2022 LG',
+    ]);
   });
 
   it('carries the two availability states the UI distinguishes (DATA_MODEL.md §17.2)', async () => {
     const map = await procedureConcorsualiRepo.getAllByKey(testDb());
-    expect(map['BARI 55 2023']?.scheda_letta_il).not.toBeNull(); // debtor detail read
-    expect(map['BARI 55 2023']?.debitore?.codice_fiscale).toBe('05412330728');
-    expect(map['ROMA 77 2022']?.scheda_letta_il).toBeNull(); // indexed, no detail yet
-    expect(map['ROMA 77 2022']?.debitore).toBeNull();
+    expect(map['BARI 55 2023 F']?.scheda_letta_il).not.toBeNull(); // debtor detail read
+    expect(map['BARI 55 2023 F']?.debitore?.codice_fiscale).toBe('05412330728');
+    expect(map['ROMA 77 2022 LG']?.scheda_letta_il).toBeNull(); // indexed, no detail yet
+    expect(map['ROMA 77 2022 LG']?.debitore).toBeNull();
   });
 });
 

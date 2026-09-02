@@ -79,6 +79,7 @@ export function registerListingsModule(app: FastifyInstance, deps: ListingsModul
       listing.tribunale,
       listing.numero,
       listing.anno,
+      listing.tipo_procedura,
     );
     const rating = await ratingsRepo.getById(db, id);
     const thread = await chatRepo.getThread(db, id);

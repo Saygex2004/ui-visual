@@ -2,11 +2,19 @@
   {
     "id": "seedBari55Aa",
     "nome": "COSTRUZIONI ADRIATICHE S.R.L. IN LIQUIDAZIONE",
-    "rg": { "completo": "55/2023", "numero": "55", "numero_base": "55", "anno": 2023 },
+    "rg": {
+      "completo": "55/2023",
+      "numero": "55",
+      "numero_base": "55",
+      "anno": 2023
+    },
     "data_dichiarazione": "2023-04-18",
     "tipo_code": "F",
     "tipo_procedura": "Fallimento",
-    "tribunale": { "nome": "Bari", "chiave": "BARI" },
+    "tribunale": {
+      "nome": "Bari",
+      "chiave": "BARI"
+    },
     "professionista": "Amato Giuseppina",
     "giudice_delegato": "De Santis Marco",
     "debitore": {
@@ -23,11 +31,19 @@
   {
     "id": "seedRoma77Bb",
     "nome": "IMMOBILIARE TIBERINA S.P.A.",
-    "rg": { "completo": "77-1/2022", "numero": "77-1", "numero_base": "77", "anno": 2022 },
+    "rg": {
+      "completo": "77-1/2022",
+      "numero": "77-1",
+      "numero_base": "77",
+      "anno": 2022
+    },
     "data_dichiarazione": "2022-11-03",
-    "tipo_code": "L",
+    "tipo_code": "LG",
     "tipo_procedura": null,
-    "tribunale": { "nome": "Roma", "chiave": "ROMA" },
+    "tribunale": {
+      "nome": "Roma",
+      "chiave": "ROMA"
+    },
     "professionista": "Ferrari Luca",
     "giudice_delegato": "Neri Silvia",
     "debitore": null,
@@ -38,11 +54,19 @@
   {
     "id": "seedMilano99Cc",
     "nome": "MANIFATTURA LOMBARDA S.N.C.",
-    "rg": { "completo": "99/2020", "numero": "99", "numero_base": "99", "anno": 2020 },
+    "rg": {
+      "completo": "99/2020",
+      "numero": "99",
+      "numero_base": "99",
+      "anno": 2020
+    },
     "data_dichiarazione": "2020-06-30",
     "tipo_code": "F",
     "tipo_procedura": "Fallimento",
-    "tribunale": { "nome": "Milano", "chiave": "MILANO" },
+    "tribunale": {
+      "nome": "Milano",
+      "chiave": "MILANO"
+    },
     "professionista": "Colombo Anna",
     "giudice_delegato": "Ricci Paolo",
     "debitore": {

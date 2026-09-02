@@ -130,10 +130,16 @@ export class SnapshotCache {
     tribunale: string | null,
     numero: string | null,
     anno: string | null,
+    tipoProcedura: string | null,
   ): ProceduraConcorsualeSelection | null {
     const state = this.states.get(scope);
     if (!state) return null;
-    return selectProceduraConcorsuale(state.proceduraByKey, { tribunale, numero, anno });
+    return selectProceduraConcorsuale(state.proceduraByKey, {
+      tribunale,
+      numero,
+      anno,
+      tipo_procedura: tipoProcedura,
+    });
   }
 
   /** `cod_tipo_rito` values observed on active immobili listings but not in

@@ -40,6 +40,9 @@ export function toListingRow(
       tribunale: listing.tribunale,
       numero: listing.numero,
       anno: listing.anno,
+      // Decides WHICH register is consulted: the two number independently,
+      // so without it a concordato borrows a fallimento's company.
+      tipo_procedura: listing.tipo_procedura,
     }),
   };
 }
