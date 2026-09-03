@@ -13,9 +13,14 @@ export interface SlackConfig {
   /** Incoming Webhook URL. Absent = notifications off, which is the correct
    *  state for local development and the emulator. */
   webhookUrl?: string;
-  /** Slack member ID (e.g. `U01234ABC`) to mention. A display name does not
-   *  work: `@mario` typed into text renders as literal characters and
-   *  notifies nobody. */
+  /** The installation-wide Slack member ID (e.g. `U01234ABC`), from the
+   *  environment. Used when a pratica names nobody mentionable. A display
+   *  name does not work: `@mario` typed into text renders as literal
+   *  characters and notifies nobody.
+   *
+   *  Who to mention for ONE message is a separate argument to `notify` —
+   *  configuration and per-message choice are different things and were
+   *  briefly conflated here. */
   mentionId?: string;
   /** Public origin of the dashboard, used to build the deep link. Absent =
    *  no link in the message rather than a broken relative one. */
@@ -64,10 +69,12 @@ export type Evento = { kind: 'creata' } | { kind: 'stato'; precedente: StatoPrat
 export function buildMessage(
   pratica: Pratica,
   evento: Evento,
-  mentionId?: string,
+  mentionIds?: string[],
   baseUrl?: string,
 ): string {
-  const mention = mentionId ? `<@${mentionId}> ` : '';
+  // One `<@ID>` each: Slack notifies per mention, so a list joined into a
+  // single token would render as text and ping nobody.
+  const mention = mentionIds?.length ? `${mentionIds.map((id) => `<@${id}>`).join(' ')} ` : '';
   const titolo =
     evento.kind === 'creata'
       ? `${mention}📄 *Nuova pratica cartacea* — NDG ${esc(pratica.ndg.join(', '))}`
@@ -114,6 +121,9 @@ export async function notify(
   pratica: Pratica,
   evento: Evento,
   logger: Logger,
+  /** Resolved by the caller from the chosen accounts. Omitted = fall back to
+   *  the configured one. */
+  mentionIds?: string[],
 ): Promise<void> {
   if (!config.webhookUrl) return; // not configured = off, not an error
   try {
@@ -121,7 +131,12 @@ export async function notify(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        text: buildMessage(pratica, evento, config.mentionId, config.baseUrl),
+        text: buildMessage(
+          pratica,
+          evento,
+          mentionIds ?? (config.mentionId ? [config.mentionId] : []),
+          config.baseUrl,
+        ),
       }),
       // Slack is not on the critical path; a hung webhook must not hold a
       // request open behind it.

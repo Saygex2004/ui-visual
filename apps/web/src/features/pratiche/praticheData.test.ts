@@ -21,7 +21,7 @@ function pratica(over: Partial<Pratica> = {}): Pratica {
     n_scatole: '3',
     note: null,
     ordinato_da: null,
-    slack_tag_user_id: null,
+    slack_tag_user_ids: [],
     data_richiesta: null,
     data_spedizione: null,
     data_consegna_prevista: null,

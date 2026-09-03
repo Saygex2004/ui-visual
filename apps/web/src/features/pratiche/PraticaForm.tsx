@@ -32,6 +32,7 @@ export function PraticaForm({
   onCancel,
 }: PraticaFormProps) {
   const { t } = useTranslation('pratiche');
+  const taggabili = utenti.filter((u) => u.taggabile);
   // A list, because one order commonly covers several positions. Kept as
   // rows of raw text rather than a parsed array: the user is mid-typing, and
   // an empty row is a row waiting to be filled, not an invalid value.
@@ -42,7 +43,7 @@ export function PraticaForm({
   const [scatole, setScatole] = useState(initial?.n_scatole ?? '');
   const [note, setNote] = useState(initial?.note ?? '');
   const [ordinatoDa, setOrdinatoDa] = useState(initial?.ordinato_da ?? '');
-  const [taggato, setTaggato] = useState(initial?.slack_tag_user_id ?? '');
+  const [taggati, setTaggati] = useState<string[]>(initial?.slack_tag_user_ids ?? []);
   const [dataRichiesta, setDataRichiesta] = useState(initial?.data_richiesta ?? '');
   const [dataSpedizione, setDataSpedizione] = useState(initial?.data_spedizione ?? '');
   const [consegnaPrevista, setConsegnaPrevista] = useState(initial?.data_consegna_prevista ?? '');
@@ -66,7 +67,7 @@ export function PraticaForm({
       n_scatole: scatole.trim() || null,
       note: note.trim() || null,
       ordinato_da: ordinatoDa || null,
-      slack_tag_user_id: taggato || null,
+      slack_tag_user_ids: taggati,
       data_richiesta: dataRichiesta || null,
       data_spedizione: dataSpedizione || null,
       data_consegna_prevista: consegnaPrevista || null,
@@ -172,24 +173,40 @@ export function PraticaForm({
             </option>
           ))}
         </SelectField>
-        {/* Only accounts an administrator has given a Slack member id: a
-            person without one cannot be mentioned, and offering them would
+        {/* Checkboxes, not a multi-select list: an order can concern several
+            people, and a list box hides what is selected behind a scrollbar
+            on exactly the field where "who gets told" must be obvious.
+            Only accounts an administrator has given a Slack member id appear —
+            a person without one cannot be mentioned, and offering them would
             promise a notification that silently never names anybody. */}
-        <SelectField
-          label={t('fields.taggatoSlack')}
-          id="pratica-taggato"
-          value={taggato}
-          onChange={(e) => setTaggato(e.target.value)}
-        >
-          <option value="">{t('fields.taggatoSlackPredefinito')}</option>
-          {utenti
-            .filter((u) => u.taggabile)
-            .map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.username}
-              </option>
-            ))}
-        </SelectField>
+        <fieldset className="pratiche-taggati">
+          <legend className="ui-micro-label">{t('fields.taggatoSlack')}</legend>
+          {taggabili.length === 0 ? (
+            <p className="pratiche-taggati-vuoto">{t('fields.taggatoSlackNessunoDisponibile')}</p>
+          ) : (
+            <div className="pratiche-taggati-opzioni">
+              {taggabili.map((u) => (
+                <label key={u.id} className="pratiche-taggati-opzione">
+                  <input
+                    type="checkbox"
+                    checked={taggati.includes(u.id)}
+                    onChange={(e) =>
+                      setTaggati((ids) =>
+                        e.target.checked ? [...ids, u.id] : ids.filter((x) => x !== u.id),
+                      )
+                    }
+                  />
+                  {u.username}
+                </label>
+              ))}
+            </div>
+          )}
+          {/* Said, not implied by empty boxes: "nobody ticked" is a real and
+              common choice, and it does NOT mean nobody is told. */}
+          {taggati.length === 0 ? (
+            <p className="pratiche-taggati-vuoto">{t('fields.taggatoSlackPredefinito')}</p>
+          ) : null}
+        </fieldset>
       </div>
 
       <fieldset className="pratiche-fieldset">

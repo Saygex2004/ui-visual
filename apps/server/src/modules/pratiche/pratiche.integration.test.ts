@@ -320,9 +320,47 @@ describe('pratiche module (HTTP, over the emulator)', () => {
       const fetchSpy = vi.fn().mockResolvedValue({ ok: true, status: 200 });
       vi.stubGlobal('fetch', fetchSpy);
       try {
-        await create({ ...NUOVA, slack_tag_user_id: mrossi!.id });
+        await create({ ...NUOVA, slack_tag_user_ids: [mrossi!.id] });
         const testo = JSON.parse(fetchSpy.mock.calls[0]![1].body).text;
         expect(testo).toContain('<@U99999ZZZ>');
+        expect(testo).not.toContain('<@U01234ABC>');
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('mentions several people at once, each with its own token', async () => {
+      const mrossi = await usersRepo.getByUsername(testDb(), 'mrossi');
+      const admin = await usersRepo.getByUsername(testDb(), 'admin');
+      await usersRepo.setSlackId(testDb(), mrossi!.id, 'U99999ZZZ');
+      await usersRepo.setSlackId(testDb(), admin!.id, 'U88888YYY');
+
+      const fetchSpy = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+      vi.stubGlobal('fetch', fetchSpy);
+      try {
+        await create({ ...NUOVA, slack_tag_user_ids: [mrossi!.id, admin!.id] });
+        const testo = JSON.parse(fetchSpy.mock.calls[0]![1].body).text;
+        // Two tokens, not one joined string: Slack notifies per mention.
+        expect(testo).toContain('<@U99999ZZZ> <@U88888YYY>');
+        expect(testo).not.toContain('<@U01234ABC>');
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('keeps the mentionable ones when only some of the chosen have an id', async () => {
+      const mrossi = await usersRepo.getByUsername(testDb(), 'mrossi');
+      const admin = await usersRepo.getByUsername(testDb(), 'admin');
+      await usersRepo.setSlackId(testDb(), mrossi!.id, 'U99999ZZZ');
+
+      const fetchSpy = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+      vi.stubGlobal('fetch', fetchSpy);
+      try {
+        await create({ ...NUOVA, slack_tag_user_ids: [mrossi!.id, admin!.id] });
+        const testo = JSON.parse(fetchSpy.mock.calls[0]![1].body).text;
+        expect(testo).toContain('<@U99999ZZZ>');
+        // Not silently swapped for the installation default: the person who
+        // CAN be reached still is.
         expect(testo).not.toContain('<@U01234ABC>');
       } finally {
         vi.unstubAllGlobals();
@@ -336,7 +374,7 @@ describe('pratiche module (HTTP, over the emulator)', () => {
       const fetchSpy = vi.fn().mockResolvedValue({ ok: true, status: 200 });
       vi.stubGlobal('fetch', fetchSpy);
       try {
-        await create({ ...NUOVA, slack_tag_user_id: mrossi!.id });
+        await create({ ...NUOVA, slack_tag_user_ids: [mrossi!.id] });
         expect(JSON.parse(fetchSpy.mock.calls[0]![1].body).text).toContain('<@U01234ABC>');
       } finally {
         vi.unstubAllGlobals();

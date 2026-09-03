@@ -25,18 +25,23 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
   // mean something. Admins still pass — `hasVista` lets them through.
   const richiedeVista = { config: { auth: { vista: 'pratiche' as const } } };
 
-  /** Who to mention for this pratica: the chosen account's Slack id, or the
-   *  installation-wide one when none is chosen or that account has no id.
+  /** Who to mention for this pratica: the Slack ids of the chosen accounts,
+   *  or the installation-wide one when nobody is chosen — or when none of the
+   *  chosen accounts turns out to have an id.
    *
-   *  Resolved at send time from the ACCOUNT rather than stored on the pratica:
-   *  a person whose Slack account is recreated gets a new member id, and every
-   *  pratica should follow them without being rewritten. */
-  async function mentionPer(pratica: {
-    slack_tag_user_id: string | null;
-  }): Promise<string | undefined> {
-    if (!pratica.slack_tag_user_id) return slack.mentionId;
-    const scelto = await usersRepo.getById(db, pratica.slack_tag_user_id);
-    return scelto?.slack_id ?? slack.mentionId;
+   *  Resolved at send time from the ACCOUNTS rather than stored on the
+   *  pratica: a person whose Slack account is recreated gets a new member id,
+   *  and every pratica should follow them without being rewritten. */
+  async function mentionPer(pratica: { slack_tag_user_ids: string[] }): Promise<string[]> {
+    const predefinito = slack.mentionId ? [slack.mentionId] : [];
+    if (pratica.slack_tag_user_ids.length === 0) return predefinito;
+    const scelti = await Promise.all(
+      pratica.slack_tag_user_ids.map((id) => usersRepo.getById(db, id)),
+    );
+    const ids = scelti.map((u) => u?.slack_id).filter((v): v is string => Boolean(v));
+    // Chosen but none of them mentionable: better the installation-wide
+    // person than a message that silently names nobody.
+    return ids.length > 0 ? ids : predefinito;
   }
 
   app.get('/pratiche', richiedeVista, async () => {
@@ -64,7 +69,7 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
     const parsed = CreatePraticaRequestSchema.safeParse(req.body);
     if (!parsed.success) throw new ApiError(400, 'errors.common.validation');
     const pratica = await praticheRepo.create(db, parsed.data, req.user!.id);
-    const mention = await mentionPer(pratica);
+    const mentions = await mentionPer(pratica);
     // AWAITED, not fire-and-forget. Cloud Run throttles a container's CPU to
     // near zero the moment the response is sent, so a promise left running
     // after `return` is simply cut off — sometimes it wins the race, usually
@@ -72,7 +77,7 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
     // error logged anywhere because the fetch never got far enough to fail.
     // `notify` never throws and carries its own 5s timeout, so awaiting it
     // bounds the request instead of risking it.
-    await notify({ ...slack, mentionId: mention }, pratica, { kind: 'creata' }, req.log);
+    await notify(slack, pratica, { kind: 'creata' }, req.log, mentions);
     reply.code(201);
     return { pratica };
   });
@@ -87,10 +92,11 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
     if (!pratica) throw new ApiError(404, 'errors.common.notFound');
     if (prima && prima.stato !== pratica.stato) {
       await notify(
-        { ...slack, mentionId: await mentionPer(pratica) },
+        slack,
         pratica,
         { kind: 'stato', precedente: prima.stato },
         req.log,
+        await mentionPer(pratica),
       );
     }
     return { pratica };

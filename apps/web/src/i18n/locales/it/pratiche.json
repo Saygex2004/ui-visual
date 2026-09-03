@@ -19,7 +19,8 @@
     "costoSpedizioneAiuto": "In euro, es. 12,50",
     "ndgNumero": "NDG {{n}}",
     "taggatoSlack": "Da taggare in Slack",
-    "taggatoSlackPredefinito": "Destinatario predefinito"
+    "taggatoSlackPredefinito": "Nessuno scelto: viene avvisato il destinatario predefinito.",
+    "taggatoSlackNessunoDisponibile": "Nessun account ha un ID Slack. Un amministratore può aggiungerlo dal pannello Account."
   },
   "filters": {
     "searchLabel": "Cerca fra le pratiche",

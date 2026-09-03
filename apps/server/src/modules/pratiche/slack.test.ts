@@ -15,7 +15,7 @@ function pratica(over: Partial<Pratica> = {}): Pratica {
     n_scatole: '3, 7',
     note: null,
     ordinato_da: null,
-    slack_tag_user_id: null,
+    slack_tag_user_ids: [],
     data_richiesta: null,
     data_spedizione: null,
     data_consegna_prevista: null,
@@ -34,7 +34,7 @@ const logger = { warn: () => {} };
 describe('buildMessage', () => {
   it('mentions with the member-ID syntax, the only form Slack notifies on', () => {
     // "@mario" as plain text renders literally and pings nobody.
-    expect(buildMessage(pratica(), { kind: 'creata' }, 'U01234ABC')).toContain('<@U01234ABC>');
+    expect(buildMessage(pratica(), { kind: 'creata' }, ['U01234ABC'])).toContain('<@U01234ABC>');
   });
 
   it('omits the mention entirely when none is configured', () => {
@@ -83,7 +83,12 @@ describe('buildMessage', () => {
   });
 
   it('links straight to the pratica, in Slack link syntax', () => {
-    const msg = buildMessage(pratica({ id: 'abc123' }), { kind: 'creata' }, 'U9', 'https://x.test');
+    const msg = buildMessage(
+      pratica({ id: 'abc123' }),
+      { kind: 'creata' },
+      ['U9'],
+      'https://x.test',
+    );
     // <url|label>, not a bare URL — a bare one renders as the raw address.
     expect(msg).toContain('<https://x.test/pratiche?pratica=abc123|Apri la pratica →>');
   });
@@ -184,5 +189,18 @@ describe('NDG multipli nel messaggio', () => {
       kind: 'creata',
     });
     expect(testo).toContain('NDG 900123, 111222, 333444');
+  });
+});
+
+describe('menzioni multiple', () => {
+  it('pings each person separately — a joined list would notify nobody', () => {
+    // Slack notifies per `<@ID>` token; "U1, U2" inside one would render as
+    // text and reach neither of them.
+    const testo = buildMessage(pratica(), { kind: 'creata' }, ['U1AAA', 'U2BBB', 'U3CCC']);
+    expect(testo).toContain('<@U1AAA> <@U2BBB> <@U3CCC>');
+  });
+
+  it('omits the mention entirely for an empty list', () => {
+    expect(buildMessage(pratica(), { kind: 'creata' }, [])).not.toContain('<@');
   });
 });

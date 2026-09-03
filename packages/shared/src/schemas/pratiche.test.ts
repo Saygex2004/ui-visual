@@ -108,22 +108,42 @@ describe('ndg — one order can cover several positions', () => {
     const patch = PraticaPatchSchema.parse({ ndg: ['A', 'B'] });
     expect(patch.ndg).toEqual(['A', 'B']);
     expect('data_spedizione' in patch).toBe(false);
-    expect('slack_tag_user_id' in patch).toBe(false);
+    expect('slack_tag_user_ids' in patch).toBe(false);
   });
 });
 
-describe('slack_tag_user_id — who gets mentioned', () => {
-  it('defaults to null, meaning the installation-wide mention', () => {
-    // An existing record must keep behaving exactly as it did before the
-    // field existed.
-    expect(PraticaInputSchema.parse(MINIMO).slack_tag_user_id).toBeNull();
+describe('slack_tag_user_ids — who gets mentioned', () => {
+  it('defaults to an empty list, meaning the installation-wide mention', () => {
+    // A record that names nobody must keep behaving exactly as it did before
+    // the field existed.
+    expect(PraticaInputSchema.parse(MINIMO).slack_tag_user_ids).toEqual([]);
   });
 
-  it('carries the ACCOUNT id, not a Slack id', () => {
-    // Resolved to a Slack member id at send time: a person whose Slack
-    // account is recreated gets a new member id, and every pratica should
-    // follow them without being rewritten.
-    const p = PraticaInputSchema.parse({ ...MINIMO, slack_tag_user_id: 'user-7' });
-    expect(p.slack_tag_user_id).toBe('user-7');
+  it('carries ACCOUNT ids, not Slack ids, and keeps several', () => {
+    // Resolved to Slack member ids at send time: a person whose Slack account
+    // is recreated gets a new member id, and every pratica should follow them
+    // without being rewritten.
+    const p = PraticaInputSchema.parse({
+      ...MINIMO,
+      slack_tag_user_ids: ['user-7', 'user-9'],
+    });
+    expect(p.slack_tag_user_ids).toEqual(['user-7', 'user-9']);
+  });
+
+  it('accepts the single-choice shape this field briefly had', () => {
+    expect(
+      PraticaInputSchema.parse({ ...MINIMO, slack_tag_user_ids: 'user-7' }).slack_tag_user_ids,
+    ).toEqual(['user-7']);
+    expect(
+      PraticaInputSchema.parse({ ...MINIMO, slack_tag_user_ids: null }).slack_tag_user_ids,
+    ).toEqual([]);
+  });
+
+  it('collapses a repeated person: mentioning them twice is noise', () => {
+    const p = PraticaInputSchema.parse({
+      ...MINIMO,
+      slack_tag_user_ids: ['user-7', 'user-7', ' user-9 '],
+    });
+    expect(p.slack_tag_user_ids).toEqual(['user-7', 'user-9']);
   });
 });

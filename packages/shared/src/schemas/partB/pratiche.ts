@@ -62,6 +62,19 @@ const listaNdg = z.preprocess(
   z.array(requiredText).min(1).max(50),
 );
 
+/** Accepts the shape this field had when it was a single choice, so records
+ *  written then still read. Empty entries dropped, duplicates collapsed:
+ *  mentioning the same person twice in one message is noise. */
+const listaIdUtenti = z.preprocess(
+  (v) => {
+    if (v == null) return [];
+    const raw = typeof v === 'string' ? [v] : v;
+    if (!Array.isArray(raw)) return raw;
+    return [...new Set(raw.map((x) => (typeof x === 'string' ? x.trim() : x)).filter(Boolean))];
+  },
+  z.array(z.string().trim().min(1)).max(20),
+);
+
 const CampiPratica = z.object({
   /** Numero di Gruppo — the client/position identifiers this order covers. */
   ndg: listaNdg,
@@ -85,12 +98,17 @@ const CampiPratica = z.object({
   /** Id of the account that ordered the case file. Nullable because a case
    *  can be registered before anyone has requested it. */
   ordinato_da: z.string().trim().nullable(),
-  /** Id of the account to mention in the Slack notification. Null falls back
-   *  to the installation-wide mention, so an existing record keeps behaving
-   *  exactly as it did before this field existed. Stored as the ACCOUNT id,
-   *  not the Slack id: a person whose Slack account is recreated gets a new
-   *  member id, and every pratica should follow them without being rewritten. */
-  slack_tag_user_id: z.string().trim().nullable(),
+  /** Ids of the accounts to mention in the Slack notification. An empty list
+   *  falls back to the installation-wide mention, so a record that names
+   *  nobody keeps behaving exactly as it did before this field existed.
+   *
+   *  Stored as ACCOUNT ids, not Slack ids: a person whose Slack account is
+   *  recreated gets a new member id, and every pratica should follow them
+   *  without being rewritten.
+   *
+   *  A bare string or null is accepted on read — the field was a single
+   *  choice for a few hours on 2026-09-02 — and normalised to a list. */
+  slack_tag_user_ids: listaIdUtenti,
 
   // ---- dates: the tracking spine ----
   /** When the file was asked for. */
@@ -120,7 +138,7 @@ export const PraticaInputSchema = CampiPratica.extend({
   n_scatole: optionalText.default(null),
   note: optionalText.default(null),
   ordinato_da: z.string().trim().nullable().default(null),
-  slack_tag_user_id: z.string().trim().nullable().default(null),
+  slack_tag_user_ids: listaIdUtenti.default([]),
   data_richiesta: optionalDate.default(null),
   data_spedizione: optionalDate.default(null),
   data_consegna_prevista: optionalDate.default(null),
