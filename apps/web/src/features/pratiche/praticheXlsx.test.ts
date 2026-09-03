@@ -10,13 +10,14 @@ import { XLSX_HEADERS, praticheToXlsx, xlsxFilename } from './praticheXlsx.js';
 function pratica(over: Partial<Pratica> = {}): Pratica {
   return {
     id: 'p1',
-    ndg: '900123',
+    ndg: ['900123'],
     numero_pratica: '163354',
     portafoglio: 'Augusto',
     stato: 'spedito',
     n_scatole: '3, 7',
     note: null,
     ordinato_da: null,
+    slack_tag_user_id: null,
     data_richiesta: null,
     data_spedizione: null,
     data_consegna_prevista: null,
@@ -149,7 +150,7 @@ describe('praticheToXlsx — XML safety', () => {
 
 describe('praticheToXlsx — rows', () => {
   it('writes exactly the pratiche given, one row each below the header', () => {
-    const sheet = sheetOf([pratica({ ndg: 'UNO' }), pratica({ ndg: 'DUE' })]);
+    const sheet = sheetOf([pratica({ ndg: ['UNO'] }), pratica({ ndg: ['DUE'] })]);
     expect(sheet).toContain('<row r="2">');
     expect(sheet).toContain('<row r="3">');
     expect(sheet).not.toContain('<row r="4">');

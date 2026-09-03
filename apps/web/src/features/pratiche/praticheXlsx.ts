@@ -15,6 +15,7 @@
 // opens it.
 import { zipSync, strToU8 } from 'fflate';
 import type { Pratica, StatoPratica } from '@pvp/shared';
+import { ndgTesto } from './praticheData.js';
 
 /** Excel counts days from 1899-12-30 — not 1900-01-01 — because its epoch
  *  carries Lotus 1-2-3's non-existent 29 Feb 1900. Computed in UTC so a
@@ -118,7 +119,7 @@ function rowCells(
   statoLabel: (s: StatoPratica) => string,
 ): Cell[] {
   return [
-    testo(p.ndg),
+    testo(ndgTesto(p.ndg)),
     testo(p.numero_pratica),
     testo(p.portafoglio),
     testo(statoLabel(p.stato)),

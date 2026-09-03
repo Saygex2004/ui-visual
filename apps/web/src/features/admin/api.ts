@@ -2,6 +2,8 @@
 // (API_CONTRACT.md §7/§8).
 import { api } from '../../lib/apiClient.js';
 import type {
+  SetSlackIdRequest,
+  SetSlackIdResponse,
   VisteStatiResponse,
   SetVisteStatiRequest,
   UsersResponse,
@@ -101,4 +103,8 @@ export function fetchVisteStati(): Promise<VisteStatiResponse> {
 
 export function setVisteStati(body: SetVisteStatiRequest): Promise<VisteStatiResponse> {
   return api.put<VisteStatiResponse>('/admin/viste/stati', body);
+}
+
+export function setSlackId(userId: string, body: SetSlackIdRequest): Promise<SetSlackIdResponse> {
+  return api.post<SetSlackIdResponse>(`/admin/users/${userId}/slack-id`, body);
 }

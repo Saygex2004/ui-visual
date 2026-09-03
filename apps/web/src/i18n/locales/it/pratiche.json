@@ -16,7 +16,10 @@
     "consegnaPrevista": "Consegna prevista",
     "consegnaEffettiva": "Consegna effettiva",
     "costoSpedizione": "Costo spedizione",
-    "costoSpedizioneAiuto": "In euro, es. 12,50"
+    "costoSpedizioneAiuto": "In euro, es. 12,50",
+    "ndgNumero": "NDG {{n}}",
+    "taggatoSlack": "Da taggare in Slack",
+    "taggatoSlackPredefinito": "Destinatario predefinito"
   },
   "filters": {
     "searchLabel": "Cerca fra le pratiche",
@@ -31,7 +34,9 @@
   },
   "actions": {
     "new": "Nuova pratica",
-    "export": "Scarica ({{count}})"
+    "export": "Scarica ({{count}})",
+    "ndgAggiungi": "Aggiungi NDG",
+    "ndgRimuovi": "Togli NDG {{n}}"
   },
   "form": {
     "create": "Crea pratica",

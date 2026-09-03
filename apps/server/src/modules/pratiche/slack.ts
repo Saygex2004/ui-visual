@@ -70,12 +70,14 @@ export function buildMessage(
   const mention = mentionId ? `<@${mentionId}> ` : '';
   const titolo =
     evento.kind === 'creata'
-      ? `${mention}📄 *Nuova pratica cartacea* — NDG ${esc(pratica.ndg)}`
+      ? `${mention}📄 *Nuova pratica cartacea* — NDG ${esc(pratica.ndg.join(', '))}`
       : `${mention}📦 *Pratica ${esc(pratica.numero_pratica)}* — ` +
         `${STATO_LABEL[evento.precedente]} → *${STATO_LABEL[pratica.stato]}*`;
 
   const dettagli = [
-    riga('NDG', pratica.ndg),
+    // Joined: an order can cover several positions, and the message has to
+    // name all of them — that is the point of ordering them together.
+    riga('NDG', pratica.ndg.join(', ')),
     riga('Numero pratica', pratica.numero_pratica),
     riga('Portafoglio', pratica.portafoglio),
     evento.kind === 'creata' ? riga('Stato', STATO_LABEL[pratica.stato]) : null,

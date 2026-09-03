@@ -129,3 +129,11 @@ export async function setViste(db: Firestore, id: string, viste: Vista[]): Promi
     updated_at: FieldValue.serverTimestamp(),
   });
 }
+
+/** Sets or clears the Slack member id used to mention this person. */
+export async function setSlackId(db: Firestore, id: string, slackId: string | null): Promise<void> {
+  await db.collection(USERS).doc(id).update({
+    slack_id: slackId,
+    updated_at: FieldValue.serverTimestamp(),
+  });
+}

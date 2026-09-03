@@ -1,7 +1,7 @@
 // API — administration bodies (API_CONTRACT.md §8).
 import { z } from 'zod';
 import { instant } from '../common.js';
-import { RoleSchema, VistaSchema } from '../partB/accounts.js';
+import { RoleSchema, SlackIdSchema, VistaSchema } from '../partB/accounts.js';
 import { StatiVisteSchema, VisteStatiInputSchema } from '../partB/visteStati.js';
 import { UserPublicSchema } from './auth.js';
 import { AdminEventTypeSchema } from '../partB/adminEvents.js';
@@ -15,6 +15,8 @@ export const AdminUserSchema = z.object({
   must_change_password: z.boolean(),
   created_at: z.string(),
   viste: z.array(VistaSchema).default([]),
+  /** Slack member id, or null when this account cannot be mentioned. */
+  slack_id: z.string().nullable().default(null),
 });
 
 export const UsersResponseSchema = z.object({ users: z.array(AdminUserSchema) });
@@ -90,6 +92,15 @@ export const SetVisteResponseSchema = z.object({ user: AdminUserSchema });
 
 export type SetVisteRequest = z.infer<typeof SetVisteRequestSchema>;
 export type SetVisteResponse = z.infer<typeof SetVisteResponseSchema>;
+
+/** Sending "" clears it — the field is how an administrator both sets and
+ *  removes the id, and a separate delete route for one optional string would
+ *  be ceremony. */
+export const SetSlackIdRequestSchema = z.object({ slack_id: SlackIdSchema.nullable() });
+export const SetSlackIdResponseSchema = z.object({ user: AdminUserSchema });
+
+export type SetSlackIdRequest = z.infer<typeof SetSlackIdRequestSchema>;
+export type SetSlackIdResponse = z.infer<typeof SetSlackIdResponseSchema>;
 
 /** The view switches: which views are open, reserved to admins, or closed
  *  for work. Absent entries are open. */

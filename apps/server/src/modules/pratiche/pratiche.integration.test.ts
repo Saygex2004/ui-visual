@@ -25,7 +25,7 @@ const TEST_ENV = {
 } satisfies NodeJS.ProcessEnv;
 
 const NUOVA = {
-  ndg: '900123',
+  ndg: ['900123'],
   numero_pratica: '163354',
   portafoglio: 'Augusto',
   stato: 'spedito',
@@ -88,7 +88,7 @@ describe('pratiche module (HTTP, over the emulator)', () => {
     // Enforced here, at the API — the client hiding a card is presentation.
     const userCookie = await utenteNormale(['pratiche']);
     expect((await list(userCookie)).statusCode).toBe(200);
-    expect((await create({ ...NUOVA, ndg: 'DA-UTENTE' }, userCookie)).statusCode).toBe(201);
+    expect((await create({ ...NUOVA, ndg: ['DA-UTENTE'] }, userCookie)).statusCode).toBe(201);
   });
 
   it('refuses every route to an account without the view, reads included', async () => {
@@ -118,7 +118,7 @@ describe('pratiche module (HTTP, over the emulator)', () => {
     expect(created.statusCode).toBe(201);
     const pratica = created.json().pratica;
     expect(pratica.id).toBeTruthy();
-    expect(pratica.ndg).toBe('900123');
+    expect(pratica.ndg).toEqual(['900123']);
     // created_at is resolved server-side; a sentinel leaking through here is
     // exactly what reading the document back after the write prevents.
     expect(typeof pratica.created_at).toBe('string');
@@ -130,10 +130,11 @@ describe('pratiche module (HTTP, over the emulator)', () => {
     expect(listed.statusCode).toBe(200);
     const body = listed.json();
     expect(body.pratiche.map((p: { id: string }) => p.id)).toContain(pratica.id);
-    // Accounts ship alongside so `ordinato_da` renders as a person, and carry
-    // nothing else about the account.
+    // Accounts ship alongside so `ordinato_da` renders as a person and the
+    // form knows who can be mentioned — and carry nothing else about the
+    // account, the Slack id included.
     expect(body.utenti.length).toBeGreaterThan(0);
-    expect(Object.keys(body.utenti[0]).sort()).toEqual(['id', 'username']);
+    expect(Object.keys(body.utenti[0]).sort()).toEqual(['id', 'taggabile', 'username']);
   });
 
   it('stores a blank optional field as null, not as an empty string', async () => {
@@ -166,7 +167,7 @@ describe('pratiche module (HTTP, over the emulator)', () => {
   });
 
   it('rejects a missing NDG, an unknown stage, a negative cost and a bad date', async () => {
-    expect((await create({ ...NUOVA, ndg: '  ' })).statusCode).toBe(400);
+    expect((await create({ ...NUOVA, ndg: ['  '] })).statusCode).toBe(400);
     expect((await create({ ...NUOVA, stato: 'smarrito' })).statusCode).toBe(400);
     expect((await create({ ...NUOVA, costo_spedizione_cent: -1 })).statusCode).toBe(400);
     // Cents, not euros: a fractional cent is not a thing.
@@ -187,7 +188,7 @@ describe('pratiche module (HTTP, over the emulator)', () => {
     expect(p.stato).toBe('consegnato');
     expect(p.data_consegna_effettiva).toBe('2026-08-24');
     expect(p.data_spedizione).toBe('2026-08-21'); // untouched by a partial patch
-    expect(p.ndg).toBe('900123'); // untouched by a partial patch
+    expect(p.ndg).toEqual(['900123']); // untouched by a partial patch
     expect(p.updated_at).not.toBeNull();
     expect(p.updated_by).toBeTruthy();
   });
@@ -290,9 +291,9 @@ describe('pratiche module (HTTP, over the emulator)', () => {
   it('still creates the pratica when Slack is unreachable', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')));
     try {
-      const res = await create({ ...NUOVA, ndg: 'SENZA-SLACK' });
+      const res = await create({ ...NUOVA, ndg: ['SENZA-SLACK'] });
       expect(res.statusCode).toBe(201);
-      expect(res.json().pratica.ndg).toBe('SENZA-SLACK');
+      expect(res.json().pratica.ndg).toEqual(['SENZA-SLACK']);
     } finally {
       vi.unstubAllGlobals();
     }
@@ -308,5 +309,54 @@ describe('pratiche module (HTTP, over the emulator)', () => {
     expect(deleted.statusCode).toBe(204);
     const ids = (await list()).json().pratiche.map((p: { id: string }) => p.id);
     expect(ids).not.toContain(id);
+  });
+
+  // ── Chi viene taggato in Slack ──
+  describe('la persona da menzionare', () => {
+    it("uses the chosen account's Slack id instead of the installation default", async () => {
+      const mrossi = await usersRepo.getByUsername(testDb(), 'mrossi');
+      await usersRepo.setSlackId(testDb(), mrossi!.id, 'U99999ZZZ');
+
+      const fetchSpy = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+      vi.stubGlobal('fetch', fetchSpy);
+      try {
+        await create({ ...NUOVA, slack_tag_user_id: mrossi!.id });
+        const testo = JSON.parse(fetchSpy.mock.calls[0]![1].body).text;
+        expect(testo).toContain('<@U99999ZZZ>');
+        expect(testo).not.toContain('<@U01234ABC>');
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('falls back to the default when the chosen account has no Slack id', async () => {
+      // Chosen but unmentionable: better the installation-wide person than a
+      // message that silently names nobody.
+      const mrossi = await usersRepo.getByUsername(testDb(), 'mrossi');
+      const fetchSpy = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+      vi.stubGlobal('fetch', fetchSpy);
+      try {
+        await create({ ...NUOVA, slack_tag_user_id: mrossi!.id });
+        expect(JSON.parse(fetchSpy.mock.calls[0]![1].body).text).toContain('<@U01234ABC>');
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('the list never exposes the Slack ids themselves, only who is mentionable', async () => {
+      const mrossi = await usersRepo.getByUsername(testDb(), 'mrossi');
+      await usersRepo.setSlackId(testDb(), mrossi!.id, 'U99999ZZZ');
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/pratiche',
+        headers: { cookie: adminCookie },
+      });
+      const utenti = res.json().utenti as { username: string; taggabile: boolean }[];
+      expect(utenti.find((u) => u.username === 'mrossi')?.taggabile).toBe(true);
+      expect(utenti.find((u) => u.username === 'admin')?.taggabile).toBe(false);
+      // The identifier on the external service is not the form's business.
+      expect(JSON.stringify(utenti)).not.toContain('U99999ZZZ');
+    });
   });
 });

@@ -28,6 +28,7 @@ import {
   CAMPI_DATA,
   EMPTY_FILTERS,
   etichettaMese,
+  ndgTesto,
   filterPratiche,
   formatEuro,
   inRitardo,
@@ -263,7 +264,7 @@ export function PraticheScreen() {
                       className="pratiche-row-open"
                       onClick={() => setAperta(p.id)}
                     >
-                      {p.ndg}
+                      {ndgTesto(p.ndg)}
                     </button>
                   </td>
                   <td>{p.numero_pratica}</td>

@@ -8,12 +8,13 @@ import { TextInput } from '../../components/TextInput.js';
 import { SelectField } from '../../components/SelectField.js';
 import { Field } from '../../components/Field.js';
 import { Button } from '../../components/Button.js';
+import { Plus, Trash2 } from 'lucide-react';
 import { formatEuro, parseEuro } from './praticheData.js';
 
 export interface PraticaFormProps {
   /** Absent for a new pratica; the record being edited otherwise. */
   initial?: Pratica;
-  utenti: { id: string; username: string }[];
+  utenti: { id: string; username: string; taggabile?: boolean }[];
   /** Portfolios already present, offered as a datalist — free text stays
    *  possible so a brand-new portfolio never blocks data entry. */
   portafogliNoti: string[];
@@ -31,13 +32,17 @@ export function PraticaForm({
   onCancel,
 }: PraticaFormProps) {
   const { t } = useTranslation('pratiche');
-  const [ndg, setNdg] = useState(initial?.ndg ?? '');
+  // A list, because one order commonly covers several positions. Kept as
+  // rows of raw text rather than a parsed array: the user is mid-typing, and
+  // an empty row is a row waiting to be filled, not an invalid value.
+  const [ndg, setNdg] = useState<string[]>(initial?.ndg ?? ['']);
   const [numeroPratica, setNumeroPratica] = useState(initial?.numero_pratica ?? '');
   const [portafoglio, setPortafoglio] = useState(initial?.portafoglio ?? '');
   const [stato, setStato] = useState<StatoPratica>(initial?.stato ?? 'richiesto');
   const [scatole, setScatole] = useState(initial?.n_scatole ?? '');
   const [note, setNote] = useState(initial?.note ?? '');
   const [ordinatoDa, setOrdinatoDa] = useState(initial?.ordinato_da ?? '');
+  const [taggato, setTaggato] = useState(initial?.slack_tag_user_id ?? '');
   const [dataRichiesta, setDataRichiesta] = useState(initial?.data_richiesta ?? '');
   const [dataSpedizione, setDataSpedizione] = useState(initial?.data_spedizione ?? '');
   const [consegnaPrevista, setConsegnaPrevista] = useState(initial?.data_consegna_prevista ?? '');
@@ -51,13 +56,17 @@ export function PraticaForm({
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     onSubmit({
-      ndg: ndg.trim(),
+      // Blanks dropped and duplicates collapsed here rather than refused:
+      // an empty extra row is the normal state of a form someone stopped
+      // filling, not a mistake worth an error message.
+      ndg: [...new Set(ndg.map((v) => v.trim()).filter((v) => v !== ''))],
       numero_pratica: numeroPratica.trim(),
       portafoglio: portafoglio.trim() || null,
       stato,
       n_scatole: scatole.trim() || null,
       note: note.trim() || null,
       ordinato_da: ordinatoDa || null,
+      slack_tag_user_id: taggato || null,
       data_richiesta: dataRichiesta || null,
       data_spedizione: dataSpedizione || null,
       data_consegna_prevista: consegnaPrevista || null,
@@ -71,14 +80,44 @@ export function PraticaForm({
   return (
     <form className="pratiche-form" onSubmit={handleSubmit}>
       <div className="pratiche-form-grid">
-        <Field label={t('fields.ndg')} htmlFor="pratica-ndg">
-          <TextInput
-            id="pratica-ndg"
-            required
-            autoFocus
-            value={ndg}
-            onChange={(e) => setNdg(e.target.value)}
-          />
+        <Field label={t('fields.ndg')} htmlFor="pratica-ndg-0">
+          <div className="pratiche-ndg-lista">
+            {ndg.map((valore, i) => (
+              // Index as key, deliberately: these rows have no identity of
+              // their own beyond their position, and the alternative (a
+              // generated id per row) would exist only to satisfy the rule.
+              <div className="pratiche-ndg-riga" key={i}>
+                <TextInput
+                  id={`pratica-ndg-${i}`}
+                  aria-label={t('fields.ndgNumero', { n: i + 1 })}
+                  required={i === 0}
+                  autoFocus={i === 0}
+                  value={valore}
+                  onChange={(e) =>
+                    setNdg((rows) => rows.map((r, idx) => (idx === i ? e.target.value : r)))
+                  }
+                />
+                {ndg.length > 1 ? (
+                  <Button
+                    type="button"
+                    severity="secondary"
+                    aria-label={t('actions.ndgRimuovi', { n: i + 1 })}
+                    onClick={() => setNdg((rows) => rows.filter((_, idx) => idx !== i))}
+                  >
+                    <Trash2 aria-hidden="true" size={15} />
+                  </Button>
+                ) : null}
+              </div>
+            ))}
+            <Button
+              type="button"
+              severity="secondary"
+              onClick={() => setNdg((rows) => [...rows, ''])}
+            >
+              <Plus aria-hidden="true" size={15} />
+              {t('actions.ndgAggiungi')}
+            </Button>
+          </div>
         </Field>
         <Field label={t('fields.numeroPratica')} htmlFor="pratica-numero">
           <TextInput
@@ -132,6 +171,24 @@ export function PraticaForm({
               {u.username}
             </option>
           ))}
+        </SelectField>
+        {/* Only accounts an administrator has given a Slack member id: a
+            person without one cannot be mentioned, and offering them would
+            promise a notification that silently never names anybody. */}
+        <SelectField
+          label={t('fields.taggatoSlack')}
+          id="pratica-taggato"
+          value={taggato}
+          onChange={(e) => setTaggato(e.target.value)}
+        >
+          <option value="">{t('fields.taggatoSlackPredefinito')}</option>
+          {utenti
+            .filter((u) => u.taggabile)
+            .map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.username}
+              </option>
+            ))}
         </SelectField>
       </div>
 

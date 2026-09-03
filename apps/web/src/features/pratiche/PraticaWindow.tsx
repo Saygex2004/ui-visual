@@ -22,7 +22,7 @@ import { translateApiError } from '../../lib/translateApiError.js';
 import { formatDate, formatTimestamp } from '../dashboard/DataTable/formatting.js';
 import { PraticaForm } from './PraticaForm.js';
 import { useDeletePratica, useUpdatePratica } from './hooks.js';
-import { formatEuro, inRitardo } from './praticheData.js';
+import { formatEuro, inRitardo, ndgTesto } from './praticheData.js';
 
 export interface PraticaWindowProps {
   pratica: Pratica;
@@ -99,7 +99,7 @@ export function PraticaWindow({
           <div className="pratiche-window-header">
             <div className="pratiche-window-heading">
               <span className="ui-micro-label">
-                {t('fields.ndg')} {pratica.ndg}
+                {t('fields.ndg')} {ndgTesto(pratica.ndg)}
               </span>
               <DialogTitle className="pratiche-window-title">
                 {t('window.title', { numero: pratica.numero_pratica })}
@@ -125,7 +125,7 @@ export function PraticaWindow({
             ) : (
               <>
                 <dl className="pratiche-window-list">
-                  <Riga label={t('fields.ndg')} value={pratica.ndg} />
+                  <Riga label={t('fields.ndg')} value={ndgTesto(pratica.ndg)} />
                   <Riga label={t('fields.numeroPratica')} value={pratica.numero_pratica} />
                   <Riga label={t('fields.portafoglio')} value={show(pratica.portafoglio)} />
                   <div className="pratiche-window-row">

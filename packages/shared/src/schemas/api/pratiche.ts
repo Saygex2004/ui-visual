@@ -9,7 +9,17 @@ export const PraticheListResponseSchema = z.object({
   pratiche: z.array(PraticaSchema),
   /** Accounts that may be named in `ordinato_da`, so the client can render a
    *  person instead of an opaque id without a second round-trip. */
-  utenti: z.array(z.object({ id: z.string(), username: z.string() })),
+  utenti: z.array(
+    z.object({
+      id: z.string(),
+      username: z.string(),
+      /** Whether this account has a Slack member id, and can therefore be
+       *  chosen as the person to mention. The id itself is deliberately not
+       *  sent: the form needs to know who is offerable, not their identifier
+       *  on another service. */
+      taggabile: z.boolean().default(false),
+    }),
+  ),
 });
 
 export const CreatePraticaRequestSchema = PraticaInputSchema;

@@ -36,6 +36,12 @@ export const EMPTY_FILTERS: PraticheFilters = {
   mese: '',
 };
 
+/** The NDGs as one readable string. One definition, used by the table, the
+ *  window and the export, so the three cannot disagree about the separator. */
+export function ndgTesto(ndg: string[]): string {
+  return ndg.join(', ');
+}
+
 // ---- money ----
 
 /** Cents → "12,50". Italian decimal comma, always two digits: a cost shown as
@@ -64,7 +70,7 @@ export function parseEuro(raw: string): number | null {
 // ---- filtering ----
 
 function haystack(p: Pratica, nomeUtente: (id: string | null) => string): string {
-  return [p.ndg, p.numero_pratica, p.portafoglio, p.note, p.n_scatole, nomeUtente(p.ordinato_da)]
+  return [...p.ndg, p.numero_pratica, p.portafoglio, p.note, p.n_scatole, nomeUtente(p.ordinato_da)]
     .filter(Boolean)
     .join(' ')
     .toLowerCase();

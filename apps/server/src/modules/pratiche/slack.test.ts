@@ -8,13 +8,14 @@ import { buildMessage, notify } from './slack.js';
 function pratica(over: Partial<Pratica> = {}): Pratica {
   return {
     id: 'p1',
-    ndg: '229613-030529',
+    ndg: ['229613-030529'],
     numero_pratica: '163354',
     portafoglio: 'Diocleziano',
     stato: 'richiesto',
     n_scatole: '3, 7',
     note: null,
     ordinato_da: null,
+    slack_tag_user_id: null,
     data_richiesta: null,
     data_spedizione: null,
     data_consegna_prevista: null,
@@ -172,5 +173,16 @@ describe('notify', () => {
       notify({ webhookUrl: 'https://hooks.slack.test/x' }, pratica(), { kind: 'creata' }, { warn }),
     ).resolves.toBeUndefined();
     expect(warn).toHaveBeenCalledOnce();
+  });
+});
+
+describe('NDG multipli nel messaggio', () => {
+  it('names every position, not just the first', () => {
+    // The point of ordering several together is that the notification says
+    // which ones — a message naming one of four is worse than useless.
+    const testo = buildMessage(pratica({ ndg: ['900123', '111222', '333444'] }), {
+      kind: 'creata',
+    });
+    expect(testo).toContain('NDG 900123, 111222, 333444');
   });
 });

@@ -19,7 +19,7 @@ async function creaPratica(
   // Scoped to the dialog: the screen behind it has its own filter controls,
   // and a page-wide lookup would be reaching across two unrelated forms.
   const form = page.getByRole('dialog');
-  await form.getByLabel('NDG').fill(campi.ndg);
+  await form.getByLabel('NDG 1', { exact: true }).fill(campi.ndg);
   await form.getByLabel('Numero pratica').fill(campi.numero);
   await form.getByLabel('Portafoglio').fill(campi.portafoglio);
   if (campi.scatole) await form.getByLabel('N. scatole').fill(campi.scatole);
@@ -144,5 +144,44 @@ test.describe('admin: pratiche', () => {
     await expect(mese).toHaveValue('');
     await expect(page.getByRole('button', { name: 'E2E-MESE-1' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'E2E-MESE-2' })).toBeVisible();
+  });
+
+  test('one order can cover several NDGs, and they all reach the file', async ({ page }) => {
+    await loginAsAdmin(page);
+    await page.goto('/pratiche');
+
+    await page.getByRole('button', { name: 'Nuova pratica' }).click();
+    const form = page.getByRole('dialog');
+    await form.getByLabel('NDG 1', { exact: true }).fill('E2E-MULTI-A');
+    await form.getByRole('button', { name: 'Aggiungi NDG' }).click();
+    await form.getByLabel('NDG 2', { exact: true }).fill('E2E-MULTI-B');
+    await form.getByRole('button', { name: 'Aggiungi NDG' }).click();
+    await form.getByLabel('NDG 3', { exact: true }).fill('E2E-MULTI-C');
+    // A row added and left empty is the normal state of a form someone
+    // stopped filling: it must be dropped, not refused.
+    await form.getByRole('button', { name: 'Aggiungi NDG' }).click();
+    await form.getByLabel('Numero pratica').fill('770001');
+    await form.getByLabel('Portafoglio').fill('Adriano');
+    await form.getByRole('button', { name: 'Crea pratica' }).click();
+
+    const riga = page.getByRole('button', { name: /E2E-MULTI-A/ });
+    await expect(riga).toBeVisible();
+    await expect(riga).toContainText('E2E-MULTI-B');
+    await expect(riga).toContainText('E2E-MULTI-C');
+
+    // Searchable by ANY of them, not just the first — otherwise the extra
+    // positions would be decoration.
+    await page.getByLabel('Cerca fra le pratiche').fill('E2E-MULTI-C');
+    await expect(page.getByRole('button', { name: /E2E-MULTI-A/ })).toBeVisible();
+    await page.getByLabel('Cerca fra le pratiche').fill('');
+
+    // And removable again.
+    await riga.click();
+    const finestra = page.getByRole('dialog');
+    await finestra.getByRole('button', { name: 'Modifica' }).click();
+    await finestra.getByRole('button', { name: 'Togli NDG 2' }).click();
+    await finestra.getByRole('button', { name: 'Salva' }).click();
+    await expect(finestra).not.toContainText('E2E-MULTI-B');
+    await expect(finestra).toContainText('E2E-MULTI-C');
   });
 });

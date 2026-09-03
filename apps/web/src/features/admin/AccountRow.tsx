@@ -12,6 +12,7 @@ import { StatusDisplay } from '../../components/StatusDisplay.js';
 import type { AdminUser } from '@pvp/shared';
 import { useSetPassword, useSetRole, useSetDisabled } from './hooks.js';
 import { VistePicker } from './VistePicker.js';
+import { SlackIdField } from './SlackIdField.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 import { formatTimestampDate } from '../dashboard/DataTable/formatting.js';
 
@@ -95,6 +96,9 @@ export function AccountRow({
         <td>{formatTimestampDate(user.created_at)}</td>
         <td>
           <VistePicker user={user} />
+        </td>
+        <td>
+          <SlackIdField user={user} />
         </td>
         <td className="admin-row-actions">
           <Button size="small" severity="secondary" onClick={() => setPasswordPanelOpen((v) => !v)}>

@@ -49,6 +49,7 @@ export function AccountsScreen() {
                   <th>{t('accounts.columnState')}</th>
                   <th>{t('accounts.columnCreatedAt')}</th>
                   <th>{t('viste.label')}</th>
+                  <th>{t('slackId.column')}</th>
                   <th>{t('accounts.columnActions')}</th>
                 </tr>
               </thead>

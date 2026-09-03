@@ -150,3 +150,12 @@ export function useSetVisteStati() {
     },
   });
 }
+
+export function useSetSlackId() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, slackId }: { userId: string; slackId: string | null }) =>
+      adminApi.setSlackId(userId, { slack_id: slackId }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: adminUsersQueryKey }),
+  });
+}

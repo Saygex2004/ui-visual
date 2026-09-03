@@ -14,13 +14,14 @@ import {
 function pratica(over: Partial<Pratica> = {}): Pratica {
   return {
     id: 'p1',
-    ndg: '900123',
+    ndg: ['900123'],
     numero_pratica: '163354',
     portafoglio: 'Augusto',
     stato: 'richiesto',
     n_scatole: '3',
     note: null,
     ordinato_da: null,
+    slack_tag_user_id: null,
     data_richiesta: null,
     data_spedizione: null,
     data_consegna_prevista: null,
@@ -107,10 +108,10 @@ describe('filterPratiche', () => {
     const all = [
       // 'a' needs its own numero_pratica: the factory default is 163354, and
       // leaving it would make the 163354 case match two rows and prove nothing.
-      pratica({ id: 'a', ndg: '900123', numero_pratica: '000001' }),
-      pratica({ id: 'b', ndg: '111', numero_pratica: '163354' }),
-      pratica({ id: 'c', ndg: '222', numero_pratica: '999', note: 'Rinnovo ipoteca' }),
-      pratica({ id: 'd', ndg: '333', numero_pratica: '888', n_scatole: '42', note: null }),
+      pratica({ id: 'a', ndg: ['900123'], numero_pratica: '000001' }),
+      pratica({ id: 'b', ndg: ['111'], numero_pratica: '163354' }),
+      pratica({ id: 'c', ndg: ['222'], numero_pratica: '999', note: 'Rinnovo ipoteca' }),
+      pratica({ id: 'd', ndg: ['333'], numero_pratica: '888', n_scatole: '42', note: null }),
     ];
     const ids = (q: string) => filterPratiche(all, { ...EMPTY_FILTERS, q }).map((p) => p.id);
     expect(ids('900123')).toEqual(['a']);
@@ -160,8 +161,8 @@ describe('filterPratiche', () => {
 
   it('combines filters conjunctively', () => {
     const all = [
-      pratica({ id: 'a', portafoglio: 'Augusto', stato: 'spedito', ndg: 'X1' }),
-      pratica({ id: 'b', portafoglio: 'Augusto', stato: 'richiesto', ndg: 'X1' }),
+      pratica({ id: 'a', portafoglio: 'Augusto', stato: 'spedito', ndg: ['X1'] }),
+      pratica({ id: 'b', portafoglio: 'Augusto', stato: 'richiesto', ndg: ['X1'] }),
     ];
     const got = filterPratiche(all, {
       ...EMPTY_FILTERS,

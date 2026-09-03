@@ -8,6 +8,7 @@ import {
   CreateUserRequestSchema,
   SetPasswordRequestSchema,
   SetRoleRequestSchema,
+  SetSlackIdRequestSchema,
   SetVisteRequestSchema,
   SetVisteStatiRequestSchema,
   type AdminUser,
@@ -34,6 +35,7 @@ function toAdminView(user: {
   must_change_password: boolean;
   created_at: string;
   viste: Vista[];
+  slack_id?: string | null;
 }): AdminUser {
   return {
     id: user.id,
@@ -43,6 +45,7 @@ function toAdminView(user: {
     must_change_password: user.must_change_password,
     created_at: user.created_at,
     viste: user.viste,
+    slack_id: user.slack_id ?? null,
   };
 }
 
@@ -129,6 +132,30 @@ export function registerAdminModule(app: FastifyInstance, deps: AdminModuleDeps)
       return reply.code(204).send();
     },
   );
+
+  // The Slack member id, which is what makes an account mentionable at all:
+  // a pratica can only tag someone who has one.
+  app.post<{ Params: { id: string } }>('/admin/users/:id/slack-id', adminOnly, async (req) => {
+    const { id } = req.params;
+    const target = await usersRepo.getById(db, id);
+    if (!target) throw new ApiError(404, 'errors.common.notFound');
+
+    const parsed = SetSlackIdRequestSchema.safeParse(req.body);
+    if (!parsed.success) throw new ApiError(400, 'errors.common.validation');
+
+    const slackId = parsed.data.slack_id;
+    await usersRepo.setSlackId(db, id, slackId);
+    // Logged, but WITHOUT the ids themselves: an admin event is readable by
+    // every administrator and this is a personal identifier on an external
+    // service. Who changed whose is what an audit trail needs.
+    await adminEventsRepo.append(db, {
+      type: 'slack_id_changed',
+      actor_id: req.user!.id,
+      subject: id,
+      details: { impostato: slackId !== null },
+    });
+    return { user: toAdminView({ ...target, slack_id: slackId }) };
+  });
 
   app.post<{ Params: { id: string } }>('/admin/users/:id/viste', adminOnly, async (req) => {
     const { id } = req.params;

@@ -247,5 +247,11 @@
     "loading": "Caricamento degli stati…",
     "loadError": "Non è stato possibile caricare lo stato delle viste.",
     "saveError": "Non è stato possibile salvare lo stato della vista."
+  },
+  "slackId": {
+    "column": "ID Slack",
+    "label": "ID Slack di {{username}}",
+    "placeholder": "U01234ABC",
+    "saveError": "Non è stato possibile salvare l'ID Slack. Controlla che sia nella forma U01234ABC."
   }
 }

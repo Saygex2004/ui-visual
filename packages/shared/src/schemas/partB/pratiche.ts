@@ -9,6 +9,11 @@
 // own in a way worth enforcing here — the same case can legitimately be
 // re-filed — so the document id stays a generated one and both stay plain
 // searchable strings.
+//
+// `ndg` is a LIST: one order can cover several positions at once, which is how
+// the archive is actually asked for. It was a single string until 2026-09-02
+// and the four records written before then carry a bare string, so reads
+// still accept one and normalise it to a one-element list.
 import { z } from 'zod';
 import { instant, calendarDate } from '../common.js';
 
@@ -48,9 +53,18 @@ export const StatoPraticaSchema = z.enum(STATI_PRATICA);
 
 /** The fields, WITHOUT defaults. Two schemas are built from this: creation
  *  adds defaults, patching must not have them — see PraticaPatchSchema. */
+/** One or more NDGs. A bare string is accepted on read and becomes a
+ *  one-element list: the records written before this became a list carry one,
+ *  and refusing them would make the whole register unreadable rather than
+ *  migrating it. Everything WRITTEN from here on is a list. */
+const listaNdg = z.preprocess(
+  (v) => (typeof v === 'string' ? [v] : v),
+  z.array(requiredText).min(1).max(50),
+);
+
 const CampiPratica = z.object({
-  /** Numero di Gruppo — the client/position identifier. */
-  ndg: requiredText,
+  /** Numero di Gruppo — the client/position identifiers this order covers. */
+  ndg: listaNdg,
   /** The case-file reference, e.g. "163354". A string, not a number: these
    *  are identifiers, and leading zeros in them are meaningful. */
   numero_pratica: requiredText,
@@ -71,6 +85,12 @@ const CampiPratica = z.object({
   /** Id of the account that ordered the case file. Nullable because a case
    *  can be registered before anyone has requested it. */
   ordinato_da: z.string().trim().nullable(),
+  /** Id of the account to mention in the Slack notification. Null falls back
+   *  to the installation-wide mention, so an existing record keeps behaving
+   *  exactly as it did before this field existed. Stored as the ACCOUNT id,
+   *  not the Slack id: a person whose Slack account is recreated gets a new
+   *  member id, and every pratica should follow them without being rewritten. */
+  slack_tag_user_id: z.string().trim().nullable(),
 
   // ---- dates: the tracking spine ----
   /** When the file was asked for. */
@@ -100,6 +120,7 @@ export const PraticaInputSchema = CampiPratica.extend({
   n_scatole: optionalText.default(null),
   note: optionalText.default(null),
   ordinato_da: z.string().trim().nullable().default(null),
+  slack_tag_user_id: z.string().trim().nullable().default(null),
   data_richiesta: optionalDate.default(null),
   data_spedizione: optionalDate.default(null),
   data_consegna_prevista: optionalDate.default(null),

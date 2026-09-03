@@ -375,3 +375,8 @@
   gap: var(--space-3);
   margin: var(--space-3) 0;
 }
+
+.admin-slack-id input {
+  max-width: 12rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+}

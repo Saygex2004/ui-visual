@@ -23,7 +23,7 @@ for (const theme of ['light', 'dark'] as const) {
       { ndg: `SHOT-${theme}-777999`, numero: '888111', portafoglio: 'Diocleziano', scatole: '12' },
     ]) {
       await page.getByRole('button', { name: 'Nuova pratica' }).click();
-      await dialog.getByLabel('NDG').fill(p.ndg);
+      await dialog.getByLabel('NDG 1', { exact: true }).fill(p.ndg);
       await dialog.getByLabel('Numero pratica').fill(p.numero);
       await dialog.getByLabel('Portafoglio').fill(p.portafoglio);
       await dialog.getByLabel('N. scatole').fill(p.scatole);
