@@ -52,7 +52,13 @@ test.describe('admin: pratiche', () => {
     await window.getByRole('button', { name: 'Modifica' }).click();
     await window.getByLabel('N. scatole').fill('12');
     await window.getByRole('button', { name: 'Salva' }).click();
-    await expect(window.getByText('12')).toBeVisible();
+    // Anchored to the "N. scatole" row, not to the text "12" anywhere in the
+    // dialog: a bare getByText('12') also matched the NDG "E2E-900123" and,
+    // on any run whose generated usernames happened to contain "12", an
+    // <option> of the "Ordinata da" select — which is exactly how it failed.
+    await expect(
+      window.locator('.pratiche-window-row', { hasText: 'N. scatole' }).locator('dd'),
+    ).toHaveText('12');
     await window.getByRole('button', { name: 'Chiudi' }).click();
 
     // The deep link the Slack notification carries: landing on that address
