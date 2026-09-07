@@ -78,6 +78,7 @@
     "estratto": "Estratto",
     "spedito": "Spedito",
     "consegnato": "Consegnato",
-    "archiviato": "Archiviato / rientrato"
+    "archiviato": "Archiviato / rientrato",
+    "non_trovato": "Non trovato"
   }
 }

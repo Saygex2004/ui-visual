@@ -8,12 +8,7 @@ import { CorpoEditor } from './CorpoEditor.js';
 import { CitazioneProposta } from './CitazioneProposta.js';
 import { Campo, ImportoLettere, Scelte } from './Campo.js';
 import { Field } from '../../../components/Field.js';
-import {
-  AZIENDE,
-  CESSIONARI_POSSIBILI,
-  MASTER_SERVICER_POSSIBILI,
-  type Azienda,
-} from '../data/aziende.js';
+import { CESSIONARI_POSSIBILI, MASTER_SERVICER_POSSIBILI, type Azienda } from '../data/aziende.js';
 import { importoInLettere } from '../utils/numeroInLettere.js';
 import { COPPIE_LETTERE as COPPIE, type CampoImporto } from '../utils/lettere.js';
 import type { Anagrafica } from '../utils/anagrafica.js';
@@ -40,6 +35,9 @@ export interface CartaFormProps {
   cambiaModoLettere: (campo: CampoImporto) => void;
   /** Who may sign, and under what title — an admin's list, or the shipped one. */
   anagrafica: Anagrafica;
+  /** Companies that can be written TO: the shipped ones plus every added one,
+   *  including those not offered as senders. */
+  destinatarie: Azienda[];
 }
 
 const ASSUNTO_EXTRA: { id: AssuntoExtra; chiave: string }[] = [
@@ -58,6 +56,7 @@ export function CartaForm({
   lettereManuali,
   cambiaModoLettere,
   anagrafica,
+  destinatarie,
 }: CartaFormProps) {
   const { t } = useTranslation('carta');
   const f = formData;
@@ -105,16 +104,18 @@ export function CartaForm({
           label={t('fields.destinatarioDaAzienda')}
           value=""
           onChange={(id) => {
-            const az = AZIENDE.find((a) => a.id === id);
+            const az = destinatarie.find((a) => a.id === id);
             if (az) compilaDestinatario(az);
           }}
         >
           <option value="">{t('scelte.destinatarioScegli')}</option>
-          {AZIENDE.filter((a) => a.id !== azienda.id && a.id !== 'template-vuoto').map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.nome}
-            </option>
-          ))}
+          {destinatarie
+            .filter((a) => a.id !== azienda.id && a.id !== 'template-vuoto')
+            .map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.nome}
+              </option>
+            ))}
         </Scelte>
         <Campo
           id="c-dest-nome"

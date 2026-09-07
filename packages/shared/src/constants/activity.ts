@@ -29,6 +29,7 @@ export const ADMIN_EVENT_TYPES = [
   'carta_firmatari_changed',
   'viste_stati_changed',
   'slack_id_changed',
+  'carta_azienda_changed',
 ] as const;
 
 export type AdminEventType = (typeof ADMIN_EVENT_TYPES)[number];

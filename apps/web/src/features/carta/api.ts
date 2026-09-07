@@ -1,5 +1,8 @@
 import { api } from '../../lib/apiClient.js';
 import type {
+  CartaAziendaResponse,
+  CartaAziendeResponse,
+  CreateCartaAziendaRequest,
   CartaFirmatariResponse,
   CartaTemplatesResponse,
   SetCartaFirmatariRequest,
@@ -34,4 +37,23 @@ export function setFirmatari(body: SetCartaFirmatariRequest): Promise<SetCartaFi
 
 export function resetFirmatari(): Promise<void> {
   return api.delete<void>('/carta/firmatari');
+}
+
+export function fetchAziende(): Promise<CartaAziendeResponse> {
+  return api.get<CartaAziendeResponse>('/carta/aziende');
+}
+
+export function creaAzienda(body: CreateCartaAziendaRequest): Promise<CartaAziendaResponse> {
+  return api.post<CartaAziendaResponse>('/carta/aziende', body);
+}
+
+export function aggiornaAzienda(
+  id: string,
+  body: Partial<CreateCartaAziendaRequest>,
+): Promise<CartaAziendaResponse> {
+  return api.patch<CartaAziendaResponse>(`/carta/aziende/${id}`, body);
+}
+
+export function eliminaAzienda(id: string): Promise<void> {
+  return api.delete<void>(`/carta/aziende/${id}`);
 }

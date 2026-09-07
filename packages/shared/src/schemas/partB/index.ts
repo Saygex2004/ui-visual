@@ -9,3 +9,4 @@ export * from './pratiche.js';
 export * from './cartaTemplate.js';
 export * from './cartaFirmatari.js';
 export * from './visteStati.js';
+export * from './cartaAzienda.js';

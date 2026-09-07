@@ -243,3 +243,37 @@ describe('buildDocument', () => {
     }
   });
 });
+
+describe("il logo di un'azienda aggiunta", () => {
+  const PNG_1PX =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+
+  it('fetches a data-URI logo verbatim, without prefixing the site origin', async () => {
+    // Added companies carry their logo inline. The helper used to prefix
+    // anything not starting with "http" with window.location.origin, which
+    // turned a data: URI into a non-existent address — the logo would have
+    // disappeared from the document without a word.
+    const azienda = {
+      id: 'aggiunta-1',
+      nome: 'Nuova Azienda S.r.l.',
+      logo: PNG_1PX,
+      logoWidth: 1,
+      logoHeight: 1,
+      via: 'Via Prova 1',
+      cap: '20100',
+      citta: 'Milano',
+    };
+    await buildDocument(azienda, input({ tipo: 'lettera' }));
+
+    const chiamate = (globalThis.fetch as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+    expect(chiamate.at(-1)?.[0]).toBe(PNG_1PX);
+    expect(String(chiamate.at(-1)?.[0])).not.toContain('pvp-aste.web.app');
+  });
+
+  it('still resolves a shipped logo against the site origin', async () => {
+    const conFile = AZIENDE.find((a) => a.logo)!;
+    await buildDocument(conFile, input({ tipo: 'lettera' }));
+    const chiamate = (globalThis.fetch as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+    expect(String(chiamate.at(-1)?.[0])).toContain('https://pvp-aste.web.app/carta/');
+  });
+});

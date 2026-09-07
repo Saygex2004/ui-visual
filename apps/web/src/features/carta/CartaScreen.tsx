@@ -16,12 +16,13 @@ import { CartaForm } from './components/CartaForm.js';
 import { Section } from './components/Section.js';
 import { COPPIE_LETTERE, haLettere, type CampoImporto } from './utils/lettere.js';
 import { anagraficaEffettiva } from './utils/anagrafica.js';
+import { aziendeDestinatarie, aziendeMittenti } from './utils/aziendeEffettive.js';
 import { importoInLettere } from './utils/numeroInLettere.js';
 import { oggettoPerTipo } from './utils/oggetto.js';
 import { generateDocx } from './utils/docxGenerator.js';
 import { missingTutto } from './utils/validazione.js';
 import { datiIniziali } from './formState.js';
-import { useCartaTemplates, useCartaFirmatari } from './hooks.js';
+import { useCartaTemplates, useCartaFirmatari, useCartaAziende } from './hooks.js';
 import { testiEffettivi } from './utils/testiEffettivi.js';
 import type { CartaFormData, TipoLettera } from './types.js';
 import './carta.css';
@@ -40,11 +41,21 @@ export function CartaScreen() {
   // Same contract for who may sign: the admin's list where one exists.
   const { data: firmatariData } = useCartaFirmatari();
   const anagrafica = useMemo(() => anagraficaEffettiva(firmatariData?.anagrafica), [firmatariData]);
+  // Shipped companies plus the ones an administrator has added. Senders and
+  // recipients are two different lists: a company added purely to be written
+  // to is not offered as a sender.
+  const { data: aziendeData } = useCartaAziende();
+  const custom = useMemo(() => aziendeData?.aziende ?? [], [aziendeData]);
+  const mittenti = useMemo(() => aziendeMittenti(custom), [custom]);
+  const destinatarie = useMemo(() => aziendeDestinatarie(custom), [custom]);
   const [zoom, setZoom] = useState(0.9);
   const [generando, setGenerando] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
 
-  const azienda = useMemo(() => AZIENDE.find((a) => a.id === azId) ?? AZIENDE[0]!, [azId]);
+  const azienda = useMemo(
+    () => mittenti.find((a) => a.id === azId) ?? mittenti[0]!,
+    [azId, mittenti],
+  );
   const mancanti = useMemo(() => missingTutto(tipo, azienda, formData), [tipo, azienda, formData]);
 
   // Which amounts the user has taken over by hand. Everything else keeps its
@@ -155,7 +166,7 @@ export function CartaScreen() {
               value={azId}
               onChange={(e) => setAzId(e.target.value)}
             >
-              {AZIENDE.map((a) => (
+              {mittenti.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.nome ?? a.id}
                 </option>
@@ -185,6 +196,7 @@ export function CartaScreen() {
             lettereManuali={lettereManuali}
             cambiaModoLettere={cambiaModoLettere}
             anagrafica={anagrafica}
+            destinatarie={destinatarie}
           />
 
           {mancanti.length > 0 ? (

@@ -110,6 +110,10 @@ export function portafogliPresenti(pratiche: Pratica[]): string[] {
  *  testable and the caller decides what "now" means. */
 export function inRitardo(p: Pratica, oggi: string): boolean {
   return (
+    // A file that was not found is not late: it is not coming. Leaving it to
+    // accumulate a red "in ritardo" badge forever would put a permanent alarm
+    // on the one case where there is nothing left to chase.
+    p.stato !== 'non_trovato' &&
     p.data_consegna_prevista != null &&
     p.data_consegna_effettiva == null &&
     p.data_consegna_prevista < oggi

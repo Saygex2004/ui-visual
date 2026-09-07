@@ -36,15 +36,22 @@ const requiredText = z.string().trim().min(1);
 /** Same rule as `optionalText`: no default here, only in the input schema. */
 const optionalDate = calendarDate.nullable();
 
-/** The life of a paper file, in order. Stored as these codes, never as the
- *  Italian labels: the labels are presentation and may be reworded, the codes
- *  are what filters and exports are written against. */
+/** The life of a paper file, in order — then the way out of it.
+ *
+ *  Stored as these codes, never as the Italian labels: the labels are
+ *  presentation and may be reworded, the codes are what filters and exports
+ *  are written against.
+ *
+ *  `non_trovato` sits last because it is NOT a further stage: it is where a
+ *  request ends when the file is not in the archive. A pratica in that state
+ *  is closed, not late — nothing more is coming. */
 export const STATI_PRATICA = [
   'richiesto',
   'estratto',
   'spedito',
   'consegnato',
   'archiviato',
+  'non_trovato',
 ] as const;
 
 export type StatoPratica = (typeof STATI_PRATICA)[number];

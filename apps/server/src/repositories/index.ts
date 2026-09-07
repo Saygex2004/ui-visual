@@ -24,4 +24,5 @@ export * as calendarRepo from './calendar.js';
 export * as praticheRepo from './pratiche.js';
 export * as cartaTemplateRepo from './cartaTemplate.js';
 export * as cartaFirmatariRepo from './cartaFirmatari.js';
+export * as cartaAziendaRepo from './cartaAzienda.js';
 export * as visteStatiRepo from './visteStati.js';

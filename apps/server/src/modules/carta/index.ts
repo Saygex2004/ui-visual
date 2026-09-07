@@ -7,6 +7,8 @@
 import type { Firestore } from 'firebase-admin/firestore';
 import type { FastifyInstance } from 'fastify';
 import {
+  CartaAziendaPatchSchema,
+  CreateCartaAziendaRequestSchema,
   SetCartaFirmatariRequestSchema,
   SetCartaTemplateRequestSchema,
   TipoTemplateSchema,
@@ -14,6 +16,7 @@ import {
 import {
   cartaTemplateRepo,
   cartaFirmatariRepo,
+  cartaAziendaRepo,
   adminEventsRepo,
 } from '../../repositories/index.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
@@ -95,6 +98,57 @@ export function registerCartaModule(app: FastifyInstance, deps: CartaModuleDeps)
       actor_id: req.user!.id,
       subject: 'carta_anagrafica/firmatari',
       details: { reset: true },
+    });
+    return reply.code(204).send();
+  });
+
+  // ── Companies added on top of the shipped ones ──
+  //
+  // Read with the view: the drafting form offers them as senders and fills
+  // recipients from them. Written by an administrator: what appears here is a
+  // registered office and a tax code printed on a signed letter.
+  app.get('/carta/aziende', richiedeVista, async () => ({
+    aziende: await cartaAziendaRepo.listAll(db),
+  }));
+
+  app.post('/carta/aziende', adminOnly, async (req, reply) => {
+    const body = CreateCartaAziendaRequestSchema.safeParse(req.body);
+    if (!body.success) throw new ApiError(400, 'errors.common.validation');
+    const azienda = await cartaAziendaRepo.create(db, body.data, req.user!.id);
+    await adminEventsRepo.append(db, {
+      type: 'carta_azienda_changed',
+      actor_id: req.user!.id,
+      subject: `carta_azienda/${azienda.id}`,
+      // The name, not the record: an admin event is a trail of what happened,
+      // and a logo would put a few hundred KB of base64 into every listing.
+      details: { nome: azienda.nome, creata: true },
+    });
+    reply.code(201);
+    return { azienda };
+  });
+
+  app.patch<{ Params: { id: string } }>('/carta/aziende/:id', adminOnly, async (req) => {
+    const body = CartaAziendaPatchSchema.safeParse(req.body);
+    if (!body.success) throw new ApiError(400, 'errors.common.validation');
+    const azienda = await cartaAziendaRepo.patch(db, req.params.id, body.data, req.user!.id);
+    if (!azienda) throw new ApiError(404, 'errors.common.notFound');
+    await adminEventsRepo.append(db, {
+      type: 'carta_azienda_changed',
+      actor_id: req.user!.id,
+      subject: `carta_azienda/${azienda.id}`,
+      details: { nome: azienda.nome },
+    });
+    return { azienda };
+  });
+
+  app.delete<{ Params: { id: string } }>('/carta/aziende/:id', adminOnly, async (req, reply) => {
+    const removed = await cartaAziendaRepo.remove(db, req.params.id);
+    if (!removed) throw new ApiError(404, 'errors.common.notFound');
+    await adminEventsRepo.append(db, {
+      type: 'carta_azienda_changed',
+      actor_id: req.user!.id,
+      subject: `carta_azienda/${req.params.id}`,
+      details: { eliminata: true },
     });
     return reply.code(204).send();
   });

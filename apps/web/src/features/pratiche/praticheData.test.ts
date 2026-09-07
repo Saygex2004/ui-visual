@@ -261,3 +261,31 @@ describe('etichettaMese', () => {
     expect(etichettaMese('2026-01')).toBe('gennaio 2026');
   });
 });
+
+describe("non trovato — la via d'uscita, non una tappa in piu'", () => {
+  it('is never late: nothing more is coming', () => {
+    // Left to the ordinary rule it would carry a red "in ritardo" badge for
+    // ever, putting a permanent alarm on the one case with nothing to chase.
+    const perso = pratica({
+      stato: 'non_trovato',
+      data_consegna_prevista: '2026-01-01',
+      data_consegna_effettiva: null,
+    });
+    expect(inRitardo(perso, '2026-09-07')).toBe(false);
+  });
+
+  it('still flags a file that is merely overdue', () => {
+    const atteso = pratica({
+      stato: 'spedito',
+      data_consegna_prevista: '2026-01-01',
+      data_consegna_effettiva: null,
+    });
+    expect(inRitardo(atteso, '2026-09-07')).toBe(true);
+  });
+
+  it('is filterable like any other stage', () => {
+    const dati = [pratica({ id: 'a', stato: 'non_trovato' }), pratica({ id: 'b' })];
+    const res = filterPratiche(dati, { ...EMPTY_FILTERS, stato: 'non_trovato' });
+    expect(res.map((p) => p.id)).toEqual(['a']);
+  });
+});

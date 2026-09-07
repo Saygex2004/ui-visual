@@ -42,8 +42,12 @@ interface CollectedRun extends InlineFmt {
 }
 
 async function fetchImageAsUint8Array(url: string) {
-  // Use absolute URL to avoid issues in production builds
-  const absoluteUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+  // A data: URI is already the image — an added company carries its logo
+  // inline. Prefixing it with the site origin (what the branch below does to
+  // the shipped "/carta/…" paths) would turn it into an address that does not
+  // exist, and the logo would silently vanish from the document.
+  const absoluteUrl =
+    url.startsWith('data:') || url.startsWith('http') ? url : `${window.location.origin}${url}`;
   const response = await fetch(absoluteUrl);
   if (!response.ok) throw new Error(`HTTP ${response.status} fetching ${absoluteUrl}`);
   const arrayBuffer = await response.arrayBuffer();

@@ -41,6 +41,8 @@ describe('carta templates (HTTP, over the emulator)', () => {
     await Promise.all(rimasti.docs.map((d) => d.ref.delete()));
     const anagrafiche = await testDb().collection('carta_anagrafica').get();
     await Promise.all(anagrafiche.docs.map((d) => d.ref.delete()));
+    const aziende = await testDb().collection('carta_azienda').get();
+    await Promise.all(aziende.docs.map((d) => d.ref.delete()));
 
     ({ app, cache } = await buildApp(loadConfig(TEST_ENV), testDb()));
     adminCookie = await loginAs(app, 'admin', 'AdminPass123!');
@@ -232,5 +234,134 @@ describe('carta templates (HTTP, over the emulator)', () => {
       headers: { cookie: adminCookie },
     });
     expect(dopo.json().anagrafica).toBeNull();
+  });
+
+  // ── Companies added on top of the shipped ones ──
+  describe('aziende aggiunte', () => {
+    const NUOVA = {
+      nome: 'Nuova Azienda S.r.l.',
+      nome_header: null,
+      sottotitolo: null,
+      via: 'Via Prova 1',
+      cap: '20100',
+      citta: 'Milano',
+      pec: 'nuova@legalmail.it',
+      email: null,
+      cf: '01234567890',
+      citta_data: null,
+      footer_text: null,
+      header_color: '#1F3864',
+      header_size: 14,
+      logo: null,
+      logo_width: null,
+      logo_height: null,
+      usabile_come_mittente: true,
+    };
+
+    const crea = (body: unknown, cookie = adminCookie) =>
+      app.inject({
+        method: 'POST',
+        url: '/api/carta/aziende',
+        headers: { cookie },
+        payload: body as object,
+      });
+
+    it('starts empty: the shipped companies are not copied into the database', async () => {
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/carta/aziende',
+        headers: { cookie: adminCookie },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.json().aziende).toEqual([]);
+    });
+
+    it('an admin adds one, and the view reads it back', async () => {
+      expect((await crea(NUOVA)).statusCode).toBe(201);
+      const cookie = await utenteConCarta();
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/carta/aziende',
+        headers: { cookie },
+      });
+      expect(res.json().aziende[0]).toMatchObject({
+        nome: 'Nuova Azienda S.r.l.',
+        pec: 'nuova@legalmail.it',
+        usabile_come_mittente: true,
+      });
+    });
+
+    it('a company can be recipient-only', async () => {
+      // Several are added purely for their address and PEC; offering them as
+      // a sender would only be a way to pick the wrong one.
+      const res = await crea({ ...NUOVA, usabile_come_mittente: false });
+      expect(res.json().azienda.usabile_come_mittente).toBe(false);
+    });
+
+    it('refuses a logo that is not an image', async () => {
+      // The string goes straight into an <img src> and into the generated
+      // document; anything that is not an image must not get in.
+      expect(
+        (await crea({ ...NUOVA, logo: 'data:text/html;base64,PHNjcmlwdD4=' })).statusCode,
+      ).toBe(400);
+      expect((await crea({ ...NUOVA, logo: 'https://altrove.test/logo.png' })).statusCode).toBe(
+        400,
+      );
+    });
+
+    it('accepts a PNG data URI as the logo', async () => {
+      const png =
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+      const res = await crea({ ...NUOVA, logo: png, logo_width: 1, logo_height: 1 });
+      expect(res.statusCode).toBe(201);
+      expect(res.json().azienda.logo).toBe(png);
+    });
+
+    it('refuses a nameless company', async () => {
+      expect((await crea({ ...NUOVA, nome: '  ' })).statusCode).toBe(400);
+    });
+
+    it('patching one field leaves the others alone', async () => {
+      const creata = (await crea(NUOVA)).json().azienda;
+      const res = await app.inject({
+        method: 'PATCH',
+        url: `/api/carta/aziende/${creata.id}`,
+        headers: { cookie: adminCookie },
+        payload: { citta: 'Roma' },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.json().azienda.citta).toBe('Roma');
+      expect(res.json().azienda.pec).toBe('nuova@legalmail.it'); // untouched
+    });
+
+    it('deletes one, and answers 404 for an unknown id', async () => {
+      const creata = (await crea(NUOVA)).json().azienda;
+      const del = await app.inject({
+        method: 'DELETE',
+        url: `/api/carta/aziende/${creata.id}`,
+        headers: { cookie: adminCookie },
+      });
+      expect(del.statusCode).toBe(204);
+
+      const ancora = await app.inject({
+        method: 'DELETE',
+        url: `/api/carta/aziende/${creata.id}`,
+        headers: { cookie: adminCookie },
+      });
+      expect(ancora.statusCode).toBe(404);
+    });
+
+    it('a non-admin holding the view cannot add or remove a company', async () => {
+      // What appears here is a registered office and a tax code printed on a
+      // signed letter.
+      const cookie = await utenteConCarta();
+      expect((await crea(NUOVA, cookie)).statusCode).toBe(403);
+      const del = await app.inject({
+        method: 'DELETE',
+        url: '/api/carta/aziende/qualsiasi',
+        headers: { cookie },
+      });
+      expect(del.statusCode).toBe(403);
+    });
   });
 });
