@@ -11,15 +11,19 @@ import { CreatePraticaRequestSchema, UpdatePraticaRequestSchema } from '@pvp/sha
 import { praticheRepo, usersRepo } from '../../repositories/index.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
 import { notify, type SlackConfig } from './slack.js';
+import { sendCreationEmail, type EmailConfig } from './email.js';
 
 export interface PraticheModuleDeps {
   db: Firestore;
   /** Absent or unconfigured = notifications off. */
   slack?: SlackConfig;
+  /** Absent or unconfigured = no email, which is what development, the
+   *  emulator and every test want. */
+  email?: EmailConfig;
 }
 
 export function registerPraticheModule(app: FastifyInstance, deps: PraticheModuleDeps): void {
-  const { db, slack = {} } = deps;
+  const { db, slack = {}, email = {} } = deps;
   // Gated on the VIEW, not on the role: an administrator may now grant
   // "Pratiche cartacee" to a normal account, and the grant has to actually
   // mean something. Admins still pass — `hasVista` lets them through.
@@ -77,7 +81,16 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
     // error logged anywhere because the fetch never got far enough to fail.
     // `notify` never throws and carries its own 5s timeout, so awaiting it
     // bounds the request instead of risking it.
-    await notify(slack, pratica, { kind: 'creata' }, req.log, mentions);
+    // Both awaited, and in parallel: they are independent courtesies, and
+    // running them one after the other would add the mail server's round trip
+    // to a request that already waits for Slack. Neither throws, so
+    // `Promise.all` cannot reject here.
+    await Promise.all([
+      notify(slack, pratica, { kind: 'creata' }, req.log, mentions),
+      // Creation only. State changes stay on Slack, where a stream of small
+      // updates belongs; a mailbox getting ten a day stops being read.
+      sendCreationEmail(email, pratica, req.log),
+    ]);
     reply.code(201);
     return { pratica };
   });

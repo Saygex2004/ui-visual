@@ -397,4 +397,44 @@ describe('pratiche module (HTTP, over the emulator)', () => {
       expect(JSON.stringify(utenti)).not.toContain('U99999ZZZ');
     });
   });
+
+  // ── La mail alla creazione ──
+  describe('notifica per email', () => {
+    it('does not send when SMTP is not configured, and creates the pratica anyway', async () => {
+      // The whole suite runs without SMTP settings: absence is "off", not an
+      // error, and the register must work exactly as before.
+      const res = await create({ ...NUOVA, ndg: ['SENZA-SMTP'] });
+      expect(res.statusCode).toBe(201);
+    });
+
+    it('a pratica stays saved when the mail server is unreachable', async () => {
+      // Same contract as Slack: the notification is a courtesy, never part of
+      // the transaction. Pointed at a port nothing listens on, so the send
+      // genuinely fails rather than being stubbed into failing.
+      const conSmtp = await buildApp(
+        loadConfig({
+          ...TEST_ENV,
+          PVPDASH_SMTP_HOST: '127.0.0.1',
+          PVPDASH_SMTP_PORT: '1',
+          PVPDASH_EMAIL_FROM: 'dashboard@test.it',
+          PVPDASH_EMAIL_TO: 'archivio@test.it',
+        }),
+        testDb(),
+      );
+      try {
+        const cookie = await loginAs(conSmtp.app, 'admin', 'AdminPass123!');
+        const res = await conSmtp.app.inject({
+          method: 'POST',
+          url: '/api/pratiche',
+          headers: { cookie },
+          payload: { ...NUOVA, ndg: ['SMTP-GIU'] },
+        });
+        expect(res.statusCode).toBe(201);
+        expect(res.json().pratica.ndg).toEqual(['SMTP-GIU']);
+      } finally {
+        conSmtp.cache?.stopPolling();
+        await conSmtp.app.close();
+      }
+    }, 30_000);
+  });
 });
