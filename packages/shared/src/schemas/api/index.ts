@@ -11,3 +11,4 @@ export * from './pratiche.js';
 export * from './cartaTemplate.js';
 export * from './cartaFirmatari.js';
 export * from './cartaAzienda.js';
+export * from './praticheRisposte.js';

@@ -81,5 +81,8 @@
     "consegnato": "Consegnato",
     "archiviato": "Archiviato / rientrato",
     "non_trovato": "Non trovato"
+  },
+  "risposte": {
+    "titolo": "Risposte ({{count}})"
   }
 }

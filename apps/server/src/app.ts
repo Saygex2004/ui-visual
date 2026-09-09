@@ -118,6 +118,7 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
             cc: config.PVPDASH_EMAIL_CC,
             replyTo: config.PVPDASH_EMAIL_REPLY_TO,
           },
+          inboundSecret: config.PVPDASH_INBOUND_SECRET,
         });
         registerRatingsModule(instance, { db });
         registerActivityModule(instance, { db });

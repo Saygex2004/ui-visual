@@ -50,6 +50,8 @@ describe('pratiche module (HTTP, over the emulator)', () => {
     // da un test verrebbero contati da quello dopo.
     const coda = await testDb().collection('mail').get();
     await Promise.all(coda.docs.map((d) => d.ref.delete()));
+    const risposte = await testDb().collection('pratiche_risposte').get();
+    await Promise.all(risposte.docs.map((d) => d.ref.delete()));
     ({ app, cache } = await buildApp(loadConfig(TEST_ENV), testDb()));
     adminCookie = await loginAs(app, 'admin', 'AdminPass123!');
   }, 30_000);
@@ -452,7 +454,9 @@ describe('pratiche module (HTTP, over the emulator)', () => {
         // Il Reply-To e' quello che rende la mail rispondibile: il mittente
         // viene riscritto da Brevo finche' il dominio non e' autenticato, e
         // una risposta a quell'indirizzo non arriverebbe a nessuno.
-        expect(doc.replyTo).toBe('testoleposta@gmail.com');
+        // Porta l'id della pratica nell'indirizzo: e' cosi' che una risposta
+        // torna alla pratica giusta senza indovinare dall'oggetto.
+        expect(doc.replyTo).toBe(`testoleposta+${res.json().pratica.id}@gmail.com`);
         expect(doc.message.subject).toContain('IMPRESA ZANELLATI SRL');
         expect(doc.message.text).toContain('Intestatario: IMPRESA ZANELLATI SRL');
         expect(doc.message.text).toContain(
@@ -487,6 +491,140 @@ describe('pratiche module (HTTP, over the emulator)', () => {
       } finally {
         c?.stopPolling();
         await conMail.close();
+      }
+    }, 30_000);
+  });
+
+  // ── Ricezione delle risposte dalla casella ──
+  describe('risposte alla richiesta', () => {
+    const SEGRETO = 'z'.repeat(32);
+
+    async function conRicezione() {
+      return buildApp(loadConfig({ ...TEST_ENV, PVPDASH_INBOUND_SECRET: SEGRETO }), testDb());
+    }
+
+    function risposta(praticaId: string, over: Record<string, unknown> = {}) {
+      return {
+        pratica_id: praticaId,
+        da: 'Eugenia Rossi <eugenia@archivio.test>',
+        oggetto: 'Re: Richiesta fascicolo cartaceo',
+        testo: 'Ricevuto, spediamo domani.',
+        ricevuta_il: '2026-09-09T15:00:00.000Z',
+        message_id: '<abc@archivio.test>',
+        ...over,
+      };
+    }
+
+    it("l'endpoint non esiste finche' non e' configurato un segreto", async () => {
+      // Una rotta pubblica che accetta scritture non deve stare in piedi
+      // senza protezione: meglio 404 che una porta aperta.
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/pratiche/inbound',
+        payload: risposta('qualsiasi'),
+      });
+      expect(res.statusCode).toBe(404);
+    });
+
+    it('rifiuta senza segreto, con segreto sbagliato, e accetta con quello giusto', async () => {
+      const { app: conIn, cache: c } = await conRicezione();
+      try {
+        const cookie = await loginAs(conIn, 'admin', 'AdminPass123!');
+        const creata = await conIn.inject({
+          method: 'POST',
+          url: '/api/pratiche',
+          headers: { cookie },
+          payload: { ...NUOVA, ndg: ['CON-RISPOSTA'] },
+        });
+        const id = creata.json().pratica.id;
+
+        const senza = await conIn.inject({
+          method: 'POST',
+          url: '/api/pratiche/inbound',
+          payload: risposta(id),
+        });
+        expect(senza.statusCode).toBe(401);
+
+        const sbagliato = await conIn.inject({
+          method: 'POST',
+          url: '/api/pratiche/inbound',
+          headers: { 'x-inbound-secret': 'y'.repeat(32) },
+          payload: risposta(id),
+        });
+        expect(sbagliato.statusCode).toBe(401);
+
+        const giusto = await conIn.inject({
+          method: 'POST',
+          url: '/api/pratiche/inbound',
+          headers: { 'x-inbound-secret': SEGRETO },
+          payload: risposta(id),
+        });
+        expect(giusto.statusCode).toBe(201);
+
+        // …e la risposta si legge dalla pratica.
+        const lette = await conIn.inject({
+          method: 'GET',
+          url: `/api/pratiche/${id}/risposte`,
+          headers: { cookie },
+        });
+        expect(lette.json().risposte).toHaveLength(1);
+        expect(lette.json().risposte[0].testo).toBe('Ricevuto, spediamo domani.');
+      } finally {
+        c?.stopPolling();
+        await conIn.close();
+      }
+    }, 30_000);
+
+    it('lo stesso messaggio due volte non compare due volte', async () => {
+      // Lo script puo' ripassare sullo stesso messaggio: a un riavvio, o se
+      // una chiamata va a vuoto dopo essere stata elaborata.
+      const { app: conIn, cache: c } = await conRicezione();
+      try {
+        const cookie = await loginAs(conIn, 'admin', 'AdminPass123!');
+        const creata = await conIn.inject({
+          method: 'POST',
+          url: '/api/pratiche',
+          headers: { cookie },
+          payload: { ...NUOVA, ndg: ['DOPPIONE'] },
+        });
+        const id = creata.json().pratica.id;
+        const invia = () =>
+          conIn.inject({
+            method: 'POST',
+            url: '/api/pratiche/inbound',
+            headers: { 'x-inbound-secret': SEGRETO },
+            payload: risposta(id, { message_id: '<stesso@archivio.test>' }),
+          });
+        expect((await invia()).statusCode).toBe(201);
+        expect((await invia()).statusCode).toBe(200); // gia' nota
+
+        const lette = await conIn.inject({
+          method: 'GET',
+          url: `/api/pratiche/${id}/risposte`,
+          headers: { cookie },
+        });
+        expect(lette.json().risposte).toHaveLength(1);
+      } finally {
+        c?.stopPolling();
+        await conIn.close();
+      }
+    }, 30_000);
+
+    it('rifiuta una risposta per una pratica che non esiste', async () => {
+      // Altrimenti creerebbe righe che non compaiono da nessuna parte, e
+      // nessuno se ne accorgerebbe.
+      const { app: conIn, cache: c } = await conRicezione();
+      try {
+        const res = await conIn.inject({
+          method: 'POST',
+          url: '/api/pratiche/inbound',
+          headers: { 'x-inbound-secret': SEGRETO },
+          payload: risposta('pratica-inesistente'),
+        });
+        expect(res.statusCode).toBe(404);
+      } finally {
+        c?.stopPolling();
+        await conIn.close();
       }
     }, 30_000);
   });

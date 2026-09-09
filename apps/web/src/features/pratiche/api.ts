@@ -6,6 +6,7 @@ import type {
   CreatePraticaResponse,
   UpdatePraticaRequest,
   UpdatePraticaResponse,
+  RispostePraticaResponse,
 } from '@pvp/shared';
 
 export function fetchPratiche(): Promise<PraticheListResponse> {
@@ -25,4 +26,8 @@ export function updatePratica(
 
 export function deletePratica(id: string): Promise<void> {
   return api.delete<void>(`/pratiche/${id}`);
+}
+
+export function fetchRisposte(id: string): Promise<RispostePraticaResponse> {
+  return api.get<RispostePraticaResponse>(`/pratiche/${id}/risposte`);
 }

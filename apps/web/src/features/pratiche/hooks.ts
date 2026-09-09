@@ -36,3 +36,16 @@ export function useDeletePratica() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: praticheQueryKey }),
   });
 }
+
+export const risposteQueryKey = (id: string) => ['pratiche', id, 'risposte'] as const;
+
+/** Le risposte di una pratica, chieste solo quando la finestra e' aperta:
+ *  sono un dettaglio, e caricarle per l'intero registro sarebbe una lettura
+ *  per pratica a ogni apertura dell'elenco. */
+export function useRispostePratica(id: string | undefined) {
+  return useQuery({
+    queryKey: risposteQueryKey(id ?? ''),
+    queryFn: () => praticheApi.fetchRisposte(id!),
+    enabled: Boolean(id),
+  });
+}

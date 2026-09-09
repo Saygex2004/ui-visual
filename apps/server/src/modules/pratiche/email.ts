@@ -125,6 +125,25 @@ export function buildRichiesta(pratica: Pratica): Messaggio {
   return { subject, text, html };
 }
 
+/** Inserisce l'id della pratica nell'indirizzo di risposta, con la notazione
+ *  `+` che Gmail (e la maggior parte dei server) consegna alla stessa casella:
+ *  `posta@gmail.com` -> `posta+VonnyY4jr@gmail.com`.
+ *
+ *  Serve a sapere con CERTEZZA a quale pratica appartiene una risposta. Le
+ *  alternative sono peggiori: l'oggetto lo riscrive chi risponde, e gli header
+ *  di conversazione qualche programma di posta li altera o li perde.
+ *
+ *  Un indirizzo che ha gia' un `+` viene lasciato stare: aggiungerne un
+ *  secondo produrrebbe un indirizzo che non esiste. */
+export function replyToPerPratica(indirizzo: string, praticaId: string): string {
+  const chiocciola = indirizzo.lastIndexOf('@');
+  if (chiocciola <= 0) return indirizzo;
+  const locale = indirizzo.slice(0, chiocciola);
+  const dominio = indirizzo.slice(chiocciola + 1);
+  if (locale.includes('+')) return indirizzo;
+  return `${locale}+${praticaId}@${dominio}`;
+}
+
 interface Logger {
   warn: (obj: unknown, msg?: string) => void;
 }
@@ -146,7 +165,7 @@ export async function sendCreationEmail(
     await db.collection(MAIL_COLLECTION).add({
       to: [config.to],
       ...(config.cc ? { cc: [config.cc] } : {}),
-      ...(config.replyTo ? { replyTo: config.replyTo } : {}),
+      ...(config.replyTo ? { replyTo: replyToPerPratica(config.replyTo, pratica.id) } : {}),
       message: { subject, text, html },
       // Non letto dall'estensione: serve a ritrovare, dato un documento in
       // coda, la pratica che lo ha generato.

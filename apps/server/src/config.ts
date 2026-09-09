@@ -67,6 +67,10 @@ const ConfigSchema = z.object({
   /** Dove tornano le risposte. Necessario perche' il mittente non e' un
    *  indirizzo utile finche' il dominio non e' autenticato su Brevo. */
   PVPDASH_EMAIL_REPLY_TO: vuotoComeAssente(z.string().email()),
+  /** Segreto condiviso con lo script che raccoglie le risposte dalla casella.
+   *  Assente = l'endpoint di ricezione non esiste (404): una rotta pubblica
+   *  che accetta scritture non deve stare in piedi senza protezione. */
+  PVPDASH_INBOUND_SECRET: vuotoComeAssente(z.string().min(24)),
 
   PVPDASH_LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])

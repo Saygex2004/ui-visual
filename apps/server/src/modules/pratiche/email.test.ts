@@ -2,7 +2,7 @@
 // che Eugenia leggerà è verificabile senza rete né code.
 import { describe, expect, it } from 'vitest';
 import type { Pratica } from '@pvp/shared';
-import { buildRichiesta } from './email.js';
+import { buildRichiesta, replyToPerPratica } from './email.js';
 
 function pratica(over: Partial<Pratica> = {}): Pratica {
   return {
@@ -88,5 +88,28 @@ describe('buildRichiesta', () => {
     expect(m.html).not.toContain('<srl>');
     expect(m.html).toContain('Rossi &amp; C. &lt;srl&gt;');
     expect(m.text).toContain('Rossi & C. <srl>'); // il testo semplice resta tale
+  });
+});
+
+describe('replyToPerPratica', () => {
+  it('inserisce l’id della pratica con la notazione +', () => {
+    expect(replyToPerPratica('testoleposta@gmail.com', 'VonnyY4jr')).toBe(
+      'testoleposta+VonnyY4jr@gmail.com',
+    );
+  });
+
+  it('lascia stare un indirizzo che ha già un +', () => {
+    // Aggiungerne un secondo produrrebbe un indirizzo che non esiste.
+    expect(replyToPerPratica('posta+altro@gmail.com', 'X')).toBe('posta+altro@gmail.com');
+  });
+
+  it('non tocca una stringa che non è un indirizzo', () => {
+    expect(replyToPerPratica('senza-chiocciola', 'X')).toBe('senza-chiocciola');
+  });
+
+  it('usa l’ultima chiocciola, non la prima', () => {
+    // Un local part può contenere una chiocciola fra virgolette; spezzare
+    // sulla prima produrrebbe un dominio sbagliato.
+    expect(replyToPerPratica('"a@b"@esempio.it', 'X')).toBe('"a@b"+X@esempio.it');
   });
 });

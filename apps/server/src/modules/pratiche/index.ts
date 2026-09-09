@@ -7,8 +7,12 @@
 // this is where it is actually enforced.
 import type { Firestore } from 'firebase-admin/firestore';
 import type { FastifyInstance } from 'fastify';
-import { CreatePraticaRequestSchema, UpdatePraticaRequestSchema } from '@pvp/shared';
-import { praticheRepo, usersRepo } from '../../repositories/index.js';
+import {
+  CreatePraticaRequestSchema,
+  InboundRispostaRequestSchema,
+  UpdatePraticaRequestSchema,
+} from '@pvp/shared';
+import { praticheRepo, praticheRisposteRepo, usersRepo } from '../../repositories/index.js';
 import { ApiError } from '../../plugins/errorEnvelope.js';
 import { notify, type SlackConfig } from './slack.js';
 import { sendCreationEmail, type EmailConfig } from './email.js';
@@ -20,10 +24,15 @@ export interface PraticheModuleDeps {
   /** Absent or unconfigured = no email, which is what development, the
    *  emulator and every test want. */
   email?: EmailConfig;
+  /** Segreto condiviso con lo script che raccoglie le risposte dalla casella.
+   *  Assente = l'endpoint di ricezione risponde 404, come se non esistesse:
+   *  una rotta pubblica che accetta scritture non deve esistere finche' non e'
+   *  protetta. */
+  inboundSecret?: string;
 }
 
 export function registerPraticheModule(app: FastifyInstance, deps: PraticheModuleDeps): void {
-  const { db, slack = {}, email = {} } = deps;
+  const { db, slack = {}, email = {}, inboundSecret } = deps;
   // Gated on the VIEW, not on the role: an administrator may now grant
   // "Pratiche cartacee" to a normal account, and the grant has to actually
   // mean something. Admins still pass — `hasVista` lets them through.
@@ -120,4 +129,49 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
     if (!removed) throw new ApiError(404, 'errors.common.notFound');
     return reply.code(204).send();
   });
+
+  app.get<{ Params: { id: string } }>('/pratiche/:id/risposte', richiedeVista, async (req) => ({
+    risposte: await praticheRisposteRepo.listByPratica(db, req.params.id),
+  }));
+
+  // ── Ricezione delle risposte ──
+  //
+  // Pubblica per necessita': la chiama uno script esterno, che non ha una
+  // sessione. Il segreto viaggia in un'intestazione e non nell'URL, perche'
+  // gli URL finiscono nei log di accesso e nelle cronologie.
+  //
+  // Confronto a lunghezza costante: un confronto normale esce al primo byte
+  // diverso, e il tempo che ci mette dice quanti byte erano giusti.
+  app.post('/pratiche/inbound', { config: { auth: { public: true } } }, async (req, reply) => {
+    if (!inboundSecret) throw new ApiError(404, 'errors.common.notFound');
+    const fornito = req.headers['x-inbound-secret'];
+    if (typeof fornito !== 'string' || !timingSafeEqual(fornito, inboundSecret)) {
+      throw new ApiError(401, 'errors.auth.unauthenticated');
+    }
+
+    const body = InboundRispostaRequestSchema.safeParse(req.body);
+    if (!body.success) throw new ApiError(400, 'errors.common.validation');
+
+    // La pratica deve esistere: senza questo controllo un id sbagliato
+    // creerebbe risposte che non compaiono da nessuna parte, e nessuno se ne
+    // accorgerebbe.
+    const pratica = await praticheRepo.getById(db, body.data.pratica_id);
+    if (!pratica) throw new ApiError(404, 'errors.common.notFound');
+
+    const { nuova } = await praticheRisposteRepo.create(db, body.data);
+    reply.code(nuova ? 201 : 200);
+    return { registrata: nuova };
+  });
+}
+
+/** Confronto che non rivela quanti caratteri iniziali erano corretti.
+ *
+ *  `a === b` esce al primo byte diverso, e la differenza di tempo fra "sbagliato
+ *  al primo carattere" e "sbagliato all'ultimo" e' misurabile: ripetendo le
+ *  richieste si ricostruisce il segreto un carattere alla volta. */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
 }

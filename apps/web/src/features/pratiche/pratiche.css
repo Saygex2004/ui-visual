@@ -381,3 +381,58 @@
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
+
+/* ---- risposte alla richiesta ---- */
+
+.pratiche-risposte {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.pratiche-risposte-lista {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pratiche-risposta {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+}
+
+.pratiche-risposta-testa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.pratiche-risposta-da {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.pratiche-risposta-oggetto {
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* pre-wrap, non <br>: il testo arriva dall'esterno e va reso come testo,
+   conservando gli a capo senza interpretare nulla. */
+.pratiche-risposta-testo {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

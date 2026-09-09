@@ -104,6 +104,10 @@ deploy_server() {
   #   in-process snapshot cache's correctness setting (SPECIFICATIONS.md §8).
   local secrets="PVPDASH_SESSION_SECRET=PVPDASH_SESSION_SECRET:latest"
   secrets="${secrets},PVPDASH_SLACK_WEBHOOK_URL=PVPDASH_SLACK_WEBHOOK_URL:latest"
+  # Segreto dell'endpoint che riceve le risposte dalla casella di posta.
+  # Senza, quella rotta risponde 404: una rotta pubblica che accetta scritture
+  # non deve stare in piedi senza protezione.
+  secrets="${secrets},PVPDASH_INBOUND_SECRET=PVPDASH_INBOUND_SECRET:latest"
   if [ "${WITH_BOOTSTRAP}" = "1" ]; then
     secrets="${secrets},PVPDASH_BOOTSTRAP_ADMIN_PASSWORD=PVPDASH_BOOTSTRAP_ADMIN_PASSWORD:latest"
   fi

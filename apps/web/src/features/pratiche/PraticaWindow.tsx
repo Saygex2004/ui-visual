@@ -21,7 +21,7 @@ import { StatusDisplay } from '../../components/StatusDisplay.js';
 import { translateApiError } from '../../lib/translateApiError.js';
 import { formatDate, formatTimestamp } from '../dashboard/DataTable/formatting.js';
 import { PraticaForm } from './PraticaForm.js';
-import { useDeletePratica, useUpdatePratica } from './hooks.js';
+import { useDeletePratica, useUpdatePratica, useRispostePratica } from './hooks.js';
 import { formatEuro, inRitardo, ndgTesto } from './praticheData.js';
 
 export interface PraticaWindowProps {
@@ -30,6 +30,37 @@ export interface PraticaWindowProps {
   portafogliNoti: string[];
   nomeUtente: (id: string | null) => string;
   onClose: () => void;
+}
+
+/** Le risposte arrivate alla richiesta di fascicolo.
+ *
+ *  Il corpo e' reso come TESTO, con `white-space: pre-wrap` per conservare gli
+ *  a capo: quel contenuto arriva dall'esterno, scritto da chiunque risponda
+ *  alla mail, e non deve poter iniettare markup nella dashboard. */
+function Risposte({ praticaId }: { praticaId: string }) {
+  const { t } = useTranslation('pratiche');
+  const { data, isLoading } = useRispostePratica(praticaId);
+  const risposte = data?.risposte ?? [];
+
+  if (isLoading || risposte.length === 0) return null;
+
+  return (
+    <section className="pratiche-risposte">
+      <h3 className="ui-micro-label">{t('risposte.titolo', { count: risposte.length })}</h3>
+      <ol className="pratiche-risposte-lista">
+        {risposte.map((r) => (
+          <li key={r.id} className="pratiche-risposta">
+            <div className="pratiche-risposta-testa">
+              <span className="pratiche-risposta-da">{r.da}</span>
+              <time dateTime={r.ricevuta_il}>{formatTimestamp(r.ricevuta_il)}</time>
+            </div>
+            {r.oggetto ? <div className="pratiche-risposta-oggetto">{r.oggetto}</div> : null}
+            <p className="pratiche-risposta-testo">{r.testo}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
 }
 
 function Riga({ label, value }: { label: string; value: string }) {
@@ -147,6 +178,8 @@ export function PraticaWindow({
                   />
                   <Riga label={t('fields.note')} value={show(pratica.note)} />
                 </dl>
+
+                <Risposte praticaId={pratica.id} />
 
                 <dl className="pratiche-window-list">
                   <div className="pratiche-window-row">
