@@ -114,14 +114,8 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
             baseUrl: config.PVPDASH_PUBLIC_BASE_URL,
           },
           email: {
-            host: config.PVPDASH_SMTP_HOST,
-            port: config.PVPDASH_SMTP_PORT,
-            user: config.PVPDASH_SMTP_USER,
-            password: config.PVPDASH_SMTP_PASSWORD,
-            secure: config.PVPDASH_SMTP_SECURE,
-            from: config.PVPDASH_EMAIL_FROM,
             to: config.PVPDASH_EMAIL_TO,
-            baseUrl: config.PVPDASH_PUBLIC_BASE_URL,
+            cc: config.PVPDASH_EMAIL_CC,
           },
         });
         registerRatingsModule(instance, { db });

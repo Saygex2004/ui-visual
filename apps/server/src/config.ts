@@ -52,42 +52,18 @@ const ConfigSchema = z.object({
   // Absent = the message carries no link, rather than a broken relative one.
   PVPDASH_PUBLIC_BASE_URL: z.string().url().optional(),
 
-  // Email notification for a NEWLY CREATED pratica, sent over plain SMTP.
+  // Richiesta del fascicolo all'archivio, alla creazione di una pratica.
+  // Il server non parla SMTP: accoda un documento nella collezione `mail` e
+  // l'estensione firestore-send-email lo consegna. Qui restano quindi solo i
+  // destinatari — host, porta e credenziali sono configurazione
+  // dell'estensione, non nostra.
   //
-  // SMTP rather than one provider's HTTP API on purpose: it works with the
-  // mailbox the company already has (Aruba, Register.it, Workspace) and
-  // equally with Resend or Brevo, so this choice does not become a lock-in
-  // that has to be undone later.
-  //
-  // All optional, and the sender decides: with no host, no recipient or no
-  // sender address, the feature is simply off — which is what local
-  // development, the emulator and every test want, and what production wants
-  // too until the credentials exist.
-  //
-  // Empty is treated as absent throughout, and that is not cosmetic:
-  // `gcloud run deploy --set-env-vars FOO=` sets FOO to the EMPTY STRING, not
-  // to nothing. Without this, deploying an installation that has no mailbox
-  // would hand the schema "" for a required-if-present field and the server
-  // would refuse to start — a mail setting taking the whole service down.
-  PVPDASH_SMTP_HOST: vuotoComeAssente(z.string().min(1)),
-  PVPDASH_SMTP_PORT: vuotoComeAssente(z.coerce.number().int().positive()).transform(
-    (v) => v ?? 587,
-  ),
-  PVPDASH_SMTP_USER: vuotoComeAssente(z.string().min(1)),
-  PVPDASH_SMTP_PASSWORD: vuotoComeAssente(z.string().min(1)),
-  /** 465 is implicit TLS; 587 and 25 start plain and upgrade with STARTTLS.
-   *  Derived from the port rather than configured, because getting the two
-   *  out of step is the classic way an SMTP setup fails with an unhelpful
-   *  error — overridable for the rare server that disagrees. */
-  PVPDASH_SMTP_SECURE: z
-    .enum(['0', '1'])
-    .optional()
-    .transform((v) => (v === undefined ? undefined : v === '1')),
-  /** The From: address. Must be one the SMTP account is allowed to send as,
-   *  or the server will refuse it. */
-  PVPDASH_EMAIL_FROM: vuotoComeAssente(z.string().email()),
-  /** Where the notification goes. One fixed address. */
+  // Vuoto significa assente, e non e' cosmetica: `--set-env-vars FOO=` scrive
+  // la stringa VUOTA, non il nulla. Lo script di deploy le passa sempre, e
+  // senza questo un'installazione senza destinatario passerebbe "" a un campo
+  // valido-se-presente e il server rifiuterebbe di avviarsi.
   PVPDASH_EMAIL_TO: vuotoComeAssente(z.string().email()),
+  PVPDASH_EMAIL_CC: vuotoComeAssente(z.string().email()),
 
   PVPDASH_LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])

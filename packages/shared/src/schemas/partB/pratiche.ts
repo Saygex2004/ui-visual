@@ -88,6 +88,9 @@ const CampiPratica = z.object({
   /** The case-file reference, e.g. "163354". A string, not a number: these
    *  are identifiers, and leading zeros in them are meaningful. */
   numero_pratica: requiredText,
+  /** Chi è intestata la posizione — "IMPRESA ZANELLATI SRL". Va nella
+   *  richiesta all'archivio, che cerca per nome oltre che per NDG. */
+  intestatario: optionalText,
   /** The portfolio the case belongs to, e.g. "Augusto", "Diocleziano". Free
    *  text rather than an enum — new portfolios appear, and a closed list would
    *  block data entry the day one does. */
@@ -140,6 +143,7 @@ const CampiPratica = z.object({
  *  starts at `richiesto` because a record exists precisely because someone
  *  asked for the file, which is that state. */
 export const PraticaInputSchema = CampiPratica.extend({
+  intestatario: optionalText.default(null),
   portafoglio: optionalText.default(null),
   stato: StatoPraticaSchema.default('richiesto'),
   n_scatole: optionalText.default(null),

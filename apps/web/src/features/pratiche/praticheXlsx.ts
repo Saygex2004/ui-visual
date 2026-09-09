@@ -96,6 +96,7 @@ function cellXml(ref: string, cell: Cell): string {
 export const XLSX_HEADERS = [
   'NDG',
   'Numero pratica',
+  'Intestatario',
   'Portafoglio',
   'Stato',
   'N. scatole',
@@ -111,7 +112,7 @@ export const XLSX_HEADERS = [
 
 /** Column widths in Excel's character units — set once here so the file opens
  *  readable instead of showing ### where a date should be. */
-const WIDTHS = [18, 16, 16, 14, 12, 14, 14, 16, 16, 16, 40, 16, 18];
+const WIDTHS = [18, 16, 30, 16, 14, 12, 14, 14, 16, 16, 16, 40, 16, 18];
 
 function rowCells(
   p: Pratica,
@@ -121,6 +122,7 @@ function rowCells(
   return [
     testo(ndgTesto(p.ndg)),
     testo(p.numero_pratica),
+    testo(p.intestatario),
     testo(p.portafoglio),
     testo(statoLabel(p.stato)),
     testo(p.n_scatole),

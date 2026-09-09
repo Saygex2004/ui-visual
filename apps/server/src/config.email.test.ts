@@ -1,5 +1,5 @@
-// The email settings, and the one deployment detail that would take the whole
-// service down if it were got wrong.
+// I destinatari della richiesta all'archivio, e il dettaglio di distribuzione
+// che manderebbe giù il servizio se fosse sbagliato.
 import { describe, expect, it } from 'vitest';
 import { loadConfig } from './config.js';
 
@@ -8,45 +8,31 @@ const MINIMO = {
   PVPDASH_SESSION_SECRET: 'x'.repeat(32),
 } satisfies NodeJS.ProcessEnv;
 
-describe('impostazioni della posta', () => {
-  it('treats an EMPTY value as absent, not as malformed', () => {
-    // `gcloud run deploy --set-env-vars FOO=` sets FOO to the empty string.
-    // The deploy script writes these unconditionally, so an installation with
-    // no mailbox sends "" for every one of them — and if that were rejected,
-    // a mail setting would stop the server from starting at all.
+describe('destinatari della richiesta fascicolo', () => {
+  it('legge destinatario e copia', () => {
     const c = loadConfig({
       ...MINIMO,
-      PVPDASH_SMTP_HOST: '',
-      PVPDASH_SMTP_PORT: '',
-      PVPDASH_SMTP_USER: '',
-      PVPDASH_SMTP_PASSWORD: '',
-      PVPDASH_EMAIL_FROM: '',
-      PVPDASH_EMAIL_TO: '',
+      PVPDASH_EMAIL_TO: 'oleksandr@duepuntozero.net',
+      PVPDASH_EMAIL_CC: 'alessia@duepuntozero.net',
     });
-    expect(c.PVPDASH_SMTP_HOST).toBeUndefined();
+    expect(c.PVPDASH_EMAIL_TO).toBe('oleksandr@duepuntozero.net');
+    expect(c.PVPDASH_EMAIL_CC).toBe('alessia@duepuntozero.net');
+  });
+
+  it('tratta il VUOTO come assente, non come malformato', () => {
+    // `gcloud run deploy --set-env-vars FOO=` scrive la stringa vuota. Lo
+    // script di deploy le passa sempre, quindi senza questo un'installazione
+    // senza destinatario passerebbe "" a un campo valido-se-presente e il
+    // server rifiuterebbe di avviarsi: un'impostazione di posta che manda giù
+    // l'intero servizio.
+    const c = loadConfig({ ...MINIMO, PVPDASH_EMAIL_TO: '', PVPDASH_EMAIL_CC: '' });
     expect(c.PVPDASH_EMAIL_TO).toBeUndefined();
-    expect(c.PVPDASH_SMTP_PORT).toBe(587); // the documented default survives
+    expect(c.PVPDASH_EMAIL_CC).toBeUndefined();
   });
 
-  it('reads a full configuration', () => {
-    const c = loadConfig({
-      ...MINIMO,
-      PVPDASH_SMTP_HOST: 'smtps.aruba.it',
-      PVPDASH_SMTP_PORT: '465',
-      PVPDASH_SMTP_USER: 'dashboard@azienda.it',
-      PVPDASH_SMTP_PASSWORD: 'segreta',
-      PVPDASH_EMAIL_FROM: 'dashboard@azienda.it',
-      PVPDASH_EMAIL_TO: 'archivio@azienda.it',
-    });
-    expect(c.PVPDASH_SMTP_HOST).toBe('smtps.aruba.it');
-    expect(c.PVPDASH_SMTP_PORT).toBe(465);
-    expect(c.PVPDASH_EMAIL_TO).toBe('archivio@azienda.it');
-  });
-
-  it('still refuses a value that is present but wrong', () => {
-    // Empty means "off"; a typo means a typo, and must be said out loud
-    // rather than quietly switching the notification off.
+  it('rifiuta comunque un indirizzo presente ma sbagliato', () => {
+    // Vuoto significa "spento"; un refuso è un refuso, e va detto ad alta voce
+    // invece di spegnere le notifiche in silenzio.
     expect(() => loadConfig({ ...MINIMO, PVPDASH_EMAIL_TO: 'non-una-mail' })).toThrow();
-    expect(() => loadConfig({ ...MINIMO, PVPDASH_SMTP_PORT: 'abc' })).toThrow();
   });
 });

@@ -38,6 +38,7 @@ export function PraticaForm({
   // an empty row is a row waiting to be filled, not an invalid value.
   const [ndg, setNdg] = useState<string[]>(initial?.ndg ?? ['']);
   const [numeroPratica, setNumeroPratica] = useState(initial?.numero_pratica ?? '');
+  const [intestatario, setIntestatario] = useState(initial?.intestatario ?? '');
   const [portafoglio, setPortafoglio] = useState(initial?.portafoglio ?? '');
   const [stato, setStato] = useState<StatoPratica>(initial?.stato ?? 'richiesto');
   const [scatole, setScatole] = useState(initial?.n_scatole ?? '');
@@ -62,6 +63,7 @@ export function PraticaForm({
       // filling, not a mistake worth an error message.
       ndg: [...new Set(ndg.map((v) => v.trim()).filter((v) => v !== ''))],
       numero_pratica: numeroPratica.trim(),
+      intestatario: intestatario.trim() || null,
       portafoglio: portafoglio.trim() || null,
       stato,
       n_scatole: scatole.trim() || null,
@@ -126,6 +128,13 @@ export function PraticaForm({
             required
             value={numeroPratica}
             onChange={(e) => setNumeroPratica(e.target.value)}
+          />
+        </Field>
+        <Field label={t('fields.intestatario')} htmlFor="pratica-intestatario">
+          <TextInput
+            id="pratica-intestatario"
+            value={intestatario}
+            onChange={(e) => setIntestatario(e.target.value)}
           />
         </Field>
         <Field label={t('fields.portafoglio')} htmlFor="pratica-portafoglio">

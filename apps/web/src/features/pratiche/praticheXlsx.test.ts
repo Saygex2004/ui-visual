@@ -7,11 +7,16 @@ import { unzipSync, strFromU8 } from 'fflate';
 import type { Pratica } from '@pvp/shared';
 import { XLSX_HEADERS, praticheToXlsx, xlsxFilename } from './praticheXlsx.js';
 
+/** Ultima colonna del foglio, in notazione Excel, ricavata dal numero di
+ *  intestazioni: A, B, … Z. */
+const ULTIMA_COLONNA = String.fromCharCode(64 + XLSX_HEADERS.length);
+
 function pratica(over: Partial<Pratica> = {}): Pratica {
   return {
     id: 'p1',
     ndg: ['900123'],
     numero_pratica: '163354',
+    intestatario: null,
     portafoglio: 'Augusto',
     stato: 'spedito',
     n_scatole: '3, 7',
@@ -69,7 +74,9 @@ describe('praticheToXlsx — package shape', () => {
   it('produces a valid workbook for an empty register', () => {
     const sheet = sheetOf([]);
     expect(sheet).toContain('<row r="1">'); // the header still exists
-    expect(sheet).toContain('A1:M1'); // autofilter over the header alone
+    // Derived from the header list rather than written as a letter: adding a
+    // column should not send someone hunting for "M" in a test file.
+    expect(sheet).toContain(`A1:${ULTIMA_COLONNA}1`); // autofilter over the header alone
   });
 });
 
@@ -159,7 +166,7 @@ describe('praticheToXlsx — rows', () => {
   });
 
   it('spans the autofilter over the header plus every row', () => {
-    expect(sheetOf([pratica(), pratica()])).toContain('ref="A1:M3"');
+    expect(sheetOf([pratica(), pratica()])).toContain(`ref="A1:${ULTIMA_COLONNA}3"`);
   });
 
   it('freezes the header row so it stays visible while scrolling', () => {

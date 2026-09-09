@@ -46,6 +46,10 @@ describe('pratiche module (HTTP, over the emulator)', () => {
 
   beforeEach(async () => {
     await reseed();
+    // `reseed` non conosce la coda `mail`: senza pulizia, i documenti lasciati
+    // da un test verrebbero contati da quello dopo.
+    const coda = await testDb().collection('mail').get();
+    await Promise.all(coda.docs.map((d) => d.ref.delete()));
     ({ app, cache } = await buildApp(loadConfig(TEST_ENV), testDb()));
     adminCookie = await loginAs(app, 'admin', 'AdminPass123!');
   }, 30_000);
@@ -398,42 +402,86 @@ describe('pratiche module (HTTP, over the emulator)', () => {
     });
   });
 
-  // ── La mail alla creazione ──
-  describe('notifica per email', () => {
-    it('does not send when SMTP is not configured, and creates the pratica anyway', async () => {
-      // The whole suite runs without SMTP settings: absence is "off", not an
-      // error, and the register must work exactly as before.
-      const res = await create({ ...NUOVA, ndg: ['SENZA-SMTP'] });
-      expect(res.statusCode).toBe(201);
-    });
-
-    it('a pratica stays saved when the mail server is unreachable', async () => {
-      // Same contract as Slack: the notification is a courtesy, never part of
-      // the transaction. Pointed at a port nothing listens on, so the send
-      // genuinely fails rather than being stubbed into failing.
-      const conSmtp = await buildApp(
+  // ── La richiesta all'archivio, accodata alla creazione ──
+  describe('richiesta fascicolo per email', () => {
+    async function conDestinatario() {
+      return buildApp(
         loadConfig({
           ...TEST_ENV,
-          PVPDASH_SMTP_HOST: '127.0.0.1',
-          PVPDASH_SMTP_PORT: '1',
-          PVPDASH_EMAIL_FROM: 'dashboard@test.it',
-          PVPDASH_EMAIL_TO: 'archivio@test.it',
+          PVPDASH_EMAIL_TO: 'oleksandr@duepuntozero.net',
+          PVPDASH_EMAIL_CC: 'alessia@duepuntozero.net',
         }),
         testDb(),
       );
+    }
+
+    it("non accoda niente quando il destinatario non e' configurato", async () => {
+      // L'intera suite gira senza destinatario: assenza significa "spento",
+      // non errore, e il registro deve funzionare esattamente come prima.
+      const prima = (await testDb().collection('mail').get()).size;
+      expect((await create({ ...NUOVA, ndg: ['SENZA-MAIL'] })).statusCode).toBe(201);
+      expect((await testDb().collection('mail').get()).size).toBe(prima);
+    });
+
+    it('accoda una richiesta con destinatario, copia e testo', async () => {
+      const { app: conMail, cache: c } = await conDestinatario();
       try {
-        const cookie = await loginAs(conSmtp.app, 'admin', 'AdminPass123!');
-        const res = await conSmtp.app.inject({
+        const cookie = await loginAs(conMail, 'admin', 'AdminPass123!');
+        const res = await conMail.inject({
           method: 'POST',
           url: '/api/pratiche',
           headers: { cookie },
-          payload: { ...NUOVA, ndg: ['SMTP-GIU'] },
+          payload: {
+            ...NUOVA,
+            ndg: ['1439529'],
+            intestatario: 'IMPRESA ZANELLATI SRL',
+            portafoglio: 'Diocleziano',
+          },
         });
         expect(res.statusCode).toBe(201);
-        expect(res.json().pratica.ndg).toEqual(['SMTP-GIU']);
+
+        const coda = await testDb()
+          .collection('mail')
+          .where('pratica_id', '==', res.json().pratica.id)
+          .get();
+        expect(coda.size).toBe(1);
+        const doc = coda.docs[0]!.data();
+        expect(doc.to).toEqual(['oleksandr@duepuntozero.net']);
+        expect(doc.cc).toEqual(['alessia@duepuntozero.net']);
+        expect(doc.message.subject).toContain('IMPRESA ZANELLATI SRL');
+        expect(doc.message.text).toContain('Intestatario: IMPRESA ZANELLATI SRL');
+        expect(doc.message.text).toContain(
+          'Riferimento operazione: Cessione Diocleziano / DPZ NPL',
+        );
       } finally {
-        conSmtp.cache?.stopPolling();
-        await conSmtp.app.close();
+        c?.stopPolling();
+        await conMail.close();
+      }
+    }, 30_000);
+
+    it('un cambio di stato NON accoda una seconda richiesta', async () => {
+      // Solo alla creazione: i passaggi di stato restano su Slack.
+      const { app: conMail, cache: c } = await conDestinatario();
+      try {
+        const cookie = await loginAs(conMail, 'admin', 'AdminPass123!');
+        const creata = await conMail.inject({
+          method: 'POST',
+          url: '/api/pratiche',
+          headers: { cookie },
+          payload: { ...NUOVA, ndg: ['SOLO-CREAZIONE'] },
+        });
+        const id = creata.json().pratica.id;
+        await conMail.inject({
+          method: 'PATCH',
+          url: `/api/pratiche/${id}`,
+          headers: { cookie },
+          payload: { stato: 'spedito' },
+        });
+        const coda = await testDb().collection('mail').where('pratica_id', '==', id).get();
+        expect(coda.size).toBe(1);
+      } finally {
+        c?.stopPolling();
+        await conMail.close();
       }
     }, 30_000);
   });

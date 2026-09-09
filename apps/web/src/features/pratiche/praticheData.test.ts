@@ -16,6 +16,7 @@ function pratica(over: Partial<Pratica> = {}): Pratica {
     id: 'p1',
     ndg: ['900123'],
     numero_pratica: '163354',
+    intestatario: null,
     portafoglio: 'Augusto',
     stato: 'richiesto',
     n_scatole: '3',

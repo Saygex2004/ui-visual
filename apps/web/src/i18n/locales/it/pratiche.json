@@ -5,6 +5,7 @@
   "fields": {
     "ndg": "NDG",
     "numeroPratica": "Numero pratica",
+    "intestatario": "Intestatario",
     "portafoglio": "Portafoglio",
     "stato": "Stato",
     "scatole": "N. scatole",

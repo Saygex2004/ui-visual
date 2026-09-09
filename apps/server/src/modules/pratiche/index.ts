@@ -89,7 +89,7 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
       notify(slack, pratica, { kind: 'creata' }, req.log, mentions),
       // Creation only. State changes stay on Slack, where a stream of small
       // updates belongs; a mailbox getting ten a day stops being read.
-      sendCreationEmail(email, pratica, req.log),
+      sendCreationEmail(db, email, pratica, req.log),
     ]);
     reply.code(201);
     return { pratica };

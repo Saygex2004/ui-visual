@@ -35,19 +35,17 @@ SLACK_MENTION_ID="${PVPDASH_SLACK_MENTION_ID:-U07JR3ASBDJ}"
 # the same reason as the mention: --set-env-vars replaces the whole set, so a
 # forgotten value silently strips the link.
 PUBLIC_BASE_URL="${PVPDASH_PUBLIC_BASE_URL:-https://pvp-aste.web.app}"
-# Email notification for a newly created pratica, over plain SMTP. Everything
-# but the password is here rather than in Secret Manager: a hostname and two
-# addresses identify, they do not authorize.
+# Richiesta del fascicolo all'archivio, alla creazione di una pratica.
+# Il server non parla SMTP: accoda un documento nella collezione `mail` e
+# l'estensione firestore-send-email lo consegna. Host, porta e credenziali sono
+# quindi configurazione DELL'ESTENSIONE, non di questo servizio: qui restano
+# solo i destinatari.
 #
-# Empty by default, and empty means OFF — the server checks for a host, a
-# sender and a recipient and simply does not send without all three. So this
-# deploys safely before the mailbox exists, and switching it on later is a
-# matter of exporting these and re-running the deploy.
-SMTP_HOST="${PVPDASH_SMTP_HOST:-}"
-SMTP_PORT="${PVPDASH_SMTP_PORT:-587}"
-SMTP_USER="${PVPDASH_SMTP_USER:-}"
-EMAIL_FROM="${PVPDASH_EMAIL_FROM:-}"
-EMAIL_TO="${PVPDASH_EMAIL_TO:-}"
+# Con valori predefiniti per la stessa ragione della menzione Slack:
+# --set-env-vars sostituisce l'intero insieme, quindi una variabile dimenticata
+# spegnerebbe la notifica in silenzio.
+EMAIL_TO="${PVPDASH_EMAIL_TO:-oleksandr@duepuntozero.net}"
+EMAIL_CC="${PVPDASH_EMAIL_CC:-alessia@duepuntozero.net}"
 # The real default Storage bucket name — read it from the Firebase console
 # (e.g. pvp-aste.appspot.com or pvp-aste.firebasestorage.app). REQUIRED for
 # `server` so attachments resolve to the correct bucket rather than the
@@ -101,12 +99,6 @@ deploy_server() {
   #   in-process snapshot cache's correctness setting (SPECIFICATIONS.md §8).
   local secrets="PVPDASH_SESSION_SECRET=PVPDASH_SESSION_SECRET:latest"
   secrets="${secrets},PVPDASH_SLACK_WEBHOOK_URL=PVPDASH_SLACK_WEBHOOK_URL:latest"
-  # Only when an SMTP host is configured: naming a secret that does not exist
-  # makes the whole deploy fail, so an installation with no mailbox must not
-  # ask for one.
-  if [ -n "${SMTP_HOST}" ]; then
-    secrets="${secrets},PVPDASH_SMTP_PASSWORD=PVPDASH_SMTP_PASSWORD:latest"
-  fi
   if [ "${WITH_BOOTSTRAP}" = "1" ]; then
     secrets="${secrets},PVPDASH_BOOTSTRAP_ADMIN_PASSWORD=PVPDASH_BOOTSTRAP_ADMIN_PASSWORD:latest"
   fi
@@ -118,7 +110,7 @@ deploy_server() {
     --max-instances 1 \
     --min-instances "${MIN_INSTANCES}" \
     --allow-unauthenticated \
-    --set-env-vars "PVPDASH_ENV=production,PVPDASH_FIRESTORE_PROJECT_ID=${PROJECT},PVPDASH_STORAGE_BUCKET=${STORAGE_BUCKET},PVPDASH_SLACK_MENTION_ID=${SLACK_MENTION_ID},PVPDASH_PUBLIC_BASE_URL=${PUBLIC_BASE_URL},PVPDASH_SMTP_HOST=${SMTP_HOST},PVPDASH_SMTP_PORT=${SMTP_PORT},PVPDASH_SMTP_USER=${SMTP_USER},PVPDASH_EMAIL_FROM=${EMAIL_FROM},PVPDASH_EMAIL_TO=${EMAIL_TO}" \
+    --set-env-vars "PVPDASH_ENV=production,PVPDASH_FIRESTORE_PROJECT_ID=${PROJECT},PVPDASH_STORAGE_BUCKET=${STORAGE_BUCKET},PVPDASH_SLACK_MENTION_ID=${SLACK_MENTION_ID},PVPDASH_PUBLIC_BASE_URL=${PUBLIC_BASE_URL},PVPDASH_EMAIL_TO=${EMAIL_TO},PVPDASH_EMAIL_CC=${EMAIL_CC}" \
     --set-secrets "${secrets}"
   echo "→ Verify now: curl \$(gcloud run services describe ${SERVICE} --region ${REGION} --project ${PROJECT} --format='value(status.url)')/readyz  → 200"
   echo "→ After the production bootstrap (first admin created + password changed), remove the bootstrap secret:"

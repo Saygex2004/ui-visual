@@ -1,26 +1,27 @@
-// The creation email. `buildEmail` is pure, so what the mail server will
-// actually be handed is assertable without a network or a stub.
+// Il testo della richiesta all'archivio. `buildRichiesta` è puro, quindi ciò
+// che Eugenia leggerà è verificabile senza rete né code.
 import { describe, expect, it } from 'vitest';
 import type { Pratica } from '@pvp/shared';
-import { buildEmail, configurato } from './email.js';
+import { buildRichiesta } from './email.js';
 
 function pratica(over: Partial<Pratica> = {}): Pratica {
   return {
     id: 'p1',
-    ndg: ['229613-030529'],
+    ndg: ['1439529'],
     numero_pratica: '163354',
+    intestatario: 'IMPRESA ZANELLATI SRL',
     portafoglio: 'Diocleziano',
     stato: 'richiesto',
-    n_scatole: '3, 7',
+    n_scatole: null,
     note: null,
     ordinato_da: null,
     slack_tag_user_ids: [],
-    data_richiesta: '2026-09-08',
+    data_richiesta: null,
     data_spedizione: null,
-    data_consegna_prevista: '2026-09-15',
+    data_consegna_prevista: null,
     data_consegna_effettiva: null,
-    costo_spedizione_cent: 1250,
-    created_at: '2026-09-08T09:00:00.000Z',
+    costo_spedizione_cent: null,
+    created_at: '2026-09-09T09:00:00.000Z',
     created_by: 'u1',
     updated_at: null,
     updated_by: null,
@@ -28,68 +29,64 @@ function pratica(over: Partial<Pratica> = {}): Pratica {
   };
 }
 
-describe('configurato', () => {
-  it('is off until a host, a sender and a recipient all exist', () => {
-    // Absent configuration is "off", not an error: this ships before the
-    // credentials do, and development and the emulator never have them.
-    expect(configurato({})).toBe(false);
-    expect(configurato({ host: 'smtp.test' })).toBe(false);
-    expect(configurato({ host: 'smtp.test', from: 'a@test.it' })).toBe(false);
-    expect(configurato({ host: 'smtp.test', from: 'a@test.it', to: 'b@test.it' })).toBe(true);
-  });
-});
-
-describe('buildEmail', () => {
-  it('names every NDG in the subject, not just the first', () => {
-    // An order covering four positions must read as four: a subject line
-    // naming one of them is how the wrong file gets pulled.
-    const m = buildEmail(pratica({ ndg: ['900123', '111222', '333444'] }));
-    expect(m.subject).toBe('Nuova pratica cartacea — NDG 900123, 111222, 333444');
-  });
-
-  it('carries a plain-text part as well as HTML', () => {
-    // Not belt-and-braces: several spam filters score a missing text/plain
-    // alternative, and it is what a watch or a terminal client displays.
-    const m = buildEmail(pratica());
-    expect(m.text).toContain('Numero pratica: 163354');
-    expect(m.text).toContain('Costo spedizione: € 12,50');
-    expect(m.html).toContain('<table');
+describe('buildRichiesta', () => {
+  it('compone la richiesta concordata con l’archivio', () => {
+    const m = buildRichiesta(pratica());
+    expect(m.text).toBe(
+      [
+        'Ciao Eugenia,',
+        '',
+        'avremmo bisogno del fascicolo cartaceo relativo alla posizione in oggetto:',
+        '',
+        'Intestatario: IMPRESA ZANELLATI SRL',
+        'NDG: 1439529',
+        'Riferimento operazione: Cessione Diocleziano / DPZ NPL',
+        '',
+        'Vi chiediamo di organizzare la spedizione presso i nostri uffici il prima possibile, applicando la tariffa ordinaria di € 12,50 a nostro carico.',
+        '',
+        'Restiamo in attesa di un vostro riscontro.',
+        '',
+        'Grazie mille,',
+      ].join('\n'),
+    );
   });
 
-  it('writes dates and money the way the rest of the product does', () => {
-    const m = buildEmail(pratica());
-    expect(m.text).toContain('Richiesta il: 08/09/2026'); // not the ISO form
-    expect(m.text).toContain('Consegna prevista: 15/09/2026');
-    expect(m.text).toContain('€ 12,50'); // comma, two digits
+  it('nomina la posizione nell’oggetto, perché il corpo ci rimanda', () => {
+    // Il testo dice "la posizione in oggetto": deve esserci davvero qualcosa
+    // a cui quel rimando punti.
+    expect(buildRichiesta(pratica()).subject).toBe(
+      'Richiesta fascicolo cartaceo — IMPRESA ZANELLATI SRL (NDG 1439529)',
+    );
   });
 
-  it('omits a field that has no value instead of printing an empty row', () => {
-    const m = buildEmail(pratica({ portafoglio: null, note: null, costo_spedizione_cent: null }));
-    expect(m.text).not.toContain('Portafoglio');
-    expect(m.text).not.toContain('Note');
-    expect(m.text).not.toContain('Costo spedizione');
+  it('elenca tutti gli NDG di un ordine, non solo il primo', () => {
+    const m = buildRichiesta(pratica({ ndg: ['1439529', '900123', '777'] }));
+    expect(m.text).toContain('NDG: 1439529, 900123, 777');
+    expect(m.subject).toContain('NDG 1439529, 900123, 777');
   });
 
-  it('escapes free text, so a debtor name cannot inject markup', () => {
-    // Notes and portfolio names are typed by hand and are not trusted.
-    const m = buildEmail(pratica({ note: 'Rossi & C. <script>alert(1)</script>' }));
-    expect(m.html).not.toContain('<script>');
-    expect(m.html).toContain('&lt;script&gt;');
-    expect(m.html).toContain('Rossi &amp; C.');
+  it('omette una riga senza dato invece di scrivere un’etichetta vuota', () => {
+    // "Intestatario:" seguito dal nulla, in una richiesta su cui qualcuno deve
+    // agire, è peggio della riga assente.
+    const m = buildRichiesta(pratica({ intestatario: null, portafoglio: null }));
+    expect(m.text).not.toContain('Intestatario:');
+    expect(m.text).not.toContain('Riferimento operazione:');
+    expect(m.text).toContain('NDG: 1439529');
+    expect(m.subject).toBe('Richiesta fascicolo cartaceo — NDG 1439529');
   });
 
-  it('links straight to the pratica when a base URL is configured', () => {
-    const m = buildEmail(pratica({ id: 'abc 123' }), 'https://pvp-aste.web.app/');
-    // The id is encoded, and the trailing slash of the base does not double.
-    expect(m.text).toContain('https://pvp-aste.web.app/pratiche?pratica=abc%20123');
-    expect(m.html).toContain('href="https://pvp-aste.web.app/pratiche?pratica=abc%20123"');
+  it('la tariffa resta quella ordinaria, non il costo della singola spedizione', () => {
+    // Sono due cose diverse: la tariffa concordata con l'archivio è fissa, il
+    // costo effettivo si registra sulla pratica.
+    const m = buildRichiesta(pratica({ costo_spedizione_cent: 4200 }));
+    expect(m.text).toContain('tariffa ordinaria di € 12,50');
+    expect(m.text).not.toContain('42,00');
   });
 
-  it('carries no link at all when there is no base URL', () => {
-    // Better nothing than a relative address that resolves against the
-    // reader's mail client.
-    const m = buildEmail(pratica());
-    expect(m.text).not.toContain('Apri la pratica');
-    expect(m.html).not.toContain('<a href');
+  it('protegge il markup da un intestatario con caratteri speciali', () => {
+    const m = buildRichiesta(pratica({ intestatario: 'Rossi & C. <srl>' }));
+    expect(m.html).not.toContain('<srl>');
+    expect(m.html).toContain('Rossi &amp; C. &lt;srl&gt;');
+    expect(m.text).toContain('Rossi & C. <srl>'); // il testo semplice resta tale
   });
 });

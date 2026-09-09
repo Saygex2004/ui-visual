@@ -127,6 +127,7 @@ export function PraticaWindow({
                 <dl className="pratiche-window-list">
                   <Riga label={t('fields.ndg')} value={ndgTesto(pratica.ndg)} />
                   <Riga label={t('fields.numeroPratica')} value={pratica.numero_pratica} />
+                  <Riga label={t('fields.intestatario')} value={show(pratica.intestatario)} />
                   <Riga label={t('fields.portafoglio')} value={show(pratica.portafoglio)} />
                   <div className="pratiche-window-row">
                     <dt>{t('fields.stato')}</dt>
