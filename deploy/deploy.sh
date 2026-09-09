@@ -50,7 +50,7 @@ EMAIL_CC="${PVPDASH_EMAIL_CC:-alessia@duepuntozero.net}"
 # utile: finche' duepuntozero.net non e' autenticato su Brevo, il From viene
 # riscritto su un loro sottodominio e una risposta li' non arriverebbe a
 # nessuno. Il Reply-To invece resta quello che scriviamo.
-EMAIL_REPLY_TO="${PVPDASH_EMAIL_REPLY_TO:-testoleposta@gmail.com}"
+EMAIL_REPLY_TO="${PVPDASH_EMAIL_REPLY_TO:-oleksandr@duepuntozero.net}"
 # The real default Storage bucket name — read it from the Firebase console
 # (e.g. pvp-aste.appspot.com or pvp-aste.firebasestorage.app). REQUIRED for
 # `server` so attachments resolve to the correct bucket rather than the
