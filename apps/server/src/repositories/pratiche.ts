@@ -3,6 +3,7 @@
 // neither is reliably unique (one NDG owns several cases, and a case can be
 // re-filed), so deriving the id would silently overwrite a real record the
 // first time a duplicate is entered.
+import { randomBytes } from 'node:crypto';
 import { FieldValue, type Firestore } from 'firebase-admin/firestore';
 import { PraticaSchema, type Pratica, type PraticaInput, type PraticaPatch } from '@pvp/shared';
 import { firestoreToPlain } from './convert.js';
@@ -26,6 +27,28 @@ export async function getById(db: Firestore, id: string): Promise<Pratica | null
   return parse(doc.id, doc.data());
 }
 
+/** Codice per l'indirizzo di risposta. Solo cifre esadecimali minuscole, e
+ *  non per estetica: la parte locale di un indirizzo viene normalizzata a
+ *  minuscolo lungo il percorso, quindi qualunque cosa contenga maiuscole non
+ *  torna indietro come l'abbiamo scritta. 16 caratteri esadecimali sono 64 bit
+ *  — abbastanza perche' due pratiche non collidano mai, e non indovinabile da
+ *  chi volesse scrivere risposte a caso. */
+function nuovoReplyKey(): string {
+  return randomBytes(8).toString('hex');
+}
+
+/** La pratica a cui appartiene un indirizzo di risposta, o null. */
+export async function getByReplyKey(db: Firestore, replyKey: string): Promise<Pratica | null> {
+  const snap = await db
+    .collection(COLLECTION)
+    .where('reply_key', '==', replyKey.toLowerCase())
+    .limit(1)
+    .get();
+  const doc = snap.docs[0];
+  if (!doc) return null;
+  return PraticaSchema.parse({ ...(firestoreToPlain(doc.data()) as object), id: doc.id });
+}
+
 export async function create(
   db: Firestore,
   input: PraticaInput,
@@ -34,6 +57,7 @@ export async function create(
   const ref = db.collection(COLLECTION).doc();
   await ref.set({
     ...input,
+    reply_key: nuovoReplyKey(),
     created_at: FieldValue.serverTimestamp(),
     created_by: createdBy,
     updated_at: null,

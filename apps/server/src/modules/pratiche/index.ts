@@ -152,13 +152,20 @@ export function registerPraticheModule(app: FastifyInstance, deps: PraticheModul
     const body = InboundRispostaRequestSchema.safeParse(req.body);
     if (!body.success) throw new ApiError(400, 'errors.common.validation');
 
-    // La pratica deve esistere: senza questo controllo un id sbagliato
-    // creerebbe risposte che non compaiono da nessuna parte, e nessuno se ne
-    // accorgerebbe.
-    const pratica = await praticheRepo.getById(db, body.data.pratica_id);
+    // Il codice arriva dall'indirizzo, quindi gia' normalizzato a minuscolo da
+    // qualche server lungo il percorso; la ricerca lo riabbassa comunque, per
+    // non dipendere da chi ce l'ha consegnato.
+    //
+    // Nessuna pratica con quel codice = rifiutata, invece di creare righe che
+    // non comparirebbero da nessuna parte e di cui nessuno si accorgerebbe.
+    const pratica = await praticheRepo.getByReplyKey(db, body.data.reply_key);
     if (!pratica) throw new ApiError(404, 'errors.common.notFound');
 
-    const { nuova } = await praticheRisposteRepo.create(db, body.data);
+    const { reply_key: _chiave, ...risposta } = body.data;
+    const { nuova } = await praticheRisposteRepo.create(db, {
+      ...risposta,
+      pratica_id: pratica.id,
+    });
     reply.code(nuova ? 201 : 200);
     return { registrata: nuova };
   });

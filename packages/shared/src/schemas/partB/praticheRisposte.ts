@@ -14,8 +14,8 @@ import { instant } from '../common.js';
 const CORPO_MAX = 20_000;
 
 export const RispostaPraticaInputSchema = z.object({
-  /** Id della pratica a cui la risposta appartiene, ricavato dall'indirizzo
-   *  con il `+` a cui e' stata inviata. */
+  /** Id della pratica a cui la risposta appartiene. Lo risolve il server dal
+   *  codice nell'indirizzo: chi manda la risposta non lo conosce. */
   pratica_id: z.string().trim().min(1).max(200),
   /** Chi ha risposto, come appare nell'intestazione `From`. */
   da: z.string().trim().min(1).max(300),

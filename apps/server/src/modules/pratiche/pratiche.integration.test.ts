@@ -454,9 +454,10 @@ describe('pratiche module (HTTP, over the emulator)', () => {
         // Il Reply-To e' quello che rende la mail rispondibile: il mittente
         // viene riscritto da Brevo finche' il dominio non e' autenticato, e
         // una risposta a quell'indirizzo non arriverebbe a nessuno.
-        // Porta l'id della pratica nell'indirizzo: e' cosi' che una risposta
-        // torna alla pratica giusta senza indovinare dall'oggetto.
-        expect(doc.replyTo).toBe(`testoleposta+${res.json().pratica.id}@gmail.com`);
+        // Porta il CODICE della pratica nell'indirizzo: e' cosi' che una
+        // risposta torna alla pratica giusta senza indovinare dall'oggetto.
+        // Non l'id: quello ha maiuscole, che gli indirizzi perdono.
+        expect(doc.replyTo).toBe(`testoleposta+${res.json().pratica.reply_key}@gmail.com`);
         expect(doc.message.subject).toContain('IMPRESA ZANELLATI SRL');
         expect(doc.message.text).toContain('Intestatario: IMPRESA ZANELLATI SRL');
         expect(doc.message.text).toContain(
@@ -503,9 +504,9 @@ describe('pratiche module (HTTP, over the emulator)', () => {
       return buildApp(loadConfig({ ...TEST_ENV, PVPDASH_INBOUND_SECRET: SEGRETO }), testDb());
     }
 
-    function risposta(praticaId: string, over: Record<string, unknown> = {}) {
+    function risposta(replyKey: string, over: Record<string, unknown> = {}) {
       return {
-        pratica_id: praticaId,
+        reply_key: replyKey,
         da: 'Eugenia Rossi <eugenia@archivio.test>',
         oggetto: 'Re: Richiesta fascicolo cartaceo',
         testo: 'Ricevuto, spediamo domani.',
@@ -536,12 +537,14 @@ describe('pratiche module (HTTP, over the emulator)', () => {
           headers: { cookie },
           payload: { ...NUOVA, ndg: ['CON-RISPOSTA'] },
         });
+        const chiave = creata.json().pratica.reply_key as string;
+        expect(chiave).toMatch(/^[0-9a-f]{16}$/); // minuscolo: gli indirizzi lo normalizzano
         const id = creata.json().pratica.id;
 
         const senza = await conIn.inject({
           method: 'POST',
           url: '/api/pratiche/inbound',
-          payload: risposta(id),
+          payload: risposta(chiave),
         });
         expect(senza.statusCode).toBe(401);
 
@@ -549,7 +552,7 @@ describe('pratiche module (HTTP, over the emulator)', () => {
           method: 'POST',
           url: '/api/pratiche/inbound',
           headers: { 'x-inbound-secret': 'y'.repeat(32) },
-          payload: risposta(id),
+          payload: risposta(chiave),
         });
         expect(sbagliato.statusCode).toBe(401);
 
@@ -557,7 +560,7 @@ describe('pratiche module (HTTP, over the emulator)', () => {
           method: 'POST',
           url: '/api/pratiche/inbound',
           headers: { 'x-inbound-secret': SEGRETO },
-          payload: risposta(id),
+          payload: risposta(chiave),
         });
         expect(giusto.statusCode).toBe(201);
 
@@ -569,6 +572,32 @@ describe('pratiche module (HTTP, over the emulator)', () => {
         });
         expect(lette.json().risposte).toHaveLength(1);
         expect(lette.json().risposte[0].testo).toBe('Ricevuto, spediamo domani.');
+      } finally {
+        c?.stopPolling();
+        await conIn.close();
+      }
+    }, 30_000);
+
+    it('accetta il codice comunque sia stato normalizzato lungo il percorso', async () => {
+      // Misurato in produzione: un indirizzo `+gTUD6…` viene consegnato come
+      // `+gtud6…`. La ricerca deve reggere entrambe le forme.
+      const { app: conIn, cache: c } = await conRicezione();
+      try {
+        const cookie = await loginAs(conIn, 'admin', 'AdminPass123!');
+        const creata = await conIn.inject({
+          method: 'POST',
+          url: '/api/pratiche',
+          headers: { cookie },
+          payload: { ...NUOVA, ndg: ['MAIUSCOLE'] },
+        });
+        const chiave = creata.json().pratica.reply_key as string;
+        const res = await conIn.inject({
+          method: 'POST',
+          url: '/api/pratiche/inbound',
+          headers: { 'x-inbound-secret': SEGRETO },
+          payload: risposta(chiave.toUpperCase()),
+        });
+        expect(res.statusCode).toBe(201);
       } finally {
         c?.stopPolling();
         await conIn.close();
@@ -587,13 +616,14 @@ describe('pratiche module (HTTP, over the emulator)', () => {
           headers: { cookie },
           payload: { ...NUOVA, ndg: ['DOPPIONE'] },
         });
+        const chiave = creata.json().pratica.reply_key as string;
         const id = creata.json().pratica.id;
         const invia = () =>
           conIn.inject({
             method: 'POST',
             url: '/api/pratiche/inbound',
             headers: { 'x-inbound-secret': SEGRETO },
-            payload: risposta(id, { message_id: '<stesso@archivio.test>' }),
+            payload: risposta(chiave, { message_id: '<stesso@archivio.test>' }),
           });
         expect((await invia()).statusCode).toBe(201);
         expect((await invia()).statusCode).toBe(200); // gia' nota
@@ -610,7 +640,7 @@ describe('pratiche module (HTTP, over the emulator)', () => {
       }
     }, 30_000);
 
-    it('rifiuta una risposta per una pratica che non esiste', async () => {
+    it('rifiuta una risposta per un codice che non appartiene a nessuna pratica', async () => {
       // Altrimenti creerebbe righe che non compaiono da nessuna parte, e
       // nessuno se ne accorgerebbe.
       const { app: conIn, cache: c } = await conRicezione();
@@ -619,7 +649,7 @@ describe('pratiche module (HTTP, over the emulator)', () => {
           method: 'POST',
           url: '/api/pratiche/inbound',
           headers: { 'x-inbound-secret': SEGRETO },
-          payload: risposta('pratica-inesistente'),
+          payload: risposta('00000000deadbeef'),
         });
         expect(res.statusCode).toBe(404);
       } finally {

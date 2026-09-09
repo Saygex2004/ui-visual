@@ -161,6 +161,21 @@ export type PraticaInput = z.infer<typeof PraticaInputSchema>;
 
 export const PraticaSchema = PraticaInputSchema.extend({
   id: z.string(),
+  /** Codice usato nell'indirizzo di risposta: `posta+<reply_key>@…`.
+   *
+   *  Esiste perche' l'id del documento NON puo' stare in un indirizzo: gli
+   *  identificativi Firestore distinguono maiuscole e minuscole, mentre la
+   *  parte locale di un indirizzo viene normalizzata a minuscolo lungo il
+   *  percorso (misurato il 2026-09-09: `gTUD6NLRETet8O7jFBmZ` consegnato come
+   *  `gtud6nlretet8o7jfbmz`). Un codice gia' tutto minuscolo non ha niente da
+   *  perdere, ed e' anche piu' corto da leggere in un'intestazione.
+   *
+   *  Facoltativo in lettura: le pratiche create prima che esistesse non ce
+   *  l'hanno, e rifiutarle renderebbe illeggibile il registro. */
+  reply_key: z
+    .string()
+    .regex(/^[0-9a-f]{8,32}$/)
+    .optional(),
   created_at: instant,
   created_by: z.string(),
   updated_at: instant.nullable().default(null),

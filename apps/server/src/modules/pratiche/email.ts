@@ -127,7 +127,7 @@ export function buildRichiesta(pratica: Pratica): Messaggio {
 
 /** Inserisce l'id della pratica nell'indirizzo di risposta, con la notazione
  *  `+` che Gmail (e la maggior parte dei server) consegna alla stessa casella:
- *  `posta@gmail.com` -> `posta+VonnyY4jr@gmail.com`.
+ *  `posta@gmail.com` -> `posta+a3f9c2d1b4e5f607@gmail.com`.
  *
  *  Serve a sapere con CERTEZZA a quale pratica appartiene una risposta. Le
  *  alternative sono peggiori: l'oggetto lo riscrive chi risponde, e gli header
@@ -135,13 +135,13 @@ export function buildRichiesta(pratica: Pratica): Messaggio {
  *
  *  Un indirizzo che ha gia' un `+` viene lasciato stare: aggiungerne un
  *  secondo produrrebbe un indirizzo che non esiste. */
-export function replyToPerPratica(indirizzo: string, praticaId: string): string {
+export function replyToPerPratica(indirizzo: string, replyKey: string): string {
   const chiocciola = indirizzo.lastIndexOf('@');
   if (chiocciola <= 0) return indirizzo;
   const locale = indirizzo.slice(0, chiocciola);
   const dominio = indirizzo.slice(chiocciola + 1);
   if (locale.includes('+')) return indirizzo;
-  return `${locale}+${praticaId}@${dominio}`;
+  return `${locale}+${replyKey}@${dominio}`;
 }
 
 interface Logger {
@@ -165,7 +165,16 @@ export async function sendCreationEmail(
     await db.collection(MAIL_COLLECTION).add({
       to: [config.to],
       ...(config.cc ? { cc: [config.cc] } : {}),
-      ...(config.replyTo ? { replyTo: replyToPerPratica(config.replyTo, pratica.id) } : {}),
+      // Senza reply_key (pratiche create prima che esistesse) l'indirizzo
+      // resta quello nudo: la mail parte comunque, semplicemente la risposta
+      // non si aggancia da sola.
+      ...(config.replyTo
+        ? {
+            replyTo: pratica.reply_key
+              ? replyToPerPratica(config.replyTo, pratica.reply_key)
+              : config.replyTo,
+          }
+        : {}),
       message: { subject, text, html },
       // Non letto dall'estensione: serve a ritrovare, dato un documento in
       // coda, la pratica che lo ha generato.
