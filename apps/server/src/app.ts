@@ -116,6 +116,7 @@ export async function buildApp(config: Config, db?: Firestore): Promise<BuiltApp
           email: {
             to: config.PVPDASH_EMAIL_TO,
             cc: config.PVPDASH_EMAIL_CC,
+            replyTo: config.PVPDASH_EMAIL_REPLY_TO,
           },
         });
         registerRatingsModule(instance, { db });

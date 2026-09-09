@@ -23,6 +23,13 @@ export interface EmailConfig {
   to?: string;
   /** In copia. Facoltativo. */
   cc?: string;
+  /** Dove finiscono le RISPOSTE, se diverso dal mittente.
+   *
+   *  Va impostato perche' il mittente non e' un indirizzo utile: finche' il
+   *  dominio non e' autenticato, Brevo riscrive il From su un proprio
+   *  sottodominio (`@…brevosend.com`) e una risposta la' non arriverebbe a
+   *  nessuno. Il Reply-To invece Brevo lo lascia intatto. */
+  replyTo?: string;
 }
 
 /** La società per conto della quale si chiede il fascicolo. Fissa: le
@@ -139,6 +146,7 @@ export async function sendCreationEmail(
     await db.collection(MAIL_COLLECTION).add({
       to: [config.to],
       ...(config.cc ? { cc: [config.cc] } : {}),
+      ...(config.replyTo ? { replyTo: config.replyTo } : {}),
       message: { subject, text, html },
       // Non letto dall'estensione: serve a ritrovare, dato un documento in
       // coda, la pratica che lo ha generato.

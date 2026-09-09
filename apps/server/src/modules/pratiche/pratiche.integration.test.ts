@@ -410,6 +410,7 @@ describe('pratiche module (HTTP, over the emulator)', () => {
           ...TEST_ENV,
           PVPDASH_EMAIL_TO: 'oleksandr@duepuntozero.net',
           PVPDASH_EMAIL_CC: 'alessia@duepuntozero.net',
+          PVPDASH_EMAIL_REPLY_TO: 'testoleposta@gmail.com',
         }),
         testDb(),
       );
@@ -448,6 +449,10 @@ describe('pratiche module (HTTP, over the emulator)', () => {
         const doc = coda.docs[0]!.data();
         expect(doc.to).toEqual(['oleksandr@duepuntozero.net']);
         expect(doc.cc).toEqual(['alessia@duepuntozero.net']);
+        // Il Reply-To e' quello che rende la mail rispondibile: il mittente
+        // viene riscritto da Brevo finche' il dominio non e' autenticato, e
+        // una risposta a quell'indirizzo non arriverebbe a nessuno.
+        expect(doc.replyTo).toBe('testoleposta@gmail.com');
         expect(doc.message.subject).toContain('IMPRESA ZANELLATI SRL');
         expect(doc.message.text).toContain('Intestatario: IMPRESA ZANELLATI SRL');
         expect(doc.message.text).toContain(

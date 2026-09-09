@@ -46,6 +46,11 @@ PUBLIC_BASE_URL="${PVPDASH_PUBLIC_BASE_URL:-https://pvp-aste.web.app}"
 # spegnerebbe la notifica in silenzio.
 EMAIL_TO="${PVPDASH_EMAIL_TO:-oleksandr@duepuntozero.net}"
 EMAIL_CC="${PVPDASH_EMAIL_CC:-alessia@duepuntozero.net}"
+# Dove tornano le risposte. Serve perche' il mittente NON e' un indirizzo
+# utile: finche' duepuntozero.net non e' autenticato su Brevo, il From viene
+# riscritto su un loro sottodominio e una risposta li' non arriverebbe a
+# nessuno. Il Reply-To invece resta quello che scriviamo.
+EMAIL_REPLY_TO="${PVPDASH_EMAIL_REPLY_TO:-testoleposta@gmail.com}"
 # The real default Storage bucket name — read it from the Firebase console
 # (e.g. pvp-aste.appspot.com or pvp-aste.firebasestorage.app). REQUIRED for
 # `server` so attachments resolve to the correct bucket rather than the
@@ -110,7 +115,7 @@ deploy_server() {
     --max-instances 1 \
     --min-instances "${MIN_INSTANCES}" \
     --allow-unauthenticated \
-    --set-env-vars "PVPDASH_ENV=production,PVPDASH_FIRESTORE_PROJECT_ID=${PROJECT},PVPDASH_STORAGE_BUCKET=${STORAGE_BUCKET},PVPDASH_SLACK_MENTION_ID=${SLACK_MENTION_ID},PVPDASH_PUBLIC_BASE_URL=${PUBLIC_BASE_URL},PVPDASH_EMAIL_TO=${EMAIL_TO},PVPDASH_EMAIL_CC=${EMAIL_CC}" \
+    --set-env-vars "PVPDASH_ENV=production,PVPDASH_FIRESTORE_PROJECT_ID=${PROJECT},PVPDASH_STORAGE_BUCKET=${STORAGE_BUCKET},PVPDASH_SLACK_MENTION_ID=${SLACK_MENTION_ID},PVPDASH_PUBLIC_BASE_URL=${PUBLIC_BASE_URL},PVPDASH_EMAIL_TO=${EMAIL_TO},PVPDASH_EMAIL_CC=${EMAIL_CC},PVPDASH_EMAIL_REPLY_TO=${EMAIL_REPLY_TO}" \
     --set-secrets "${secrets}"
   echo "→ Verify now: curl \$(gcloud run services describe ${SERVICE} --region ${REGION} --project ${PROJECT} --format='value(status.url)')/readyz  → 200"
   echo "→ After the production bootstrap (first admin created + password changed), remove the bootstrap secret:"

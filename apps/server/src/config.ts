@@ -64,6 +64,9 @@ const ConfigSchema = z.object({
   // valido-se-presente e il server rifiuterebbe di avviarsi.
   PVPDASH_EMAIL_TO: vuotoComeAssente(z.string().email()),
   PVPDASH_EMAIL_CC: vuotoComeAssente(z.string().email()),
+  /** Dove tornano le risposte. Necessario perche' il mittente non e' un
+   *  indirizzo utile finche' il dominio non e' autenticato su Brevo. */
+  PVPDASH_EMAIL_REPLY_TO: vuotoComeAssente(z.string().email()),
 
   PVPDASH_LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
