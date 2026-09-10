@@ -83,6 +83,8 @@
     "non_trovato": "Non trovato"
   },
   "risposte": {
-    "titolo": "Risposte ({{count}})"
+    "titolo": "Risposte ({{count}})",
+    "mostraCitato": "Mostra il messaggio citato",
+    "nascondiCitato": "Nascondi il messaggio citato"
   }
 }

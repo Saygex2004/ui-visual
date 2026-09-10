@@ -5,7 +5,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
-import type { Pratica, PraticaInput } from '@pvp/shared';
+import type { Pratica, PraticaInput, RispostaPratica } from '@pvp/shared';
+import { separaCitazione } from '@pvp/shared';
 import {
   DialogRoot,
   DialogPortal,
@@ -32,11 +33,7 @@ export interface PraticaWindowProps {
   onClose: () => void;
 }
 
-/** Le risposte arrivate alla richiesta di fascicolo.
- *
- *  Il corpo e' reso come TESTO, con `white-space: pre-wrap` per conservare gli
- *  a capo: quel contenuto arriva dall'esterno, scritto da chiunque risponda
- *  alla mail, e non deve poter iniettare markup nella dashboard. */
+/** Le risposte arrivate alla richiesta di fascicolo. */
 function Risposte({ praticaId }: { praticaId: string }) {
   const { t } = useTranslation('pratiche');
   const { data, isLoading } = useRispostePratica(praticaId);
@@ -49,17 +46,55 @@ function Risposte({ praticaId }: { praticaId: string }) {
       <h3 className="ui-micro-label">{t('risposte.titolo', { count: risposte.length })}</h3>
       <ol className="pratiche-risposte-lista">
         {risposte.map((r) => (
-          <li key={r.id} className="pratiche-risposta">
-            <div className="pratiche-risposta-testa">
-              <span className="pratiche-risposta-da">{r.da}</span>
-              <time dateTime={r.ricevuta_il}>{formatTimestamp(r.ricevuta_il)}</time>
-            </div>
-            {r.oggetto ? <div className="pratiche-risposta-oggetto">{r.oggetto}</div> : null}
-            <p className="pratiche-risposta-testo">{r.testo}</p>
-          </li>
+          <Risposta key={r.id} risposta={r} />
         ))}
       </ol>
     </section>
+  );
+}
+
+/** Una risposta.
+ *
+ *  Del corpo si mostra solo quello che e' stato scritto ora: la mail
+ *  originale, che il programma di posta ricopia sotto ogni risposta, resta
+ *  raggiungibile ma chiusa. E' una copia di cio' che abbiamo mandato noi, e
+ *  aperta copre la risposta vera — che spesso e' una riga sola.
+ *
+ *  Chiusa, non buttata, perche' il taglio e' un'euristica: quando sbaglia,
+ *  riaprire deve bastare a rivedere tutto.
+ *
+ *  Il corpo e' reso come TESTO, con `white-space: pre-wrap` per conservare gli
+ *  a capo: quel contenuto arriva dall'esterno, scritto da chiunque risponda
+ *  alla mail, e non deve poter iniettare markup nella dashboard. */
+function Risposta({ risposta }: { risposta: RispostaPratica }) {
+  const { t } = useTranslation('pratiche');
+  const [citatoAperto, setCitatoAperto] = useState(false);
+  const { nuovo, citato } = separaCitazione(risposta.testo);
+
+  return (
+    <li className="pratiche-risposta">
+      <div className="pratiche-risposta-testa">
+        <span className="pratiche-risposta-da">{risposta.da}</span>
+        <time dateTime={risposta.ricevuta_il}>{formatTimestamp(risposta.ricevuta_il)}</time>
+      </div>
+      {risposta.oggetto ? (
+        <div className="pratiche-risposta-oggetto">{risposta.oggetto}</div>
+      ) : null}
+      <p className="pratiche-risposta-testo">{nuovo}</p>
+      {citato ? (
+        <>
+          <button
+            type="button"
+            className="pratiche-risposta-citato-toggle"
+            aria-expanded={citatoAperto}
+            onClick={() => setCitatoAperto((aperto) => !aperto)}
+          >
+            {t(citatoAperto ? 'risposte.nascondiCitato' : 'risposte.mostraCitato')}
+          </button>
+          {citatoAperto ? <p className="pratiche-risposta-citato">{citato}</p> : null}
+        </>
+      ) : null}
+    </li>
   );
 }
 

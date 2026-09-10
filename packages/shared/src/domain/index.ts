@@ -19,3 +19,4 @@ export * from './procedureConcorsuali.js';
 // callers passing/receiving rich-text nodes already have the schema type.
 export { sanitizeRichText, extractPlainText } from './richtext.js';
 export * from './viste.js';
+export * from './citazioneMail.js';

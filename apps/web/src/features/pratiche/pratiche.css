@@ -436,3 +436,33 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+/* Il messaggio citato: chiuso di default, e quando è aperto va letto come
+   "questo l'abbiamo scritto noi" — quindi rientrato, più piccolo e smorzato,
+   come la barra verticale che i programmi di posta mettono a lato. */
+.pratiche-risposta-citato-toggle {
+  margin-top: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pratiche-risposta-citato-toggle:hover {
+  color: var(--color-text);
+}
+
+.pratiche-risposta-citato {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--color-border-soft);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
